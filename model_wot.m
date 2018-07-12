@@ -1,18 +1,18 @@
+%===================================================
 %
-%
-%
+% Work in progress ... 
+%===================================================:
+%===================================================
+	
+% Setup
 fprintf("Start Modeling\n")
 addpath lib
-%===============================
 
-% Setup Model
-N = 25;	% Number of nodes
-T = 1; % Number of times steps 
+N = 50;				% Number of nodes
+T = 1; 				% Number of times steps 
+Am = zeros(N,N);	% Initial Adjacency Matrix
 
-% Initialize Adjacency Matrix
-Am = zeros(N,N);
-
-% Build Model
+% Dynamically Build Model
 
 for t = 1:T
         for j = 1:N
@@ -31,10 +31,9 @@ for t = 1:T
         endfor;
 endfor;
 
-% Output the final model
 outputModel(Am);
 
-%===============================
+% Tear down
 rmpath lib
 fprintf("Modeling Complete\n");
 
