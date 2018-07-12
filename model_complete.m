@@ -1,20 +1,20 @@
+%==============================================
+% 
+% Create a complete network for N nodes and
+% and output the results in files suitable
+% for import into the visualization tool Gephi
 %
-%
-%
+%==============================================
+
+% Setup	
 fprintf("Start Modeling\n")
 addpath lib
-%===============================
 
-% Setup Model
-N = 25;	% Number of Nodes
-
-% Initialize Adjacency Matrix
+N = 50;	% Number of Nodes
 Am = connectedGraph(N);
-
-% Output the final model
 outputModel(Am);
 
-%===============================
+% Tear Down
 rmpath lib
 fprintf("Modeling Complete\n");
 

@@ -1,14 +1,17 @@
 function outputModel(Am)
+%=====================================================
 %
-% Write a nodes and edges output file for external processing
+% Write nodes and edges output files for external 
+% processing (semicolon delimited files)
 %
-
-N = size(Am,1);
+%=====================================================
 
 fileNodes 	= "g_nodes.csv";
 fIdNodes 	= fopen(fileNodes,"w");
 fileEdges	= "g_edges.csv";
 fIdEdges	= fopen(fileEdges,"w");
+
+N = size(Am,1);
 
 fprintf("Begin Ouput\n");
 fprintf("Outputting Nodes\n");
