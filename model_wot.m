@@ -10,12 +10,12 @@
 fprintf("Start Modeling\n")
 addpath lib
 
-T = 12; 			  % Max Time (say a year)
+T = 12;         % Max Time (say a year)
 dt = 1;         % Time Step (say a month)
 numT = T / dt;  % Number of time steps
 
-N = 100;				  % Number of nodes
-Am = zeros(N,N);	% Initial Adjacency Matrix
+N = 100;         % Number of nodes
+Am = zeros(N,N); % Initial Adjacency Matrix - No connections
 
 % Dynamically Build Model
 
@@ -30,22 +30,20 @@ Am = zeros(N,N);	% Initial Adjacency Matrix
 
 for t = 1:numT
     for i = 1:N
-        for j = 1:N
-            if (i ~= j) % skip diagonal elements
-              numNewConnections = round(logisticFunction(t-1)) - sum(Am(i,:));
-              if (numNewConnections > 0)
-              fprintf('numNewConnections = %d\n',numNewConnections);
-                for nc = 1:numNewConnections
-				          index = round(unifrnd(1,N));
-                  if (i ~= index)               % skip diagonal elements
-                    Am(i,index) = 1;            % this might happen more than once, ignore for now
-   					        %Am(index,j) = 1;           % uncomment for undirecte releationship
-					          %fprintf('t=%d, i=%d, index=%d\n',t,i,index);
-                  end;
-                end;
-              end;
-            end;
+      numNewConnections = round(logisticFunction(t-1)) - sum(Am(i,:));
+      if (numNewConnections > 0)
+        if (i == 1)
+          fprintf('For t = %d, numNewConnections = %d\n', t, numNewConnections);
         end;
+        for nc = 1:numNewConnections
+          index = round(unifrnd(1,N));
+          if (i ~= index)               % skip diagonal elements
+            Am(i,index) = 1;            % this might happen more than once, ignore for now
+            Am(index,i) = 1;            % Make undirected relationship
+            %fprintf('t=%d, i=%d, index=%d\n',t,i,index);
+          end;
+        end;
+      end;
     end;
 end;
 

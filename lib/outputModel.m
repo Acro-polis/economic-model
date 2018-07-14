@@ -27,7 +27,7 @@ fprintf(fIdEdges,"Source;Target;Label;Type\n");
 for i = 1:N
         for j = 1:N
                 if (i ~= j && Am(i,j) > 0)
-                        fprintf(fIdEdges, '%d;%d;\"Edge %d to %d\";\"Mixed\"\n', j, i, j, i);
+                        fprintf(fIdEdges, '%d;%d;\"Edge %d to %d\";\"Mixed\"\n', i, j, i, j);
                 end;
         end;
 end;
