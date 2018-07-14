@@ -1,6 +1,6 @@
 %===================================================
 %
-% Growth model for web of trust
+% Initial growth model for web of trust
 %
 % Author: Jess
 % Created: 2018.07.11
@@ -9,6 +9,8 @@
 % Setup
 fprintf("Start Modeling\n")
 addpath lib
+
+% Initializations
 
 T = 12;         % Max Time (say a year)
 dt = 1;         % Time Step (say a month)
@@ -52,5 +54,3 @@ outputModel(Am);
 % Tear down
 rmpath lib
 fprintf("Modeling Complete\n");
-
-
