@@ -16,11 +16,11 @@ T = 12;         % Max Time (say a year)
 dt = 1;         % Time Step (say a month)
 numT = T / dt;  % Number of time steps
 
-N = 50;                   % Number of initial nodes
+N = 100;                  % Number of initial nodes
 Am = zeros(N,N);          % Initial Adjacency Matrix - No connections
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
 
-NewNodesPercent = 0.1; % Percentage of new nodes added each time dt; dt > 1
+NewNodesPercent = 0.1;    % Percentage of new nodes added each time dt; dt > 1
 
 % Dynamically Build Model
 
@@ -42,15 +42,15 @@ for t = 1:numT
     if (t >= 2)
         numNewNodes = round(N * NewNodesPercent);
         %fprintf('nnn = %d\n',numNewNodes);
-        N = N + numNewNodes;
         [Am, OriginTimes] = addNewNodes(Am, OriginTimes, t, numNewNodes);
+        N = size(Am,1);
     end;
     
     % Loop over nodes
     for i = 1:N
       
       % Calculate new connections to add for node i taking into
-      % consideration the time it entered the network
+      % consideration the time node i entered the network
       adjustedTime = t - OriginTimes(i) - 1;
       if (adjustedTime < 0)
           adjustedTime = 0;
