@@ -4,6 +4,8 @@ function outputModel(Am)
 % Write nodes and edges output files for external 
 % processing (semicolon delimited files)
 %
+% Author: Jess
+% Created: 2018.07.8
 %=====================================================
 
 fileNodes 	= "g_nodes.csv";

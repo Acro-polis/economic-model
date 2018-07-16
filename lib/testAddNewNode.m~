@@ -1,0 +1,9 @@
+%=====================================================
+%
+% Test function addNewNode
+%
+%=====================================================
+N = 4;
+Am = zeros(N, N);
+Am = addNewNode(Am);
+fprintf([repmat(' %d ', 1, N) '\n'], BS_channelTable')

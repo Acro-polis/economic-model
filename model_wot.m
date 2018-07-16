@@ -52,5 +52,5 @@ end;
 outputModel(Am);
 
 % Tear down
-rmpath lib
+%rmpath lib
 fprintf("Modeling Complete\n");
