@@ -1,6 +1,6 @@
 %===================================================
 %
-% Hybrid Random Growth Newwork Model
+% Hybrid Random Growth Network Model
 %
 % Author: Jess
 % Created: 2018.07.19
@@ -21,7 +21,7 @@ TN = N;                   % Number of current nodes
 Am = connectedGraph(N);   % Initial Adjacency Matrix - Connected graph
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
 
-alpha = 0.33;             % Proportion of random connections vs preferred connections [0,1]
+alpha = 0.50;             % Proportion of random connections vs preferred connections [0,1]
 
 % NewNodesPercent = 0.1;    % Percentage of new nodes added each time dt; dt > 1
 % numNewNodes = round(N * NewNodesPercent);
@@ -30,7 +30,7 @@ alpha = 0.33;             % Proportion of random connections vs preferred connec
 for time = 1:numT
 
     % Number of new nodes per time
-    numNewNodes = 1;
+    numNewNodes = 2;
     
     % Distribuiton of N new connections per new node
     newRandomConnections = round(alpha * N);

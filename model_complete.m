@@ -10,7 +10,7 @@
 fprintf("Start Modeling\n")
 addpath lib
 
-N = 50;	% Number of Nodes
+N = 125;	% Number of Nodes
 Am = connectedGraph(N);
 outputModel(Am);
 

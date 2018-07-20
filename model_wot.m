@@ -12,15 +12,15 @@ addpath lib
 
 % Initializations
 
-T = 12;         % Max Time (say a year)
+T = 100;         % Max Time (say a year)
 dt = 1;         % Time Step (say a month)
 numT = T / dt;  % Number of time steps
 
-N = 100;                  % Number of initial nodes
+N = 25;                   % Number of initial nodes
 Am = zeros(N,N);          % Initial Adjacency Matrix - No connections
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
 
-NewNodesPercent = 0.1;    % Percentage of new nodes added each time dt; dt > 1
+NewNodesPercent = 0.05;   % Percentage of new nodes added each time dt; dt > 1
 
 % Dynamically Build Model
 
@@ -56,7 +56,7 @@ for t = 1:numT
           adjustedTime = 0;
       end;
       %fprintf('t = %d, i = %d, at = %d\n',t, i, adjustedTime);
-      numNewConnections = round(logisticFunction(adjustedTime)) - sum(Am(i,:));
+      numNewConnections = round(logisticFunction(25, 1.0, 0.75, 4.0, adjustedTime)) - sum(Am(i,:));
       
       % Make the new connections
       if (numNewConnections > 0)
