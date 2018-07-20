@@ -1,6 +1,6 @@
 %===================================================
 %
-% Initial growth model for web of trust
+% Logistic model for network growth
 %
 % Author: Jess
 % Created: 2018.07.11
