@@ -13,6 +13,7 @@ addpath lib
 N = 125;	% Number of Nodes
 Am = connectedGraph(N);
 outputModel(Am);
+plotFrequecyDistribution(Am, 0);
 
 % Tear Down
 %rmpath lib

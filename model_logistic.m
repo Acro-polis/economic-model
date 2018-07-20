@@ -12,11 +12,11 @@ addpath lib
 
 % Initializations
 
-T = 100;         % Max Time (say a year)
+T = 100;        % Max Time (say a year)
 dt = 1;         % Time Step (say a month)
 numT = T / dt;  % Number of time steps
 
-N = 25;                   % Number of initial nodes
+N = 25;                    % Number of initial nodes
 Am = zeros(N,N);          % Initial Adjacency Matrix - No connections
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
 
@@ -76,6 +76,8 @@ for t = 1:numT
 end;
 
 outputModel(Am);
+
+plotFrequecyDistribution(Am, 0);
 
 % Tear down
 %rmpath lib
