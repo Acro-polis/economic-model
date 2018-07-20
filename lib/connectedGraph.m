@@ -8,8 +8,9 @@ function [Am] = connectedGraph(N)
 %=====================================================
 
 Am = ones(N,N);
+
 for i = 1:N
 	Am(i,i) = 0;
-endfor;
+end;
 
 end

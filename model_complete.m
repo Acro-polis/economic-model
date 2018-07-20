@@ -15,7 +15,7 @@ Am = connectedGraph(N);
 outputModel(Am);
 
 % Tear Down
-rmpath lib
+%rmpath lib
 fprintf("Modeling Complete\n");
 
 
