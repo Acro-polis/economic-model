@@ -21,10 +21,7 @@ TN = N;                   % Number of current nodes
 Am = connectedGraph(N);   % Initial Adjacency Matrix - Connected graph
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
 
-alpha = 0.50;             % Proportion of random connections vs preferred connections [0,1]
-
-% NewNodesPercent = 0.1;    % Percentage of new nodes added each time dt; dt > 1
-% numNewNodes = round(N * NewNodesPercent);
+alpha = 0.00;             % Proportion of random connections vs preferred connections [0,1]
 
 % Loop over time
 for time = 1:numT
