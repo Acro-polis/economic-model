@@ -12,7 +12,7 @@ addpath lib
 
 % Initializations
 
-T = 100;        % Max Time (say a year)
+T = 9975;       % Max Time (say a year)
 dt = 1;         % Time Step (say a month)
 numT = T / dt;  % Number of time steps
 
@@ -77,7 +77,8 @@ end;
 
 outputModel(Am);
 
-plotFrequecyDistribution(Am, 0);
+plotFrequecyDistributionSim_MF(Am, N, 0.5, 1);
+%plotFrequecyDistribution(Am, 0);
 
 % Tear down
 %rmpath lib

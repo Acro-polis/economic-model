@@ -12,7 +12,7 @@ addpath lib
 
 % Initializations
 
-T = 975;                % Max Time 
+T = 975;               % Max Time 
 dt = 1;                 % Time Step 
 numT = round(T / dt);   % Number of time steps (integer)
 
@@ -21,7 +21,7 @@ TN = N;                   % Number of current nodes
 Am = connectedGraph(N);   % Initial Adjacency Matrix - Connected graph
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
 
-alpha = 0.05;             % Proportion of random connections vs preferred connections [0,1]
+alpha = 0.99;             % Proportion of random connections vs preferred connections [0,1]
                           % 1 = all random, 0 = all preferred (need < 1.0
                           % for Mean-field plot, so use 0.99.
 
