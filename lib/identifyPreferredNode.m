@@ -5,7 +5,7 @@ function [index] = identifyPreferredNode(Am)
 % to their degrees. This is the preferential attachment
 % model.
 %
-% TODO - This algorithm needs QA
+% TODO - Add more explaination
 %
 % Author: Jess
 % Created: 2018.07.19

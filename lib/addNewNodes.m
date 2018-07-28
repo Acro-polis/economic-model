@@ -4,7 +4,7 @@ function [Am_out, OriginTimes_out] = addNewNodes(Am, OriginTimes, T, numNewNodes
 % Am            = Existing Adjacency Matrix (NxN)
 % OriginTimes   = Origin Times for existing nodes (Nx1)
 % T             = Current time step (integer)
-% numNewNodes   = Number of new Nodes to add to the network
+% numNewNodes   = Number of new nodes to add to the network
 %
 %
 % Author: Jess

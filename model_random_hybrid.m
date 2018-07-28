@@ -12,7 +12,7 @@ addpath lib
 
 % Initializations
 
-T = 1000;               % Max Time 
+T = 975;                % Max Time 
 dt = 1;                 % Time Step 
 numT = round(T / dt);   % Number of time steps (integer)
 
@@ -21,7 +21,9 @@ TN = N;                   % Number of current nodes
 Am = connectedGraph(N);   % Initial Adjacency Matrix - Connected graph
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
 
-alpha = 0.00;             % Proportion of random connections vs preferred connections [0,1]
+alpha = 0.05;             % Proportion of random connections vs preferred connections [0,1]
+                          % 1 = all random, 0 = all preferred (need < 1.0
+                          % for Mean-field plot, so use 0.99.
 
 % Loop over time
 for time = 1:numT
@@ -66,7 +68,8 @@ end;
 
 outputModel(Am);
 
-plotFrequecyDistribution(Am, 1);
+plotFrequecyDistributionSim_MF(Am, N, alpha, 1);
+%plotFrequecyDistribution(Am, 1);
 
 % Tear down
 %rmpath lib
