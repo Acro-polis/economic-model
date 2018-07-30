@@ -12,16 +12,12 @@ function [Am_out, OriginTimes_out] = addNewNodes(Am, OriginTimes, T, numNewNodes
 %=====================================================
 
 N = size(Am,1);
-Am_out = Am;
 
 % Add new nodes to the adjacency matrix
-for i = 1:numNewNodes    
-    newColumn = zeros(N , 1);
-    Am_out = [Am_out newColumn];
-    N = N + 1;
-    newRow = zeros(1, N);
-    Am_out = [Am_out; newRow];
-end;
+newColumns = zeros(N , numNewNodes);
+Am_out = [Am newColumns];
+newRows = zeros(numNewNodes, N + numNewNodes);
+Am_out = [Am_out; newRows];
 
 % Add new origin times T
 newTimes = ones(numNewNodes,1).*T;

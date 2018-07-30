@@ -12,15 +12,15 @@ addpath lib
 
 % Initializations
 
-T = 9975;       % Max Time (say a year)
+T = 180;        % Max Time (say a year)
 dt = 1;         % Time Step (say a month)
 numT = T / dt;  % Number of time steps
 
-N = 25;                    % Number of initial nodes
+N = 25;                   % Number of initial nodes
 Am = zeros(N,N);          % Initial Adjacency Matrix - No connections
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
 
-NewNodesPercent = 0.05;   % Percentage of new nodes added each time dt; dt > 1
+NewNodesPercent = 0.02;   % Percentage of new nodes added each time dt; dt > 1
 
 % Dynamically Build Model
 
@@ -41,9 +41,9 @@ for t = 1:numT
     % Add new nodes
     if (t >= 2)
         numNewNodes = round(N * NewNodesPercent);
-        %fprintf('nnn = %d\n',numNewNodes);
         [Am, OriginTimes] = addNewNodes(Am, OriginTimes, t, numNewNodes);
         N = size(Am,1);
+        fprintf('For T = %d, New Nodes = %d & N = %d\n',t, numNewNodes, N);
     end;
     
     % Loop over nodes
@@ -77,8 +77,7 @@ end;
 
 outputModel(Am);
 
-plotFrequecyDistributionSim_MF(Am, N, 0.5, 1);
-%plotFrequecyDistribution(Am, 0);
+plotFrequecyDistributionLogistic(Am, 1, T, N, NewNodesPercent);
 
 % Tear down
 %rmpath lib

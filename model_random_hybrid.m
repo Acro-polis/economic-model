@@ -68,8 +68,8 @@ end;
 
 outputModel(Am);
 
-plotFrequecyDistributionSim_MF(Am, N, alpha, 1);
-%plotFrequecyDistribution(Am, 1);
+plottingStyle = 1;
+plotFrequecyDistributionHybrid(Am, N, alpha, plottingStyle);
 
 % Tear down
 %rmpath lib

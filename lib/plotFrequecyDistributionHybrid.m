@@ -1,4 +1,4 @@
-function [fDistSim, fDistMF] = plotFrequecyDistributionSim_MF(Am, N, alpha, plotStyle)
+function [fDistSim, fDistMF] = plotFrequecyDistributionHybrid(Am, N, alpha, plotStyle)
 %===================================================
 %
 % Plot the frequency distribution for the matrix Am
@@ -25,7 +25,7 @@ else
     ylabel('Frequency');
 end;
 
-text = sprintf('Frequency Distribution Degree N = %u, T = %u, a = %.2f',N,size(Am,1),alpha);
+text = sprintf('Frequency Distribution - Hybrd: N = %u, T = %u, a = %.2f',N,size(Am,1),alpha);
 title(text);
 legend('Simulated','Mean-field');
 
