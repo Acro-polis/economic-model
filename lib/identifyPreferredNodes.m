@@ -1,4 +1,4 @@
-function [selectedNodes] = identifyPreferredNodes(Am, N, RN)
+function [selectedNodes] = identifyPreferredNodes(Am, N, RN, randomAttachments)
 %===================================================
 %
 % Randomly identify a node with probabilities proportional
@@ -15,6 +15,9 @@ assert(N >= RN,'Error in identifyPreferredNodes: N < RN')
 nodes = 1:N;
 selectedNodes = [];
 D = sum(Am);
+
+nodes(randomAttachments) = [];
+D(randomAttachments) = [];
 
 for i = 1:RN
     

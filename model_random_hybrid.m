@@ -12,11 +12,11 @@ addpath lib
 
 % Initializations
 
-T = 9998;                 % Max Time 
+T = 975;                % Max Time 
 dt = 1;                 % Time Step 
 numT = round(T / dt);   % Number of time steps (integer)
 
-N = 2;                   % Number of initial nodes
+N = 25;                    % Number of initial nodes
 TN = N;                   % Number of current nodes
 Am = connectedGraph(N);   % Initial Adjacency Matrix - Connected graph
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
@@ -48,17 +48,17 @@ for time = 1:numT
         
         % Add random connections to the other nodes
         if newRandomConnections >  0 
-            attachments = findRandomNodes(TN - 1, newRandomConnections);
-            newAm(attachments, TN) = 1;
-            newAm(TN, attachments) = 1;
+            randomAttachments = findRandomNodes(TN - 1, newRandomConnections);
+            newAm(randomAttachments, TN) = 1;
+            newAm(TN, randomAttachments) = 1;
             %fprintf('Found %d random attachments\n',size(attachments,2));
         end;
         
         % Add preferred connections to the other nodes
         if newPreferredConnections > 0
-            attachments = identifyPreferredNodes(Am, TN - 1, newPreferredConnections);
-            newAm(attachments, TN) = 1;
-            newAm(TN, attachments) = 1;
+            preferredAttachments = identifyPreferredNodes(Am, TN - 1, newPreferredConnections, randomAttachments);
+            newAm(preferredAttachments, TN) = 1;
+            newAm(TN, preferredAttachments) = 1;
             %fprintf('Found %d preferred attachments\n',size(attachments,2));
         end;
         
@@ -78,7 +78,7 @@ fprintf('\n');
 fprintf('Expected %d connections, generated %d connections\n',expectedConnections,generatedConnections);
 fprintf('\n');
 
-plottingStyle = 0;
+plottingStyle = 1;
 plotFrequecyDistributionHybrid(Am, N, alpha, plottingStyle);
 
 % Tear down
