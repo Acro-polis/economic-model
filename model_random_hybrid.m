@@ -12,17 +12,17 @@ addpath lib
 
 % Initializations
 
-T = 998;                % Max Time 
+T = 975;                % Max Time 
 dt = 1;                 % Time Step 
 numT = round(T / dt);   % Number of time steps (integer)
 
-N = 2;                    % Number of initial nodes
+N = 25;                   % Number of initial nodes
 TN = N;                   % Number of current nodes
 Am = connectedGraph(N);   % Initial Adjacency Matrix - Connected graph
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
 numNewNodesPerDt = 1;     % Number of new nodes per time
 
-alpha = 0.50;             % Proportion of random connections vs preferred connections [0,1]
+alpha = 0.99;             % Proportion of random connections vs preferred connections [0,1]
                           % 1 = All random (need slightly less than < 1.0
                           %     for Mean-field plot, so use 0.99.
                           % 0 = All preferred 
@@ -82,7 +82,7 @@ fprintf('Expected %d nodes, generated %d nodes\n',expectedNodes,generatedNodes);
 fprintf('Expected %d connections, generated %d connections\n',expectedConnections,generatedConnections);
 fprintf('\n');
 
-plottingStyle = 0;
+plottingStyle = 1;
 plotFrequecyDistributionHybrid(Am, N, T, alpha, plottingStyle);
 
 % Tear down

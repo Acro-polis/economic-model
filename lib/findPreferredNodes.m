@@ -9,7 +9,7 @@ function [selectedNodes] = findPreferredNodes(Am, N, RN, randomAttachments)
 % N                 = Number of nodes available for attachment
 % RN                = Number of random attachments to make
 % randomAttachments = nodes already attached during
-%                     prior random attachment phase
+%                     prior t - 1 random attachment phase
 %
 % Author: Jess
 % Created: 2018.07.19
@@ -24,16 +24,31 @@ D = sum(Am);
 nodes(randomAttachments) = [];
 D(randomAttachments) = [];
 
+%TODO - can / should this be vecorized?
+
 for i = 1:RN
     
+    % Calculate degree probabilities
     d = sum(D);
-    P = cumsum(D ./ d);
-    r = unifrnd(0,1);
-    index = find([-1 P] < r, 1, 'last');
+    P = D ./ d;
     
-    selectedNodes = [selectedNodes nodes(index)];
-    nodes(index) = [];
-    D(index) = [];
+    % Calculate CDF of sorted probabilities
+    [S, H] = sort(P,'descend');
+    cdf = cumsum(S);
+    
+    % Find the index of the node that corresponds 
+    % to the inverse of the CDF
+    r = unifrnd(0,1);
+    index = find([-1 cdf] < r, 1, 'last');
+    
+    % Map back the selected "index" to the corresponding nodes 
+    % original position
+    selectedNode = H(index);
+    
+    % Store the selected node, and then remove it for the next iteration
+    selectedNodes = [selectedNodes nodes(selectedNode)];
+    nodes(selectedNode) = [];
+    D(selectedNode) = [];
 
 end;
 
