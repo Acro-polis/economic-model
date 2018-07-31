@@ -10,10 +10,10 @@
 fprintf("Start Modeling\n")
 addpath lib
 
-N = 125;	% Number of Nodes
+N = 1000;	% Number of Nodes
 Am = connectedGraph(N);
 outputModel(Am);
-plotFrequecyDistribution(Am, 0);
+plotFrequencyDistributionConnected(Am, 0);
 
 % Tear Down
 %rmpath lib
