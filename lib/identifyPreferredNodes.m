@@ -16,6 +16,7 @@ nodes = 1:N;
 selectedNodes = [];
 D = sum(Am);
 
+% Ignore nodes attached during random phase
 nodes(randomAttachments) = [];
 D(randomAttachments) = [];
 
