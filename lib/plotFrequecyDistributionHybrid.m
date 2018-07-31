@@ -1,12 +1,14 @@
-function [fDistSim, fDistMF] = plotFrequecyDistributionHybrid(Am, N, alpha, plotStyle)
+function [fDistSim, fDistMF] = plotFrequecyDistributionHybrid(Am, N, T, alpha, plotStyle)
 %===================================================
 %
 % Plot the frequency distribution for the matrix Am
 % and the corresponding mean-field approximation
 %
 % plotStyle = 1 for loglog, anything else for linear
-%
-% Am is the adjacency matrix
+% Am        = final adjacency matrix
+% N         = iniital nodes
+% T         = time steps
+% alpha     = proportion of random vs preferred
 %
 % Author: Jess
 % Created: 2018.07.19
@@ -25,7 +27,7 @@ else
     ylabel('Frequency');
 end;
 
-text = sprintf('Frequency Distribution - Hybrd: N = %u, T = %u, a = %.2f',N,size(Am,1),alpha);
+text = sprintf('Frequency Distribution - Hybrd: SN = %u, FN = %u, T = %u, a = %.2f', N, size(Am,1), T, alpha);
 title(text);
 legend('Simulated','Mean-field');
 

@@ -1,10 +1,13 @@
-function [fDist] = plotFrequecyDistributionLogistic(Am, plotStyle, T, N, NewNodesPercent)
+function [fDist] = plotFrequecyDistributionLogistic(Am, N, T, NewNodesPercent, plotStyle)
 %===================================================
 %
 % Plot the frequency distribution for the matrix Am
 %
-% plotStyle = 1 for loglog, anything else for linear
-% Am is the adjacency matrix
+% plotStyle       = 1 for loglog, anything else for linear
+% Am              = final adjacency matrix
+% N               = iniital nodes
+% T               = time steps
+% newNodesPercent = % new nodes added per time step
 %
 % Author: Jess
 % Created: 2018.07.19
@@ -22,7 +25,7 @@ else
     ylabel('Frequency');
 end;
 
-text = sprintf('Frequency Distribution - Logistic Model: T = %d, N = %d, New Nodes = %.1f Percent', T, N, NewNodesPercent*100);
+text = sprintf('Frequency Distribution - Logistic: SN = %u, FN = %u, T = %u, New Nodes = %.1f Percent', N, size(Am,1), T, NewNodesPercent*100);
 title(text);
 legend('Simulated');
 

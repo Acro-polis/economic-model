@@ -22,6 +22,8 @@ OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
 
 NewNodesPercent = 0.02;   % Percentage of new nodes added each time dt; dt > 1
 
+startNodes = N;
+
 % Dynamically Build Model
 
 % Algorithm
@@ -77,7 +79,8 @@ end;
 
 outputModel(Am);
 
-plotFrequecyDistributionLogistic(Am, 1, T, N, NewNodesPercent);
+plottingStyle = 1;
+plotFrequecyDistributionLogistic(Am, startNodes, T, NewNodesPercent, plottingStyle);
 
 % Tear down
 %rmpath lib

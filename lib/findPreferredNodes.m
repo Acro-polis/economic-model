@@ -1,11 +1,15 @@
-function [selectedNodes] = identifyPreferredNodes(Am, N, RN, randomAttachments)
+function [selectedNodes] = findPreferredNodes(Am, N, RN, randomAttachments)
 %===================================================
 %
-% Randomly identify a node with probabilities proportional
-% to their degrees. This is the preferential attachment
-% model.
+% Randomly identify a set of nodes with probabilities 
+% proportional to their degrees. This is the preferential 
+% attachment model.
 %
-% TODO - Add more explaination
+% Am                = Adjacency matrix from time t - 1
+% N                 = Number of nodes available for attachment
+% RN                = Number of random attachments to make
+% randomAttachments = nodes already attached during
+%                     prior random attachment phase
 %
 % Author: Jess
 % Created: 2018.07.19
@@ -16,7 +20,7 @@ nodes = 1:N;
 selectedNodes = [];
 D = sum(Am);
 
-% Ignore nodes attached during random phase
+% Ignore nodes attached during prior random phase
 nodes(randomAttachments) = [];
 D(randomAttachments) = [];
 

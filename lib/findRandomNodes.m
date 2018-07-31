@@ -4,8 +4,8 @@ function [selectedNodes] = findRandomNodes(N, RN)
 % Given a set of nodes 1 to N, randomly pick RN of 
 % them and return and the resulting vector
 % 
-% N  = The number of nodes
-% RN = The number of unique nodes to select randomly
+% N  = The number of nodes available to connect to
+% RN = The number of unique conections to make
 %
 % Author: Jess
 % Created: 2018.07.30
