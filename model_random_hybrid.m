@@ -12,11 +12,11 @@ addpath lib
 
 % Initializations
 
-T = 975;               % Max Time 
+T = 998;                % Max Time 
 dt = 1;                 % Time Step 
 numT = round(T / dt);   % Number of time steps (integer)
 
-N = 25;                   % Number of initial nodes
+N = 2;                    % Number of initial nodes
 TN = N;                   % Number of current nodes
 Am = connectedGraph(N);   % Initial Adjacency Matrix - Connected graph
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
@@ -43,11 +43,10 @@ for time = 1:numT
         TN = size(newAm,1);
         
         % Add random connections to the other nodes
-        for newRandomConnection = 1:newRandomConnections
-            index = round(unifrnd(1,TN - 1)); % Note can reassign (duplicate), TODO for later, if necessary
-            newAm(index, TN) = 1;
-            newAm(TN, index) = 1;
-            %fprintf('t = %d, random index = %d\n', time, index);
+        if newRandomConnections >  0 
+            attachments = findRandomNodes(TN - 1, newRandomConnections);
+            newAm(attachments, TN) = 1;
+            newAm(TN, attachments) = 1;
         end;
         
         % Add preferred connections to the other nodes
