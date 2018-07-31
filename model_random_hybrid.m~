@@ -12,16 +12,16 @@ addpath lib
 
 % Initializations
 
-T = 9998;                 % Max Time 
+T = 975;                % Max Time 
 dt = 1;                 % Time Step 
 numT = round(T / dt);   % Number of time steps (integer)
 
-N = 2;                   % Number of initial nodes
+N = 25;                   % Number of initial nodes
 TN = N;                   % Number of current nodes
 Am = connectedGraph(N);   % Initial Adjacency Matrix - Connected graph
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
 
-alpha = 0.50;             % Proportion of random connections vs preferred connections [0,1]
+alpha = 0.10;             % Proportion of random connections vs preferred connections [0,1]
                           % 1 = all random, 0 = all preferred (need < 1.0
                           % for Mean-field plot, so use 0.99.
 
@@ -51,7 +51,6 @@ for time = 1:numT
             attachments = findRandomNodes(TN - 1, newRandomConnections);
             newAm(attachments, TN) = 1;
             newAm(TN, attachments) = 1;
-            %fprintf('Found %d random attachments\n',size(attachments,2));
         end;
         
         % Add preferred connections to the other nodes
@@ -59,7 +58,7 @@ for time = 1:numT
             attachments = identifyPreferredNodes(Am, TN - 1, newPreferredConnections);
             newAm(attachments, TN) = 1;
             newAm(TN, attachments) = 1;
-            %fprintf('Found %d preferred attachments\n',size(attachments,2));
+            fprintf('',size(attachments,);
         end;
         
         Am = newAm;
@@ -78,7 +77,7 @@ fprintf('\n');
 fprintf('Expected %d connections, generated %d connections\n',expectedConnections,generatedConnections);
 fprintf('\n');
 
-plottingStyle = 0;
+plottingStyle = 1;
 plotFrequecyDistributionHybrid(Am, N, alpha, plottingStyle);
 
 % Tear down

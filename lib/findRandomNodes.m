@@ -1,14 +1,14 @@
 function [selectedNodes] = findRandomNodes(N, RN)
 %=====================================================
 %
-% Given the set of nodes 1 to N randomly pick RN of them 
-% return and the corresponding vector
+% Given a set of nodes 1 to N, randomly pick RN of 
+% them and return and the resulting vector
 % 
-% N = Represents the set nodes ranging from 1 to N
-% RN = The number of nodes to identify uniquely randomly
+% N  = The number of nodes
+% RN = The number of unique nodes to select randomly
 %
 % Author: Jess
-% Created: 2018.07.16
+% Created: 2018.07.30
 %=====================================================
 assert(N >= RN,'Error in FindRandomNodes: N < RN')
 
