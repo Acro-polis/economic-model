@@ -18,7 +18,7 @@ function [fd] = degreeFrequencyDistributionRandomHybrid(N,alpha,maxD)
 %
 % Where N     = Number of initial nodes / degress of the model
 %       alpha = Proportion of random connections vs preferred connections [0,1]
-%       maxD  = max dimendion d for which to calculate f(d)
+%       maxD  = max dimension d for which to calculate f(d)
 %
 % Author: Jess
 % Created: 2018.07.27

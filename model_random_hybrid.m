@@ -85,6 +85,9 @@ fprintf('\n');
 plottingStyle = 1;
 plotFrequecyDistributionHybrid(Am, N, T, alpha, plottingStyle);
 
+%G = graph(Am);
+%p = plot(G,'Layout','force');
+
 % Tear down
 %rmpath lib
 fprintf("Modeling Complete\n");
