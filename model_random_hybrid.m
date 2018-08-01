@@ -12,11 +12,11 @@ addpath lib
 
 % Initializations
 
-T = 975;                % Max Time 
+T = 99;                 % Max Time 
 dt = 1;                 % Time Step 
 numT = round(T / dt);   % Number of time steps (integer)
 
-N = 25;                   % Number of initial nodes
+N = 1;                   % Number of initial nodes
 TN = N;                   % Number of current nodes
 Am = connectedGraph(N);   % Initial Adjacency Matrix - Connected graph
 OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
