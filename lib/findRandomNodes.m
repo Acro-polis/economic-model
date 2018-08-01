@@ -1,10 +1,9 @@
 function [selectedNodes] = findRandomNodes(N, RN)
 %=====================================================
 %
-% Given a set of nodes 1 to N, randomly pick RN of 
-% them and return and the resulting vector
+% Select RN nodes without replacement from the set of N 
 % 
-% N  = The number of nodes available to connect to
+% N  = The number of nodes available for connection
 % RN = The number of unique conections to make
 %
 % Author: Jess
@@ -12,13 +11,6 @@ function [selectedNodes] = findRandomNodes(N, RN)
 %=====================================================
 assert(N >= RN,'Error in FindRandomNodes: N < RN')
 
-nodes = 1:N;
-selectedNodes = [];
-
-for i = 1:RN
-    index = round(unifrnd(1,size(nodes,2)));
-    selectedNodes = [selectedNodes nodes(index)];
-    nodes(index) = [];
-end
+selectedNodes = randsample(N,RN);
 
 end
