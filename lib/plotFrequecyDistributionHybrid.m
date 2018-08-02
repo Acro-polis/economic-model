@@ -18,11 +18,11 @@ fDistSim = degreeFrequencyDistribution(Am);
 fDistMF = degreeFrequencyDistributionRandomHybrid(N, alpha, max(fDistSim(N:end,1)));
 
 if (plotStyle == 1)
-    loglog(fDistSim(N:end,1),fDistSim(N:end,2),fDistSim(N:end,1),fDistMF);
+    figureHandle = loglog(fDistSim(N:end,1),fDistSim(N:end,2),fDistSim(N:end,1),fDistMF);
     xlabel('Log Degree');
     ylabel('Log Frequency');
 else
-    plot(fDistSim(N:end,1),fDistSim(N:end,2),fDistSim(N:end,1),fDistMF)
+    figureHandle = plot(fDistSim(N:end,1),fDistSim(N:end,2),fDistSim(N:end,1),fDistMF)
     xlabel('Degree');
     ylabel('Frequency');
 end

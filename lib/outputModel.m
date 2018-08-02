@@ -1,4 +1,4 @@
-function outputModel(Am)
+function outputModel(title, Am, SN, T, alpha, version_number)
 %=====================================================
 %
 % Write nodes and edges output files for external 
@@ -7,34 +7,34 @@ function outputModel(Am)
 % Author: Jess
 % Created: 2018.07.8
 %=====================================================
-
-fileNodes 	= "g_nodes.csv";
-fIdNodes 	= fopen(fileNodes,"w");
-fileEdges	= "g_edges.csv";
-fIdEdges	= fopen(fileEdges,"w");
-
-N = size(Am,1);
-
 fprintf("Begin Ouput\n");
-fprintf("Outputting Nodes\n");
 
-fprintf(fIdNodes,"Id;Label\n");
-for i = 1:N
-        fprintf(fIdNodes, '%d;\"Node %d\"\n', i, i);
+FN = size(Am,1);
+
+outputNodes = 0;
+if outputNodes
+    fileNodes   = sprintf('Nodes %s SN=%u FN=%u T=%u a=%.2f V%.1f.csv', title, SN, FN, T, alpha, version_number);
+    fIdNodes 	= fopen(fullfile([pwd '/Output'],fileNodes),"w");
+    fprintf("Outputting Nodes\n");
+    fprintf(fIdNodes,"Id;Label\n");
+    for i = 1:FN
+            fprintf(fIdNodes, '%d;\"Node %d\"\n', i, i);
+    end
+    fclose(fIdNodes);
 end
 
-fprintf("Outputing Edges\n");
+fileEdges   = sprintf('Edges %s SN=%u FN=%u T=%u a=%.2f V%.1f.csv', title, SN, FN, T, alpha, version_number);
+fIdEdges	= fopen(fullfile([pwd '/Output'],fileEdges),"w");
 
+fprintf("Outputing Edges\n");
 fprintf(fIdEdges,"Source;Target;Label;Type\n");
-for i = 1:N
-        for j = 1:N
+for i = 1:FN
+        for j = 1:FN
                 if (i ~= j && Am(i,j) > 0)
                         fprintf(fIdEdges, '%d;%d;\"Edge %d to %d\";\"Mixed\"\n', i, j, i, j);
                 end
         end
 end
-
-fclose(fIdNodes);
 fclose(fIdEdges);
 
 fprintf("Output Complete\n");

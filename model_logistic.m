@@ -5,7 +5,8 @@
 % Author: Jess
 % Created: 2018.07.11
 %===================================================
-	
+version_number = 1.0;
+
 % Setup
 fprintf("Start Modeling\n")
 addpath lib
@@ -77,7 +78,7 @@ for t = 1:numT
     end;
 end;
 
-outputModel(Am);
+outputModel("Logistic", Am, N, T, -1.0, version_number);
 
 plottingStyle = 1;
 plotFrequecyDistributionLogistic(Am, startNodes, T, NewNodesPercent, plottingStyle);

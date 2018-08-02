@@ -5,6 +5,7 @@
 % Author: Jess
 % Created: 2018.07.19
 %===================================================
+version_number = 1.0;
 	
 % Setup
 fprintf("Start Modeling\n\n")
@@ -12,8 +13,8 @@ addpath lib
 
 % Parameters
 
-N =   1;                  % Number of initial nodes
-T =  99;                  % Max Time 
+N =  25;                  % Number of initial nodes
+T =  75;                  % Max Time 
 alpha = 0.00;             % Proportion of random connections vs preferred connections [0,1]
                           % 1 = All random (need slightly less than < 1.0
                           %     for Mean-field plot, so use 0.99.
@@ -97,7 +98,7 @@ fprintf('\n');
 plottingStyle = 1;
 plotFrequecyDistributionHybrid(Am, N, T, alpha, plottingStyle);
 
-outputModel(Am);
+outputModel("Hybrid", Am, N, T, alpha, version_number);
 fprintf('\n');
 
 %G = graph(Am);
