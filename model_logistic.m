@@ -43,7 +43,7 @@ for t = 1:numT
     % Add new nodes
     if (t >= 2)
         numNewNodes = round(N * NewNodesPercent);
-        [Am, OriginTimes] = addNewNodes(Am, OriginTimes, t, numNewNodes);
+        [Am, OriginTimes] = addNewNodes(Am, numNewNodes, OriginTimes, t);
         N = size(Am,1);
         fprintf('For T = %d, New Nodes = %d & N = %d\n',t, numNewNodes, N);
     end;

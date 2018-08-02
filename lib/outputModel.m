@@ -21,7 +21,7 @@ fprintf("Outputting Nodes\n");
 fprintf(fIdNodes,"Id;Label\n");
 for i = 1:N
         fprintf(fIdNodes, '%d;\"Node %d\"\n', i, i);
-end;
+end
 
 fprintf("Outputing Edges\n");
 
@@ -30,9 +30,9 @@ for i = 1:N
         for j = 1:N
                 if (i ~= j && Am(i,j) > 0)
                         fprintf(fIdEdges, '%d;%d;\"Edge %d to %d\";\"Mixed\"\n', i, j, i, j);
-                end;
-        end;
-end;
+                end
+        end
+end
 
 fclose(fIdNodes);
 fclose(fIdEdges);

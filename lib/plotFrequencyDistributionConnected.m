@@ -20,7 +20,7 @@ else
     plot(fDist(:,1),fDist(:,2));
     xlabel('Degree');
     ylabel('Frequency');
-end;
+end
 
 text = sprintf('Frequency Distribution - Connected: N = %u,',size(Am,1));
 title(text);

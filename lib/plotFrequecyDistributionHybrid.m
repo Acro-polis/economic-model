@@ -25,7 +25,7 @@ else
     plot(fDistSim(N:end,1),fDistSim(N:end,2),fDistSim(N:end,1),fDistMF)
     xlabel('Degree');
     ylabel('Frequency');
-end;
+end
 
 text = sprintf('Frequency Distribution - Hybrd: SN = %u, FN = %u, T = %u, a = %.2f', N, size(Am,1), T, alpha);
 title(text);

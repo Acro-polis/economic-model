@@ -23,7 +23,7 @@ else
     plot(fDist(:,1),fDist(:,2));
     xlabel('Degree');
     ylabel('Frequency');
-end;
+end
 
 text = sprintf('Frequency Distribution - Logistic: SN = %u, FN = %u, T = %u, New Nodes = %.1f Percent', N, size(Am,1), T, NewNodesPercent*100);
 title(text);

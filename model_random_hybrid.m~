@@ -10,22 +10,22 @@
 fprintf("Start Modeling\n")
 addpath lib
 
-% Parameters
+% Initializations
 
-N =   5;                  % Number of initial nodes
-T = 995;                  % Max Time 
+T = 9999;               % Max Time 
+dt = 1;                 % Time Step 
+numT = round(T / dt);   % Number of time steps (integer)
+
+N = 1;                    % Number of initial nodes
+TN = N;                   % Number of current nodes
+Am = connectedGraph(N);   % Initial Adjacency Matrix - Connected graph
+OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
+numNewNodesPerDt = 1;     % Number of new nodes per time
+
 alpha = 0.99;             % Proportion of random connections vs preferred connections [0,1]
                           % 1 = All random (need slightly less than < 1.0
                           %     for Mean-field plot, so use 0.99.
                           % 0 = All preferred 
-numNewNodesPerDt = 1;     % Number of new nodes per time
-
-% Initializations
-dt = 1;                   % Time Step 
-numT = round(T / dt);     % Number of time steps (integer)
-Am = connectedGraph(N);   % Initial Adjacency Matrix - Connected graph
-OriginTimes = ones(N,1);  % The origin time for these nodes (t=1)
-
 
 numNewRandomConnections = round(alpha * N);
 numNewPreferredConnections = N - numNewRandomConnections;
@@ -41,7 +41,7 @@ expectedConnections = numberOfConnections(Am, modeUndirected) + T*N*numNewNodesP
 for time = 2:(numT+1)
     fprintf('Time step = %u\n',time);
 
-    % Store dimension of each node for time - 1
+    % Store dimention of each node for time - 1
     D = sum(Am);
     nodesD = size(D,2);
 
@@ -49,7 +49,7 @@ for time = 2:(numT+1)
     for newNode = 1:numNewNodesPerDt
 
         % Add new node
-        [Am, OriginTimes] = addNewNodes(Am, 1, OriginTimes, time);
+        [Am, OriginTimes] = addNewNodes(Am, OriginTimes, time, 1);
         TN = size(Am,1);
         
         % Add random connections to the other nodes
@@ -59,21 +59,23 @@ for time = 2:(numT+1)
             Am(randomAttachments, TN) = 1;
             Am(TN, randomAttachments) = 1;
             %fprintf('Found %d random attachments\n',size(attachments,2));
-        end
+        end;
         
         % Add preferred connections to the other nodes
         if numNewPreferredConnections > 0
-            preferredAttachments = findPreferredNodes(D, nodesD, numNewPreferredConnections, randomAttachments);
+            preferredAttachments = findPreferredNodes(Am, mpdesD, numNewPreferredConnections, randomAttachments);
             Am(preferredAttachments, TN) = 1;
             Am(TN, preferredAttachments) = 1;
             %fprintf('Found %d preferred attachments\n',size(attachments,2));
-        end
+        end;
         
-    end    
+    end;    
 
     %fprintf('For t = %d, avgDeg = %f\n',time, averageDegree(Am));
 
-end
+end;
+
+outputModel(Am);
 
 generatedNodes = size(Am,1);
 generatedConnections = numberOfConnections(Am,modeUndirected);
@@ -85,9 +87,6 @@ fprintf('\n');
 
 plottingStyle = 1;
 plotFrequecyDistributionHybrid(Am, N, T, alpha, plottingStyle);
-
-outputModel(Am);
-fprintf('\n');
 
 %G = graph(Am);
 %p = plot(G,'Layout','force');

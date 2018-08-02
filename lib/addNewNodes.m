@@ -1,4 +1,4 @@
-function [Am_out, OriginTimes_out] = addNewNodes(Am, OriginTimes, T, numNewNodes)
+function [Am, OriginTimes] = addNewNodes(Am, numNewNodes, OriginTimes, T)
 %=====================================================
 %
 % Am            = Existing Adjacency Matrix (NxN)
@@ -13,15 +13,13 @@ function [Am_out, OriginTimes_out] = addNewNodes(Am, OriginTimes, T, numNewNodes
 
 N = size(Am,1);
 
-% Add new nodes to the adjacency matrix
-newColumns = zeros(N , numNewNodes);
-Am_out = [Am newColumns];
-newRows = zeros(numNewNodes, N + numNewNodes);
-Am_out = [Am_out; newRows];
+% Add new row and column
+Am(:, end + numNewNodes) = 0;
+Am(end + numNewNodes, :) = 0;
 
 % Add new origin times T
-newTimes = ones(numNewNodes,1).*T;
-OriginTimes_out = [OriginTimes; newTimes];
+newTimes = ones(numNewNodes, 1) .* T;
+OriginTimes = [OriginTimes; newTimes];
 
 end
 

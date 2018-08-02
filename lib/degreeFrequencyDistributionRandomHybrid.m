@@ -25,7 +25,6 @@ function [fd] = degreeFrequencyDistributionRandomHybrid(N,alpha,maxD)
 %===================================================
 
 D = N:maxD;
-fd = size(D);
 
 A = (2 * alpha * N) / (1 - alpha);
 C = 2 / (1 - alpha);

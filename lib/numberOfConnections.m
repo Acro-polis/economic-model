@@ -11,8 +11,8 @@ function [numberOfConnections] = numberOfConnections(Am,mode)
 
 D = 2;
 if (mode ~= 1) 
-    D = 1 
-end;
+    D = 1;
+end
     
 numberOfConnections = sum(sum(Am)) / D;
 
