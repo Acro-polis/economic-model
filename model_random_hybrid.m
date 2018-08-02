@@ -13,8 +13,8 @@ addpath lib
 
 % Parameters
 
-N =  25;                  % Number of initial nodes
-T =  75;                  % Max Time 
+N =  2;                   % Number of initial nodes
+T =  998;                 % Max Time 
 alpha = 0.00;             % Proportion of random connections vs preferred connections [0,1]
                           % 1 = All random (need slightly less than < 1.0
                           %     for Mean-field plot, so use 0.99.
@@ -40,10 +40,12 @@ Am = zeros(expectedNodes,expectedNodes);
 TN = size(Cm,1);
 Am(1:TN , 1:TN) = Cm;
 
+startTime = tic();
+
 % Loop over time
 for time = 1:numT
     
-   if mod(time,10) == 1
+   if mod(time,100) == 1
        fprintf('Time Step = %u\n',time);
    end
 
@@ -84,9 +86,13 @@ for time = 1:numT
 
 end
 
+elapsedTime = toc(startTime);
+
 generatedNodes = size(Am,1);
 generatedConnections = numberOfConnections(Am, modeUndirected);
 
+fprintf('\n');
+fprintf('Elapsed time = %.2f seconds\n',elapsedTime);
 fprintf('\n');
 fprintf('Random Connections = %.2f, Preferred = %.2f\n',numNewRandomConnections, numNewPreferredConnections);
 fprintf('\n');
