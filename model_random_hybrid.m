@@ -14,8 +14,8 @@ addpath lib
 % Parameters
 
 N =  2;                   % Number of initial nodes
-T =  998;                 % Max Time 
-alpha = 0.00;             % Proportion of random connections vs preferred connections [0,1]
+T =  9998;                % Max Time 
+alpha = 0.99;             % Proportion of random connections vs preferred connections [0,1]
                           % 1 = All random (need slightly less than < 1.0
                           %     for Mean-field plot, so use 0.99.
                           % 0 = All preferred 
