@@ -12,7 +12,7 @@ fprintf("Start Modeling\n\n")
 addpath lib
 
 % Initializations
-T =  100;                   % Max Time 
+T =  60;                     % Max Time 
 dt = 1;                     % Time Step 
 numSteps = round(T / dt);   % Number of time steps (integer)
 
@@ -47,7 +47,7 @@ fprintf("Price of goods = %.2f drachmas\n", price);
 
 % Sellers 1 = Seller, 0 = No Seller
 S = zeros(N,1);
-amountSold = zeros(N,1);
+unitsSold = zeros(N,1);
 percentSellers = 0.5;
 numberOfSellers = round(percentSellers*N);
 
@@ -56,11 +56,11 @@ fprintf("Num Sellers = %d <= %d agents\n", numberOfSellers, N);
 % Seller Inventory
 inventoryInitialUnits = 100;
 inventoryInitialValue = inventoryInitialUnits*price;
-sellerInventoryUnits(1:N) = inventoryInitialUnits;
+sellerInventoryUnits = zeros(N,1);
 
 % Buyers 1 = Buyer, = No Buyer
 B = zeros(N,1);
-amountBought = zeros(N,1);
+unitsBought = zeros(N,1);
 percentBuyers = 1.0;
 numberOfBuyers = round(percentBuyers*N);
 
@@ -73,6 +73,7 @@ if (numberOfSellers == N)
     S = ones(N,1);
 else   
     for i = 1:numberOfSellers
+        sellerInventoryUnits(selectedNodes(i,1)) = inventoryInitialUnits;
         S(selectedNodes(i,1)) = 1;
     end
 end
@@ -128,36 +129,48 @@ for time = 1:numSteps
        
        % If sellers available, pick one randomly
        numberOfAvailableSellers = size(availableSellers,1);
-       fprintf("numberOfAvailableSellers = %d\n",numberOfAvailableSellers);
+       fprintf("For Buyer %d, # Sellers = %d\n", buyer, numberOfAvailableSellers);
        
        if  numberOfAvailableSellers > 0
-           % Sale?
+           
+           % Sale!
            j = randsample(numberOfAvailableSellers,1);
            sellerIndex = availableSellers(j);
+           numUnits = 1;
+           fprintf("Buyer %d exchanging with Seller %d\n", buyer, sellerIndex);
            
            % Seller
+           
            % Decrement Inventory
-           sellerInventoryUnits(sellerIndex) = sellerInventoryUnits(sellerIndex) - 1;
+           sellerInventoryUnits(sellerIndex) = sellerInventoryUnits(sellerIndex) - numUnits;
+           unitsSold(sellerIndex) = unitsSold(sellerIndex) + numUnits;
+           
            % Increment Wallet
-           Wallet(sellerIndex,1) = Wallet(sellerIndex,1) + price;
+           Wallet(sellerIndex,1) = Wallet(sellerIndex,1) + numUnits*price;
            
            % Buyer
+           
            % Increment Amount Bought
-           amountBought(buyer,1) = amountBought(buyer,1) + price;
+           unitsBought(buyer,1) = unitsBought(buyer,1) + numUnits;
+           
            % Decrement Wallet
-           Wallet(buyer,1) = Wallet(buyer,1) - price;
+           Wallet(buyer,1) = Wallet(buyer,1) - numUnits*price;
            
        else
            % No sale :-(
        end
    end
    
-   % Report Initial Statistics
+   % Report Incremental Statistics
+   
    sumWallets = sum(Wallet(:,1));
    sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
-   sumSellerInventoryValue = sum(sellerInventoryUnits(:,1))*price;
-   fprintf("Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
-   
+   sumSellerInventoryValue = sumSellerInventoryUnits*price;
+   sumBought = sum(unitsBought(:,1));
+   sumSold = sum(unitsSold(:,1));
+   fprintf("\nMoney Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
+   fprintf("Total units purchased = %.2f, total units sold = %.2f\n\n", sumBought, sumSold);
+
    if sumSellerInventoryUnits <= 0
        fprintf("Out of inventory at time = %d\n",time);
        break;
