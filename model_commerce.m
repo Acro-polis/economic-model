@@ -37,7 +37,8 @@ Demurrage = c*drachma / d*dt;
 fprintf("UBI = %.2f drachmas/dt, Demurrage = %.2f drachmas/dt\n", UBI, Demurrage);
 
 % Wallet
-Wallet(1:N) = UBI*100;
+initialWallet = UBI*100;
+Wallet(1:N) = initialWallet;
 
 % Cost of goods
 p = 1;
@@ -105,10 +106,11 @@ for time = 1:numSteps
        
        % TODO add UBI
        % TODO subtract Demurrage
+       % TODO random order buyers
        
        % Agent is buyer & has money?
        if B(buyer,1) ~= 1 || Wallet(buyer,1) <= price
-           fprintf("B(%d) is not a buyer or out of money\n",B(buyer));
+           fprintf("B(%d) is not a buyer or out of money\n",B(buyer,1));
            continue;
        end
        
@@ -172,8 +174,34 @@ for time = 1:numSteps
    fprintf("Total units purchased = %.2f, total units sold = %.2f\n\n", sumBought, sumSold);
 
    if sumSellerInventoryUnits <= 0
-       fprintf("Out of inventory at time = %d\n",time);
+       fprintf("Stopping simulation: Out of inventory at time = %d\n",time);
        break;
    end   
    
 end
+
+% Plot some results
+
+% Final Wallet Size
+ax1 = subplot(2,1,1);
+plot(ax1, 1:N, Wallet(1:end,1),'-o');
+xlim([1 N]);
+ylim([0 initialWallet*1.75]);
+xlabel('Agent');
+ylabel('Drachmas');
+title('Wallet Size');
+
+% Bought / Sold Distribution
+ax2 = subplot(2,1,2);
+x = 1:N;
+plot(ax2, x, unitsBought(1:end,1), '--o', x, unitsSold(1:end,1), '-o');
+xlim([1 N]);
+ylim([0 inventoryInitialUnits*1.25]);
+xlabel('Agent');
+ylabel('Units');
+title('Units Bought & Sold');
+legend('Bought','Sold');
+
+
+
+
