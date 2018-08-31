@@ -1,0 +1,166 @@
+%===================================================
+%
+% Commerce model on a network
+%
+% Author: Jess
+% Created: 2018.08.30
+%===================================================
+version_number = 1.0;
+	
+% Setup
+fprintf("Start Modeling\n\n")
+addpath lib
+
+% Initializations
+T =  100;                   % Max Time 
+dt = 1;                     % Time Step 
+numSteps = round(T / dt);   % Number of time steps (integer)
+
+N =  20;                    % Number of Agents (nodes)
+AM = connectedGraph(N);     % The WOT network
+
+fprintf("Network consists of %d agents.\n", N);
+
+% Unit of currency
+drachma = 1;
+
+% Rate of UBI
+a = 1;
+b = 1;
+UBI = a*drachma / b*dt; 
+
+% Rate of Demurrage
+c = 1;
+d = 1;
+Demurrage = c*drachma / d*dt;
+
+fprintf("UBI = %.2f drachmas/dt, Demurrage = %.2f drachmas/dt\n", UBI, Demurrage);
+
+% Wallet
+Wallet(1:N) = UBI*100;
+
+% Cost of goods
+p = 1;
+price = p*drachma;
+
+fprintf("Price of goods = %.2f drachmas\n", price);
+
+% Sellers 1 = Seller, 0 = No Seller
+S = zeros(N,1);
+amountSold = zeros(N,1);
+percentSellers = 0.5;
+numberOfSellers = round(percentSellers*N);
+
+fprintf("Num Sellers = %d <= %d agents\n", numberOfSellers, N);
+
+% Seller Inventory
+inventoryInitialUnits = 100;
+inventoryInitialValue = inventoryInitialUnits*price;
+sellerInventoryUnits(1:N) = inventoryInitialUnits;
+
+% Buyers 1 = Buyer, = No Buyer
+B = zeros(N,1);
+amountBought = zeros(N,1);
+percentBuyers = 1.0;
+numberOfBuyers = round(percentBuyers*N);
+
+fprintf("Num Buyers  = %d <= %d agents\n", numberOfBuyers, N);
+
+% Randomely select sellers
+% TODO - Make preferrential
+selectedNodes = randsample(N,numberOfSellers);
+if (numberOfSellers == N) 
+    S = ones(N,1);
+else   
+    for i = 1:numberOfSellers
+        S(selectedNodes(i,1)) = 1;
+    end
+end
+
+% Select buyers
+if (numberOfBuyers == N) 
+    B = ones(N,1);
+else
+    selectedNodes = randsample(N,numberOfBuyers);
+    for i = 1:numberOfBuyers
+        B(selectedNodes(i,1)) = 1;
+    end
+end
+
+% Report Initial Statistics
+sumWallets = sum(Wallet(:,1));
+sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
+sumSellerInventoryValue = sum(sellerInventoryUnits(:,1))*price;
+fprintf("Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
+
+% Start simulation
+for time = 1:numSteps
+    
+   if mod(time,T/10) == 1
+       fprintf('Time Step = %u\n',time);
+   end
+    
+   for buyer = 1:numberOfBuyers
+       
+       % TODO add UBI
+       % TODO subtract Demurrage
+       
+       % Agent is buyer & has money?
+       if B(buyer,1) ~= 1 || Wallet(buyer,1) <= price
+           fprintf("B(%d) is not a buyer or out of money\n",B(buyer));
+           continue;
+       end
+       
+       % Find connections
+       connections = find(AM(buyer,:) ~= 0);
+       
+       % Find connections that are sellers
+       availableSellers = [];
+       for connection = 1:size(connections,2)
+           i = connections(1,connection);
+           if S(i) == 1
+               % Collect the sellers that have inventory
+               if sellerInventoryUnits(i) > 0
+                   availableSellers = [availableSellers ; i];
+               end
+           end
+       end
+       
+       % If sellers available, pick one randomly
+       numberOfAvailableSellers = size(availableSellers,1);
+       fprintf("numberOfAvailableSellers = %d\n",numberOfAvailableSellers);
+       
+       if  numberOfAvailableSellers > 0
+           % Sale?
+           j = randsample(numberOfAvailableSellers,1);
+           sellerIndex = availableSellers(j);
+           
+           % Seller
+           % Decrement Inventory
+           sellerInventoryUnits(sellerIndex) = sellerInventoryUnits(sellerIndex) - 1;
+           % Increment Wallet
+           Wallet(sellerIndex,1) = Wallet(sellerIndex,1) + price;
+           
+           % Buyer
+           % Increment Amount Bought
+           amountBought(buyer,1) = amountBought(buyer,1) + price;
+           % Decrement Wallet
+           Wallet(buyer,1) = Wallet(buyer,1) - price;
+           
+       else
+           % No sale :-(
+       end
+   end
+   
+   % Report Initial Statistics
+   sumWallets = sum(Wallet(:,1));
+   sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
+   sumSellerInventoryValue = sum(sellerInventoryUnits(:,1))*price;
+   fprintf("Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
+   
+   if sumSellerInventoryUnits <= 0
+       fprintf("Out of inventory at time = %d\n",time);
+       break;
+   end   
+   
+end
