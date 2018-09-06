@@ -12,7 +12,7 @@ fprintf("Start Modeling\n\n")
 addpath lib
 
 % Initializations
-T =  60;                     % Max Time 
+T =  70;                     % Max Time 
 dt = 1;                     % Time Step 
 numSteps = round(T / dt);   % Number of time steps (integer)
 
@@ -30,7 +30,7 @@ b = 1;
 UBI = a*drachma / b*dt; 
 
 % Rate of Demurrage
-c = 1;
+c = 0.5;
 d = 1;
 Demurrage = c*drachma / d*dt;
 
@@ -38,7 +38,7 @@ fprintf("UBI = %.2f drachmas/dt, Demurrage = %.2f drachmas/dt\n", UBI, Demurrage
 
 % Wallet
 initialWallet = UBI*100;
-Wallet(1:N) = initialWallet;
+Wallet = ones(N,1).*initialWallet;
 
 % Cost of goods
 p = 1;
@@ -68,7 +68,7 @@ numberOfBuyers = round(percentBuyers*N);
 fprintf("Num Buyers  = %d <= %d agents\n", numberOfBuyers, N);
 
 % Randomely select sellers
-% TODO - Make preferrential
+% TODO - Make preferrential selection
 selectedNodes = randsample(N,numberOfSellers);
 if (numberOfSellers == N) 
     S = ones(N,1);
@@ -95,29 +95,42 @@ sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
 sumSellerInventoryValue = sum(sellerInventoryUnits(:,1))*price;
 fprintf("Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
 
+%--------------------------------------------------------------------------
+
 % Start simulation
 for time = 1:numSteps
     
    if mod(time,T/10) == 1
        fprintf('Time Step = %u\n',time);
    end
-    
+   
+   if time > 1 
+       
+       % Add UBI
+       Wallet(1:N,1) = Wallet(1:N,1) + UBI;
+       
+       % Subtract Demurrage; ensure non-negative values
+       Wallet(1:N,1) = Wallet(1:N,1) - Demurrage;
+       Wallet(Wallet < 0) = 0;
+       
+   end
+   
+   fprintf("At start of time = %d, money supply = %.2f\n",time, sum(Wallet(:,1)));
+   
    for buyer = 1:numberOfBuyers
        
-       % TODO add UBI
-       % TODO subtract Demurrage
        % TODO random order buyers
        
        % Agent is buyer & has money?
        if B(buyer,1) ~= 1 || Wallet(buyer,1) <= price
-           fprintf("B(%d) is not a buyer or out of money\n",B(buyer,1));
+           fprintf("B(%d) is not a buyer or out of money\n",buyer);
            continue;
        end
        
        % Find connections
        connections = find(AM(buyer,:) ~= 0);
        
-       % Find connections that are sellers
+       % Find connections that are sellers (prohibits buying from yourself)
        availableSellers = [];
        for connection = 1:size(connections,2)
            i = connections(1,connection);
@@ -131,7 +144,7 @@ for time = 1:numSteps
        
        % If sellers available, pick one randomly
        numberOfAvailableSellers = size(availableSellers,1);
-       fprintf("For Buyer %d, # Sellers = %d\n", buyer, numberOfAvailableSellers);
+       %fprintf("For Buyer %d, # Sellers = %d\n", buyer, numberOfAvailableSellers);
        
        if  numberOfAvailableSellers > 0
            
@@ -139,7 +152,7 @@ for time = 1:numSteps
            j = randsample(numberOfAvailableSellers,1);
            sellerIndex = availableSellers(j);
            numUnits = 1;
-           fprintf("Buyer %d exchanging with Seller %d\n", buyer, sellerIndex);
+           %fprintf("Buyer %d exchanging with Seller %d\n", buyer, sellerIndex);
            
            % Seller
            
@@ -176,6 +189,11 @@ for time = 1:numSteps
    if sumSellerInventoryUnits <= 0
        fprintf("Stopping simulation: Out of inventory at time = %d\n",time);
        break;
+   end
+   
+   if sumWallets <= 0
+       fprintf("Stopping simulation: Out of money at time = %d\n",time);
+       break;
    end   
    
 end
@@ -186,7 +204,7 @@ end
 ax1 = subplot(2,1,1);
 plot(ax1, 1:N, Wallet(1:end,1),'-o');
 xlim([1 N]);
-ylim([0 initialWallet*1.75]);
+ylim([0 max(Wallet)*1.25]);
 xlabel('Agent');
 ylabel('Drachmas');
 title('Wallet Size');
@@ -196,7 +214,7 @@ ax2 = subplot(2,1,2);
 x = 1:N;
 plot(ax2, x, unitsBought(1:end,1), '--o', x, unitsSold(1:end,1), '-o');
 xlim([1 N]);
-ylim([0 inventoryInitialUnits*1.25]);
+ylim([0 max(unitsSold)*1.25]);
 xlabel('Agent');
 ylabel('Units');
 title('Units Bought & Sold');
