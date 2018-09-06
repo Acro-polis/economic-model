@@ -12,7 +12,7 @@ fprintf("Start Modeling\n\n")
 addpath lib
 
 % Initializations
-T =  70;                     % Max Time 
+T =  100;                   % Max Time 
 dt = 1;                     % Time Step 
 numSteps = round(T / dt);   % Number of time steps (integer)
 
@@ -24,21 +24,24 @@ fprintf("Network consists of %d agents.\n", N);
 % Unit of currency
 drachma = 1;
 
+% Wallet
+initialWallet = 100;
+Wallet = ones(N,1).*initialWallet;
+initialWallet = ones(N,1).*initialWallet;
+
 % Rate of UBI
 a = 1;
 b = 1;
 UBI = a*drachma / b*dt; 
+totalUBI = zeros(N,1);
 
 % Rate of Demurrage
-c = 5;
+c = 1;
 d = 1;
 Demurrage = c*drachma / d*dt;
+totalDemurrage = zeros(N,1);
 
 fprintf("UBI = %.2f drachmas/dt, Demurrage = %.2f drachmas/dt\n", UBI, Demurrage);
-
-% Wallet
-initialWallet = UBI*100;
-Wallet = ones(N,1).*initialWallet;
 
 % Cost of goods
 p = 1;
@@ -89,6 +92,11 @@ else
     end
 end
 
+% Simulation finish states
+OutOfTime = 0;
+OutOfInventory = 1;
+OutOfMoney = 2;
+
 % Report Initial Statistics
 sumWallets = sum(Wallet(:,1));
 sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
@@ -96,6 +104,7 @@ sumSellerInventoryValue = sum(sellerInventoryUnits(:,1))*price;
 fprintf("Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
 
 %--------------------------------------------------------------------------
+SuspendCode = OutOfTime;
 
 % Start simulation
 for time = 1:numSteps
@@ -108,22 +117,29 @@ for time = 1:numSteps
        
        % Add UBI
        Wallet(1:N,1) = Wallet(1:N,1) + UBI;
+       totalUBI(1:N,1) = totalUBI(1:N,1) + UBI;
        
        % Subtract Demurrage; ensure non-negative values
        Wallet(1:N,1) = Wallet(1:N,1) - Demurrage;
        Wallet(Wallet < 0) = 0;
+       totalDemurrage(1:N,1) = totalDemurrage(1:N,1) + Demurrage;
        
    end
    
-   fprintf("At start of time = %d, money supply = %.2f\n",time, sum(Wallet(:,1)));
+   fprintf("At start of time = %d, money supply = %.2f\n\n",time, sum(Wallet(:,1)));
    
    for buyer = 1:numberOfBuyers
        
        % TODO random order buyers
        
-       % Agent is buyer & has money?
-       if B(buyer,1) ~= 1 || Wallet(buyer,1) <= price
-           fprintf("B(%d) is not a buyer or out of money\n",buyer);
+       % Skip non-buying agents
+       if B(buyer,1) ~= 1
+           continue;
+       end
+       
+       % Skip agents out of money
+       if Wallet(buyer,1) <= price
+           fprintf("B(%d) is out of money\n",buyer);
            continue;
        end
        
@@ -187,43 +203,101 @@ for time = 1:numSteps
    fprintf("Total units purchased = %.2f, total units sold = %.2f\n\n", sumBought, sumSold);
 
    if sumSellerInventoryUnits <= 0
-       fprintf("Stopping simulation: Out of inventory at time = %d\n",time);
+       SuspendCode = OutOfInventory;
        break;
    end
    
    if sumWallets <= 0
-       fprintf("Stopping simulation: Out of money at time = %d\n",time);
+       SuspendCode = OutOfMoney;
        break;
    end   
    
 end
 
+% Completion status
+if SuspendCode == OutOfTime
+    fprintf("Simulation ended normally at time = %d\n",time);
+elseif SuspendCode == OutOfInventory
+    fprintf("Simulation Halted: Out of inventory at time = %d\n",time);
+elseif SuspendCode == OutOfMoney
+    fprintf("Simulation Halted: Out of money at time = %d\n",time);
+end
+        
 % Plot some results
+yScale = 1.5;
 
 % Final Wallet Size
-ax1 = subplot(2,1,1);
-plot(ax1, 1:N, Wallet(1:end,1),'-o');
+ax1 = subplot(4,1,1);
+plot(ax1, 1:N, Wallet,'-o');
 xlim([1 N]);
-maxyLim = max(Wallet(1:end,1))*1.25;
-if (maxyLim <= 0) maxyLim = 1; end
+maxyLim = max(Wallet(1:end,1))*yScale;
+if (maxyLim <= 0) 
+    maxyLim = 1; 
+end
 ylim([0 maxyLim]);
 xlabel('Agent');
 ylabel('Drachmas');
-title('Wallet Size');
+title('Remaining Money');
+legend('Wallet Size');
 
 % Bought / Sold Distribution
-ax2 = subplot(2,1,2);
+maxB = max(unitsBought(1:end,1));
+maxS = max(unitsSold(1:end,1));
+maxyLim = maxS;
+if (maxS < maxB) 
+    maxyLim = maxB; 
+end
+
+ax2 = subplot(4,1,2);
 x = 1:N;
-plot(ax2, x, unitsBought(1:end,1), '--o', x, unitsSold(1:end,1), '-o');
+plot(ax2, x, unitsBought, '--o', x, unitsSold, '-o');
 xlim([1 N]);
-maxyLim = max(unitsSold(1:end,1))*1.25;
-if (maxyLim <= 0) maxyLim = 1; end
+
+maxyLim = maxyLim*yScale;
+if (maxyLim <= 0) 
+    maxyLim = 1; 
+end
 ylim([0 maxyLim]);
+
 xlabel('Agent');
 ylabel('Units');
 title('Units Bought & Sold');
 legend('Bought','Sold');
 
+% Buyers & Sellers Plot
+ax3 = subplot(4,1,3);
+x = 1:N;
+plot(ax3, x, B, 'x', x, S, 'o');
+xlim([1 N]);
+ylim([0.9 1.1]);
+xlabel('Agent');
+ylabel('Type');
+title('Buyers & Sellers');
+legend('Buyers','Sellers');
 
+% Money Supply
+net = initialWallet + totalUBI - totalDemurrage;
+maxW = max(initialWallet(1:end,1));
+maxUBI = max(totalUBI(1:end,1));
+maxD = max(totalDemurrage(1:end,1));
+maxN = max(net(1:end,1));
+maxylim = maxW;
+if maxyLim < maxUBI
+    maxyLim = maxUBI;
+end
+if maxyLim < maxD
+    maxyLim = maxD;
+end
+if maxyLim < maxN
+    maxyLim = maxN;
+end
 
-
+ax4 = subplot(4,1,4);
+x = 1:N;
+plot(ax4, x, net, 'c-*', x, initialWallet, '--o', x, totalUBI, 'g-x', x, totalDemurrage, '-ro');
+xlim([1 N]);
+ylim([0 maxyLim*yScale]);
+xlabel('Agent');
+ylabel('Drachma');
+title('Money Supply');
+legend('Net', 'Seed','UBI', 'Dumurrage');
