@@ -30,7 +30,7 @@ b = 1;
 UBI = a*drachma / b*dt; 
 
 % Rate of Demurrage
-c = 0.5;
+c = 5;
 d = 1;
 Demurrage = c*drachma / d*dt;
 
@@ -204,7 +204,9 @@ end
 ax1 = subplot(2,1,1);
 plot(ax1, 1:N, Wallet(1:end,1),'-o');
 xlim([1 N]);
-ylim([0 max(Wallet)*1.25]);
+maxyLim = max(Wallet(1:end,1))*1.25;
+if (maxyLim <= 0) maxyLim = 1; end
+ylim([0 maxyLim]);
 xlabel('Agent');
 ylabel('Drachmas');
 title('Wallet Size');
@@ -214,7 +216,9 @@ ax2 = subplot(2,1,2);
 x = 1:N;
 plot(ax2, x, unitsBought(1:end,1), '--o', x, unitsSold(1:end,1), '-o');
 xlim([1 N]);
-ylim([0 max(unitsSold)*1.25]);
+maxyLim = max(unitsSold(1:end,1))*1.25;
+if (maxyLim <= 0) maxyLim = 1; end
+ylim([0 maxyLim]);
 xlabel('Agent');
 ylabel('Units');
 title('Units Bought & Sold');
