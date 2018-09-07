@@ -5,6 +5,7 @@
 % Author: Jess
 % Created: 2018.08.30
 %===================================================
+
 version_number = 1.0;
 	
 % Setup
@@ -14,7 +15,7 @@ fprintf("===========================================================\n\n");
 addpath lib
 
 % Initializations
-T =  150;                   % Max Time 
+T =  500;                   % Max Time 
 dt = 1;                     % Time Step 
 numSteps = round(T / dt);   % Number of time steps (integer)
 
@@ -32,15 +33,16 @@ Wallet = ones(N,1).*initialWallet;
 initialWallet = ones(N,1).*initialWallet;
 
 % Rate of UBI
-a = 1;
+a = 1.0;
 b = 1;
 UBI = a*drachma / b*dt; 
 totalUBI = zeros(N,1);
 
-% Rate of Demurrage
-c = 10;
+% Percentage of Demurrage
+percentDemurrage = 0.5;
+assert(percentDemurrage >= 0 && percentDemurrage <= 1.0,'Assert: Percentage Demurrage Out Of Range!');
 d = 1;
-Demurrage = c*drachma / d*dt;
+Demurrage = percentDemurrage*drachma / d*dt;
 totalDemurrage = zeros(N,1);
 
 fprintf("UBI = %.2f drachmas/dt, Demurrage = %.2f drachmas/dt\n", UBI, Demurrage);
@@ -117,13 +119,14 @@ for time = 1:numSteps
    if time > 1 
        
        % Add UBI
-       Wallet(1:N,1) = Wallet(1:N,1) + UBI;
-       totalUBI(1:N,1) = totalUBI(1:N,1) + UBI;
+       Wallet = Wallet + UBI;
+       totalUBI = totalUBI + UBI;
        
        % Subtract Demurrage; ensure non-negative values
-       Wallet(1:N,1) = Wallet(1:N,1) - Demurrage;
+       incrementalDemurrage = Demurrage*Wallet;
+       Wallet(1:N,1) = Wallet - incrementalDemurrage;
        Wallet(Wallet < 0) = 0;
-       totalDemurrage(1:N,1) = totalDemurrage(1:N,1) + Demurrage;
+       totalDemurrage = totalDemurrage + incrementalDemurrage;
        
    end
    
@@ -231,42 +234,33 @@ end
 yScale = 1.5;
 
 % 1. Final Wallet Size
-ax1 = subplot(4,1,1);
-plot(ax1, 1:N, Wallet,'-o');
-xlim([1 N]);
-maxyLim = max(Wallet(1:end,1))*yScale;
-if (maxyLim <= 0) 
-    maxyLim = 1; 
+maxYHeight = max(Wallet(1:end,1))*yScale;
+if (maxYHeight <= 0) 
+    maxYHeight = 1; 
 end
-ylim([0 maxyLim]);
+
+ax1 = subplot(4,1,1);
+x = 1:N;
+plot(ax1, x, Wallet,'-o');
+xlim([1 N]);
+ylim([0 maxYHeight]);
 xlabel('Agent');
 ylabel('Drachmas');
 title('Remaining Money');
 legend('Wallet Size');
 
 % 2. Bought / Sold Distribution
-maxB = max(unitsBought(1:end,1));
-maxS = max(unitsSold(1:end,1));
-maxE = max(sellerInventoryUnits);
-maxyLim = maxS;
-if maxyLim < maxB
-    maxyLim = maxB; 
-end
-if maxyLim < maxE
-    maxyLim = maxE;
+yHeights = sort([max(unitsBought(1:end,1)) max(unitsSold(1:end,1)) max(sellerInventoryUnits)],'descend');
+maxYHeight = yHeights(1)*yScale;
+if (maxYHeight <= 0) 
+    maxmaxYHeight = 1; 
 end
 
 ax2 = subplot(4,1,2);
 x = 1:N;
 plot(ax2, x, unitsBought, '--o', x, unitsSold, '-o', x, sellerInventoryUnits, 'c--*');
 xlim([1 N]);
-
-maxyLim = maxyLim*yScale;
-if (maxyLim <= 0) 
-    maxyLim = 1; 
-end
-ylim([0 maxyLim]);
-
+ylim([0 maxYHeight]);
 xlabel('Agent');
 ylabel('Units');
 title('Units Bought & Sold');
@@ -285,26 +279,21 @@ legend('Buyers','Sellers');
 
 % 4. Money Supply
 net = initialWallet + totalUBI - totalDemurrage;
-maxW = max(initialWallet(1:end,1));
-maxUBI = max(totalUBI(1:end,1));
-maxD = max(totalDemurrage(1:end,1));
-maxN = max(net(1:end,1));
-maxylim = maxW;
-if maxyLim < maxUBI
-    maxyLim = maxUBI;
+yHeights = sort([max(net) max(initialWallet) max(totalUBI) max(totalDemurrage)],'descend');
+maxYHeight = yHeights(1)*yScale;
+if (maxYHeight <= 0) 
+    maxmaxYHeight = 1; 
 end
-if maxyLim < maxD
-    maxyLim = maxD;
-end
-if maxyLim < maxN
-    maxyLim = maxN;
+minyLim = 0;
+if min(net) < 0
+    minyLim = min(net)*yScale;
 end
 
 ax4 = subplot(4,1,4);
 x = 1:N;
 plot(ax4, x, net, 'c-*', x, initialWallet, '--o', x, totalUBI, 'g-x', x, totalDemurrage, '-ro');
 xlim([1 N]);
-ylim([0 maxyLim*yScale]);
+ylim([minyLim maxYHeight]);
 xlabel('Agent');
 ylabel('Drachma');
 title('Money Supply');
