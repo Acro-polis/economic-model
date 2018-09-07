@@ -8,11 +8,13 @@
 version_number = 1.0;
 	
 % Setup
-fprintf("Start Modeling\n\n")
+fprintf("\n===========================================================\n");
+fprintf("Modeling Start\n")
+fprintf("===========================================================\n\n");
 addpath lib
 
 % Initializations
-T =  100;                   % Max Time 
+T =  150;                   % Max Time 
 dt = 1;                     % Time Step 
 numSteps = round(T / dt);   % Number of time steps (integer)
 
@@ -36,7 +38,7 @@ UBI = a*drachma / b*dt;
 totalUBI = zeros(N,1);
 
 % Rate of Demurrage
-c = 1;
+c = 10;
 d = 1;
 Demurrage = c*drachma / d*dt;
 totalDemurrage = zeros(N,1);
@@ -53,6 +55,7 @@ fprintf("Price of goods = %.2f drachmas\n", price);
 S = zeros(N,1);
 unitsSold = zeros(N,1);
 percentSellers = 0.5;
+assert(percentSellers > 0 && percentSellers <= 1.0,'Assert: Percentage Sellers Out Of Range!')
 numberOfSellers = round(percentSellers*N);
 
 fprintf("Num Sellers = %d <= %d agents\n", numberOfSellers, N);
@@ -66,6 +69,7 @@ sellerInventoryUnits = zeros(N,1);
 B = zeros(N,1);
 unitsBought = zeros(N,1);
 percentBuyers = 1.0;
+assert(percentBuyers > 0 && percentBuyers <= 1.0,'Assert: Percentage Buyers Out Of Range!')
 numberOfBuyers = round(percentBuyers*N);
 
 fprintf("Num Buyers  = %d <= %d agents\n", numberOfBuyers, N);
@@ -92,11 +96,6 @@ else
     end
 end
 
-% Simulation finish states
-OutOfTime = 0;
-OutOfInventory = 1;
-OutOfMoney = 2;
-
 % Report Initial Statistics
 sumWallets = sum(Wallet(:,1));
 sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
@@ -104,15 +103,17 @@ sumSellerInventoryValue = sum(sellerInventoryUnits(:,1))*price;
 fprintf("Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
 
 %--------------------------------------------------------------------------
+% Simulation finish states
+OutOfTime = 0;
+OutOfInventory = 1;
+OutOfMoney = 2;
 SuspendCode = OutOfTime;
 
 % Start simulation
 for time = 1:numSteps
     
-   if mod(time,T/10) == 1
-       fprintf('Time Step = %u\n',time);
-   end
-   
+   fprintf("----- Start of time step = %d, money supply = %.2f -----\n\n", time, sum(Wallet(:,1)));
+      
    if time > 1 
        
        % Add UBI
@@ -126,11 +127,11 @@ for time = 1:numSteps
        
    end
    
-   fprintf("At start of time = %d, money supply = %.2f\n\n",time, sum(Wallet(:,1)));
+   % Randomly order buyers before each time step
+   numBuyerIndex = 1:numberOfBuyers;
+   randBuyerIndex = numBuyerIndex(randperm(length(numBuyerIndex)));
    
-   for buyer = 1:numberOfBuyers
-       
-       % TODO random order buyers
+   for buyer = 1:numel(randBuyerIndex)
        
        % Skip non-buying agents
        if B(buyer,1) ~= 1
@@ -139,7 +140,7 @@ for time = 1:numSteps
        
        % Skip agents out of money
        if Wallet(buyer,1) <= price
-           fprintf("B(%d) is out of money\n",buyer);
+           fprintf("- B(%d) is out of money\n",buyer);
            continue;
        end
        
@@ -160,6 +161,7 @@ for time = 1:numSteps
        
        % If sellers available, pick one randomly
        numberOfAvailableSellers = size(availableSellers,1);
+       
        %fprintf("For Buyer %d, # Sellers = %d\n", buyer, numberOfAvailableSellers);
        
        if  numberOfAvailableSellers > 0
@@ -168,6 +170,7 @@ for time = 1:numSteps
            j = randsample(numberOfAvailableSellers,1);
            sellerIndex = availableSellers(j);
            numUnits = 1;
+           
            %fprintf("Buyer %d exchanging with Seller %d\n", buyer, sellerIndex);
            
            % Seller
@@ -199,8 +202,9 @@ for time = 1:numSteps
    sumSellerInventoryValue = sumSellerInventoryUnits*price;
    sumBought = sum(unitsBought(:,1));
    sumSold = sum(unitsSold(:,1));
-   fprintf("\nMoney Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
-   fprintf("Total units purchased = %.2f, total units sold = %.2f\n\n", sumBought, sumSold);
+   fprintf("\n----- End of time step   = %d -----\n\n",time);
+   fprintf("* Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
+   fprintf("* Total units purchased = %.2f, total units sold = %.2f\n\n", sumBought, sumSold);
 
    if sumSellerInventoryUnits <= 0
        SuspendCode = OutOfInventory;
@@ -226,7 +230,7 @@ end
 % Plot some results
 yScale = 1.5;
 
-% Final Wallet Size
+% 1. Final Wallet Size
 ax1 = subplot(4,1,1);
 plot(ax1, 1:N, Wallet,'-o');
 xlim([1 N]);
@@ -240,17 +244,21 @@ ylabel('Drachmas');
 title('Remaining Money');
 legend('Wallet Size');
 
-% Bought / Sold Distribution
+% 2. Bought / Sold Distribution
 maxB = max(unitsBought(1:end,1));
 maxS = max(unitsSold(1:end,1));
+maxE = max(sellerInventoryUnits);
 maxyLim = maxS;
-if (maxS < maxB) 
+if maxyLim < maxB
     maxyLim = maxB; 
+end
+if maxyLim < maxE
+    maxyLim = maxE;
 end
 
 ax2 = subplot(4,1,2);
 x = 1:N;
-plot(ax2, x, unitsBought, '--o', x, unitsSold, '-o');
+plot(ax2, x, unitsBought, '--o', x, unitsSold, '-o', x, sellerInventoryUnits, 'c--*');
 xlim([1 N]);
 
 maxyLim = maxyLim*yScale;
@@ -262,9 +270,9 @@ ylim([0 maxyLim]);
 xlabel('Agent');
 ylabel('Units');
 title('Units Bought & Sold');
-legend('Bought','Sold');
+legend('Bought','Sold','Ending Inventory');
 
-% Buyers & Sellers Plot
+% 3. Buyers & Sellers Plot
 ax3 = subplot(4,1,3);
 x = 1:N;
 plot(ax3, x, B, 'x', x, S, 'o');
@@ -275,7 +283,7 @@ ylabel('Type');
 title('Buyers & Sellers');
 legend('Buyers','Sellers');
 
-% Money Supply
+% 4. Money Supply
 net = initialWallet + totalUBI - totalDemurrage;
 maxW = max(initialWallet(1:end,1));
 maxUBI = max(totalUBI(1:end,1));
