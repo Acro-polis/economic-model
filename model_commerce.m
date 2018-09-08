@@ -6,7 +6,7 @@
 % Created: 2018.08.30
 %===================================================
 
-version_number = 1.0;
+version_number = 1.1; % Tracking state in time
 	
 % Setup
 fprintf("\n===========================================================\n");
@@ -15,7 +15,7 @@ fprintf("===========================================================\n\n");
 addpath lib
 
 % Initializations
-T =  500;                   % Max Time 
+T =  100;                   % Max Time 
 dt = 1;                     % Time Step 
 numSteps = round(T / dt);   % Number of time steps (integer)
 
@@ -28,24 +28,24 @@ fprintf("Network consists of %d agents.\n", N);
 drachma = 1;
 
 % Wallet
-initialWallet = 100;
-Wallet = ones(N,1).*initialWallet;
-initialWallet = ones(N,1).*initialWallet;
+seedWalletSize = 100;
+Wallet = newATMatrix(N,T,seedWalletSize);
+initialWallet = Wallet(:,1); % time = 0
 
 % Rate of UBI
 a = 1.0;
-b = 1;
+b = 1.0;
 UBI = a*drachma / b*dt; 
 totalUBI = zeros(N,1);
 
 % Percentage of Demurrage
-percentDemurrage = 0.5;
+percentDemurrage = 0.05;
 assert(percentDemurrage >= 0 && percentDemurrage <= 1.0,'Assert: Percentage Demurrage Out Of Range!');
 d = 1;
 Demurrage = percentDemurrage*drachma / d*dt;
 totalDemurrage = zeros(N,1);
 
-fprintf("UBI = %.2f drachmas/dt, Demurrage = %.2f drachmas/dt\n", UBI, Demurrage);
+fprintf("UBI = %.2f drachmas / dt, Demurrage = %.2f percent / dt\n", UBI, Demurrage*100);
 
 % Cost of goods
 p = 1;
@@ -113,19 +113,20 @@ SuspendCode = OutOfTime;
 
 % Start simulation
 for time = 1:numSteps
-    
-   fprintf("----- Start of time step = %d, money supply = %.2f -----\n\n", time, sum(Wallet(:,1)));
-      
-   if time > 1 
+   
+   if time == 1
+       fprintf("----- Start of time step = %d, money supply = %.2f -----\n\n", time, sum(Wallet(:,time)));
+   elseif time > 1 
+       
+       fprintf("----- Start of time step = %d, money supply = %.2f -----\n\n", time, sum(Wallet(:,time - 1)));
        
        % Add UBI
-       Wallet = Wallet + UBI;
+       Wallet(:,time) = Wallet(:,time - 1) + UBI;
        totalUBI = totalUBI + UBI;
        
        % Subtract Demurrage; ensure non-negative values
-       incrementalDemurrage = Demurrage*Wallet;
-       Wallet(1:N,1) = Wallet - incrementalDemurrage;
-       Wallet(Wallet < 0) = 0;
+       incrementalDemurrage = Demurrage*Wallet(:,time);
+       Wallet(:,time) = Wallet(:,time - 1) - incrementalDemurrage;
        totalDemurrage = totalDemurrage + incrementalDemurrage;
        
    end
@@ -142,7 +143,7 @@ for time = 1:numSteps
        end
        
        % Skip agents out of money
-       if Wallet(buyer,1) <= price
+       if Wallet(buyer,time) <= price
            fprintf("- B(%d) is out of money\n",buyer);
            continue;
        end
@@ -183,7 +184,7 @@ for time = 1:numSteps
            unitsSold(sellerIndex) = unitsSold(sellerIndex) + numUnits;
            
            % Increment Wallet
-           Wallet(sellerIndex,1) = Wallet(sellerIndex,1) + numUnits*price;
+           Wallet(sellerIndex,time) = Wallet(sellerIndex,time) + numUnits*price;
            
            % Buyer
            
@@ -191,7 +192,7 @@ for time = 1:numSteps
            unitsBought(buyer,1) = unitsBought(buyer,1) + numUnits;
            
            % Decrement Wallet
-           Wallet(buyer,1) = Wallet(buyer,1) - numUnits*price;
+           Wallet(buyer,time) = Wallet(buyer,time) - numUnits*price;
            
        else
            % No sale :-(
@@ -200,7 +201,7 @@ for time = 1:numSteps
    
    % Report Incremental Statistics
    
-   sumWallets = sum(Wallet(:,1));
+   sumWallets = sum(Wallet(:,time));
    sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
    sumSellerInventoryValue = sumSellerInventoryUnits*price;
    sumBought = sum(unitsBought(:,1));
@@ -234,14 +235,14 @@ end
 yScale = 1.5;
 
 % 1. Final Wallet Size
-maxYHeight = max(Wallet(1:end,1))*yScale;
+maxYHeight = max(Wallet(:,time))*yScale;
 if (maxYHeight <= 0) 
     maxYHeight = 1; 
 end
 
 ax1 = subplot(4,1,1);
 x = 1:N;
-plot(ax1, x, Wallet,'-o');
+plot(ax1, x, Wallet(:,time),'-o');
 xlim([1 N]);
 ylim([0 maxYHeight]);
 xlabel('Agent');
@@ -298,3 +299,10 @@ xlabel('Agent');
 ylabel('Drachma');
 title('Money Supply');
 legend('Net', 'Seed','UBI', 'Dumurrage');
+
+figure;
+x = 1:time;
+plot(x, Wallet(:,1:time),'-o');
+xlabel('Time');
+ylabel('Drachma');
+title('Wallet');
