@@ -35,17 +35,17 @@ initialWallet = Wallet(:,1); % time = 0
 % Rate of UBI
 a = 1.0;
 b = 1.0;
-UBI = a*drachma / b*dt; 
-totalUBI = zeros(N,1);
+incrementalUBI = a*drachma / b*dt; 
+UBI = newATMatrix(N,T,0.0);
 
 % Percentage of Demurrage
 percentDemurrage = 0.05;
 assert(percentDemurrage >= 0 && percentDemurrage <= 1.0,'Assert: Percentage Demurrage Out Of Range!');
 d = 1;
-Demurrage = percentDemurrage*drachma / d*dt;
-totalDemurrage = zeros(N,1);
+percentDemurrage = percentDemurrage*drachma / d*dt;
+Demurrage = newATMatrix(N,T,0.0);
 
-fprintf("UBI = %.2f drachmas / dt, Demurrage = %.2f percent / dt\n", UBI, Demurrage*100);
+fprintf("UBI = %.2f drachmas / dt, Demurrage = %.2f percent / dt\n", incrementalUBI, percentDemurrage*100);
 
 % Cost of goods
 p = 1;
@@ -121,13 +121,13 @@ for time = 1:numSteps
        fprintf("----- Start of time step = %d, money supply = %.2f -----\n\n", time, sum(Wallet(:,time - 1)));
        
        % Add UBI
-       Wallet(:,time) = Wallet(:,time - 1) + UBI;
-       totalUBI = totalUBI + UBI;
+       Wallet(:,time) = Wallet(:,time - 1) + incrementalUBI;
+       UBI(:,time) = UBI(:,time - 1) + incrementalUBI;
        
-       % Subtract Demurrage; ensure non-negative values
-       incrementalDemurrage = Demurrage*Wallet(:,time);
-       Wallet(:,time) = Wallet(:,time - 1) - incrementalDemurrage;
-       totalDemurrage = totalDemurrage + incrementalDemurrage;
+       % Subtract Demurrage
+       incrementalDemurrage = percentDemurrage*Wallet(:,time);
+       Demurrage(:,time) = Demurrage(:,time - 1) + incrementalDemurrage;
+       Wallet(:,time) = Wallet(:,time - 1) - incrementalDemurrage; % Can be negative for now
        
    end
    
@@ -279,6 +279,8 @@ title('Buyers & Sellers');
 legend('Buyers','Sellers');
 
 % 4. Money Supply
+totalUBI = UBI(:,time);
+totalDemurrage = Demurrage(:,time);
 net = initialWallet + totalUBI - totalDemurrage;
 yHeights = sort([max(net) max(initialWallet) max(totalUBI) max(totalDemurrage)],'descend');
 maxYHeight = yHeights(1)*yScale;
@@ -306,3 +308,10 @@ plot(x, Wallet(:,1:time),'-o');
 xlabel('Time');
 ylabel('Drachma');
 title('Wallet');
+
+figure;
+x = 1:time;
+plot(x, UBI(:,1:time),'-o', x, Demurrage(:,1:time),'-x');
+xlabel('Time');
+ylabel('Drachma');
+title('UBI & Demurrage');
