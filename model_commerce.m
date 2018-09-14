@@ -15,7 +15,7 @@ fprintf("===========================================================\n\n");
 addpath lib
 
 % Initializations
-T =  100;                   % Max Time 
+T =  150;                   % Max Time 
 dt = 1;                     % Time Step 
 numSteps = round(T / dt);   % Number of time steps (integer)
 
@@ -63,7 +63,7 @@ numberOfSellers = round(percentSellers*N);
 fprintf("Num Sellers = %d <= %d agents\n", numberOfSellers, N);
 
 % Seller Inventory
-inventoryInitialUnits = 100;
+inventoryInitialUnits = 200;
 inventoryInitialValue = inventoryInitialUnits*price;
 sellerInventoryUnits = zeros(N,1);
 
@@ -120,17 +120,17 @@ for time = 1:numSteps
        
        fprintf("----- Start of time step = %d, money supply = %.2f -----\n\n", time, sum(Wallet(:,time - 1)));
        
-       % Add UBI
-       Wallet(:,time) = Wallet(:,time - 1) + incrementalUBI;
-       UBI(:,time) = UBI(:,time - 1) + incrementalUBI;
-       
        % Subtract Demurrage
-       incrementalDemurrage = percentDemurrage * Wallet(:,time);
+       incrementalDemurrage = percentDemurrage * Wallet(:,time - 1);
        Demurrage(:,time) = Demurrage(:,time - 1) + incrementalDemurrage;
        Wallet(:,time) = Wallet(:,time - 1) - incrementalDemurrage;
 
        % Wallet cannot be reduced below zero due to demurrage
        Wallet(Wallet < 0) = 0;
+       
+       % Add UBI
+       Wallet(:,time) = Wallet(:,time) + incrementalUBI;
+       UBI(:,time) = UBI(:,time - 1) + incrementalUBI;
        
    end
    
@@ -258,7 +258,7 @@ legend('Wallet Size');
 yHeights = sort([max(unitsBought(1:end,1)) max(unitsSold(1:end,1)) max(sellerInventoryUnits)],'descend');
 maxYHeight = yHeights(1)*yScale;
 if (maxYHeight <= 0) 
-    maxmaxYHeight = 1; 
+    maxYHeight = 1; 
 end
 
 ax2 = subplot(4,1,2);
