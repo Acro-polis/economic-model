@@ -70,7 +70,7 @@ sellerInventoryUnits = zeros(N,1);
 % Buyers 1 = Buyer, = No Buyer
 B = zeros(N,1);
 unitsBought = zeros(N,1);
-percentBuyers = 1.0;
+percentBuyers = 0.8;
 assert(percentBuyers > 0 && percentBuyers <= 1.0,'Assert: Percentage Buyers Out Of Range!')
 numberOfBuyers = round(percentBuyers*N);
 
@@ -125,9 +125,12 @@ for time = 1:numSteps
        UBI(:,time) = UBI(:,time - 1) + incrementalUBI;
        
        % Subtract Demurrage
-       incrementalDemurrage = percentDemurrage*Wallet(:,time);
+       incrementalDemurrage = percentDemurrage * Wallet(:,time);
        Demurrage(:,time) = Demurrage(:,time - 1) + incrementalDemurrage;
-       Wallet(:,time) = Wallet(:,time - 1) - incrementalDemurrage; % Can be negative for now
+       Wallet(:,time) = Wallet(:,time - 1) - incrementalDemurrage;
+
+       % Wallet cannot be reduced below zero due to demurrage
+       Wallet(Wallet < 0) = 0;
        
    end
    
@@ -232,6 +235,7 @@ elseif SuspendCode == OutOfMoney
 end
         
 % Plot some results
+close all
 yScale = 1.5;
 
 % 1. Final Wallet Size
