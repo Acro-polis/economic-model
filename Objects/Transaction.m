@@ -6,28 +6,28 @@ classdef Transaction < handle
 %================================================================
 
     properties (SetAccess=private)
-        Id
-        Type
-        Amount
-        AgentId
-        SourceAgentId
-        DestinationAgentId
-        DateCreated
+        id
+        type
+        amount
+        agentId
+        sourceAgentId
+        destinationAgentId
+        dateCreated
     end
-    
+        
     methods
         
         %
         % Constructor
         %
-        function obj = Transaction(Type, Amount, AgentId, SourceAgentId, DestinationAgentId, DateCreated)
-            obj.Id = 1; % TODO make a unique number
-            obj.Type = Type;
-            obj.Amount = Amount;
-            obj.AgentId = AgentId;
-            obj.SourceAgentId = SourceAgentId;
-            obj.DestinationAgentId = DestinationAgentId;
-            obj.DateCreated = DateCreated;
+        function obj = Transaction(type, amount, agentId, sourceAgentId, destinationAgentId, dateCreated)
+            obj.id = 1; % TODO make a unique number
+            obj.type = type;
+            obj.amount = amount;
+            obj.agentId = agentId;
+            obj.sourceAgentId = sourceAgentId;
+            obj.destinationAgentId = destinationAgentId;
+            obj.dateCreated = dateCreated;
         end
         
     end

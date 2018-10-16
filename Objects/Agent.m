@@ -6,9 +6,9 @@ classdef Agent < handle
 %================================================================
 
     properties (SetAccess = private)
-        Id
-        Birthdate
-        Wallet
+        id
+        birthdate
+        wallet
     end
     
     methods
@@ -16,10 +16,10 @@ classdef Agent < handle
         %
         % Constructor
         %
-        function obj = Agent(Id, Birthdate)
-            obj.Id = Id;
-            obj.Birthdate = Birthdate;
-            obj.Wallet = CryptoWallet(obj.Id);
+        function obj = Agent(id, birthdate)
+            obj.id = id;
+            obj.birthdate = birthdate;
+            obj.wallet = CryptoWallet(obj.id);
         end
         
         %

@@ -6,32 +6,32 @@ classdef CryptoWallet < handle
 %================================================================    
 
     properties (SetAccess=private)
-        AgentId             
-        Transactions        
+        agentId             
+        transactions        
     end
     
     properties (Dependent)
-        CurrentBalance
+        currentBalance
     end
     
     methods
         
-        function obj = CryptoWallet(AgentId)
-            obj.AgentId = AgentId;
-            obj.Transactions = Transaction.empty;
+        function obj = CryptoWallet(agentId)
+            obj.agentId = agentId;
+            obj.transactions = Transaction.empty;
         end
         
-        function addTransaction(obj, NewTransaction)
-            obj.Transactions = [obj.Transactions, NewTransaction];
+        function addTransaction(obj, newTransaction)
+            obj.transactions = [obj.transactions, newTransaction];
         end
         
-        function CurrentBalance = get.CurrentBalance(obj)
-            CurrentBalance = sum([obj.Transactions.Amount]);
+        function CurrentBalance = get.currentBalance(obj)
+            CurrentBalance = sum([obj.transactions.amount]);
         end
         
-        function balance = BalanceByTransactionType(obj, TransactionType)
+        function balance = balanceByTransactionType(obj, transactionType)
             % '-and' & '-or' are logical operations that can be added
-            results = findobj(obj.Transactions,'Type', TransactionType);
+            results = findobj(obj.transactions,'Type', transactionType);
             balance = sum([results.Amount]);
         end
         
