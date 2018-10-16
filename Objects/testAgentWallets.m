@@ -1,6 +1,6 @@
 %=====================================================
 %
-% Test function TestWallet
+% Test function testAgentWallets
 %
 % Note: Work in progress
 %
