@@ -11,12 +11,17 @@ classdef Agent < handle
         wallet
     end
     
+    properties (Constant)
+        PolisId = 0 % TODO - harden this approach
+    end
+    
     methods
         
         %
         % Constructor
         %
         function obj = Agent(id, birthdate)
+            assert(id ~= 0,'Error: Agent Id = reserved Polis Id');
             obj.id = id;
             obj.birthdate = birthdate;
             obj.wallet = CryptoWallet(obj.id);

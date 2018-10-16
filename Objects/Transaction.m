@@ -30,6 +30,10 @@ classdef Transaction < handle
             obj.dateCreated = dateCreated;
         end
         
+        function dump(obj)
+            fprintf('%d\t %s %+.2f\t %d %d %d\t %s\n', obj.id, obj.type, obj.amount, obj.agentId, obj.sourceAgentId, obj.destinationAgentId, datestr(obj.dateCreated));
+        end
+        
     end
 end
 
