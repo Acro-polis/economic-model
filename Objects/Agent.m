@@ -1,11 +1,11 @@
-classdef Agent
+classdef Agent < handle
 %================================================================
 % Class Agent
 %
 % Created by Jess 09.13.18
 %================================================================
 
-    properties
+    properties (SetAccess = private)
         Id
         Birthdate
         Wallet
@@ -13,12 +13,18 @@ classdef Agent
     
     methods
         
+        %
+        % Constructor
+        %
         function obj = Agent(Id, Birthdate)
             obj.Id = Id;
             obj.Birthdate = Birthdate;
-            Wallet = Wallet(obj.Id);
+            obj.Wallet = CryptoWallet(obj.Id);
         end
         
+        %
+        % 
+        %
     end
 end
 
