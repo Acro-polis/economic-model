@@ -14,10 +14,12 @@ fprintf("Modeling Start\n")
 fprintf("===========================================================\n\n");
 addpath lib
 
-% Open Input File
+% Open Input File, read header
 fileName = 'InputCommerce.txt';
 fileId = fopen(fileName, "r");
-fgetl(fileId); % Header (ignore)
+for i = 1:3
+    fgetl(fildId);
+end
 
 % Initializations
 T =  parseInputString(fgetl(fileId));   % Max Time (Input 1)
