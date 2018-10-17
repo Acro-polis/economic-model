@@ -42,6 +42,14 @@ t31 = Transaction(TransactionType.SELL, 50, agent1.id, agent1.id, agent3.id, dat
 agent1.wallet.addTransaction(t13);
 agent3.wallet.addTransaction(t31);
 
+% A3 buys from A1
+t31 = Transaction(TransactionType.BUY, -75, agent3.id, agent3.id, agent1.id, datetime('now'));
+t13 = Transaction(TransactionType.SELL, 75, agent3.id, agent3.id, agent1.id, datetime('now'));
+
+agent3.wallet.addTransaction(t31);
+agent1.wallet.addTransaction(t13);
+
+% Test / Output Results
 a1bal = agent1.wallet.currentBalance;
 a2bal = agent2.wallet.currentBalance;
 a3bal = agent3.wallet.currentBalance;
@@ -50,9 +58,9 @@ fprintf('Agent1 Current Balnace = %d\n', a1bal);
 fprintf('Agent2 Current Balnace = %d\n', a2bal);
 fprintf('Agent3 Current Balnace = %d\n', a3bal);
 
-assert(a1bal == 350,'Error in Agent 1 balance, %d != 350', a1bal);
+assert(a1bal == 425,'Error in Agent 1 balance, %d != 425', a1bal);
 assert(a2bal == 400,'Error in Agent 2 balance, %d != 400', a2bal);
-assert(a3bal == 750,'Error in Agent 3 balance, %d != 750', a3bal);
+assert(a3bal == 675,'Error in Agent 3 balance, %d != 675', a3bal);
 
 agent1.wallet.dump();
 fprintf('\n');

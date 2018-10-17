@@ -29,12 +29,17 @@ classdef CryptoWallet < handle
             CurrentBalance = sum([obj.transactions.amount]);
         end
         
+        function balance = balanceForSourceAgentId(obj, agentId)
+            results = findobj(obj.transactions,'soureAgentId', agentId);
+            balance = sum([results.Amount]);
+        end
+
         function balance = balanceForTransactionType(obj, transactionType)
-            % '-and' & '-or' are logical operations that can be added
-            results = findobj(obj.transactions,'Type', transactionType);
+            results = findobj(obj.transactions,'type', transactionType);
             balance = sum([results.Amount]);
         end
         
+            % '-and' & '-or' are logical operations that can be added
         % Function getBalanceForSource
         % Function getBalanceForDestination
         % etc.

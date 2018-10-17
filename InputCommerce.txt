@@ -1,0 +1,10 @@
+Commerce Model Input Parameters
+Number of Time Steps: 200
+Number of Agents: 20
+Initial Wallet Size (drachma): 100.0
+UBI Rate (drachma / dt): 10.0
+Percent Demurrage: 0.05
+Price of Goods (drachma): 1.0
+Percentage of Agents Selling: 0.50
+Initual Inventory (# units): 500.0
+Percentage of Agents Buying: 0.90

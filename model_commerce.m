@@ -14,13 +14,20 @@ fprintf("Modeling Start\n")
 fprintf("===========================================================\n\n");
 addpath lib
 
-% Initializations
-T =  150;                   % Max Time 
-dt = 1;                     % Time Step 
-numSteps = round(T / dt);   % Number of time steps (integer)
+% Open Input File
+fileName = 'InputCommerce.txt';
+fileId = fopen(fileName, "r");
+fgetl(fileId); % Header (ignore)
 
-N =  20;                    % Number of Agents (nodes)
-AM = connectedGraph(N);     % The WOT network
+% Initializations
+T =  parseInputString(fgetl(fileId));   % Max Time (Input 1)
+dt = 1;                                 % Time Step 
+numSteps = round(T / dt);               % Number of time steps (integer)
+
+fprintf("Simulation has %d time steps\n", numSteps);
+
+N =  round(parseInputString(fgetl(fileId)));    % Number of Agents (nodes) (Input 2)
+AM = connectedGraph(N);                         % The WOT network
 
 fprintf("Network consists of %d agents.\n", N);
 
@@ -28,18 +35,20 @@ fprintf("Network consists of %d agents.\n", N);
 drachma = 1;
 
 % Wallet
-seedWalletSize = 100;
+seedWalletSize = parseInputString(fgetl(fileId)); % Wallet Size (Input 3)
 Wallet = newATMatrix(N,T,seedWalletSize);
 initialWallet = Wallet(:,1); % time = 0
 
+fprintf("Starting Wallet Size = %.2f\n", seedWalletSize);
+
 % Rate of UBI
-a = 1.0;
+a = parseInputString(fgetl(fileId)); % UBI Rate (Input 4)
 b = 1.0;
 incrementalUBI = a*drachma / b*dt; 
 UBI = newATMatrix(N,T,0.0);
 
 % Percentage of Demurrage
-percentDemurrage = 0.05;
+percentDemurrage = parseInputString(fgetl(fileId)); % Percentage Demurrage (Input 5)
 assert(percentDemurrage >= 0 && percentDemurrage <= 1.0,'Assert: Percentage Demurrage Out Of Range!');
 d = 1;
 percentDemurrage = percentDemurrage*drachma / d*dt;
@@ -48,7 +57,7 @@ Demurrage = newATMatrix(N,T,0.0);
 fprintf("UBI = %.2f drachmas / dt, Demurrage = %.2f percent / dt\n", incrementalUBI, percentDemurrage*100);
 
 % Cost of goods
-p = 1;
+p = parseInputString(fgetl(fileId)); % Price Goods (Input 6);
 price = p*drachma;
 
 fprintf("Price of goods = %.2f drachmas\n", price);
@@ -56,25 +65,27 @@ fprintf("Price of goods = %.2f drachmas\n", price);
 % Sellers 1 = Seller, 0 = No Seller
 S = zeros(N,1);
 unitsSold = zeros(N,1);
-percentSellers = 0.5;
+percentSellers = parseInputString(fgetl(fileId)); % Percentage Sellers (Input 7)
 assert(percentSellers > 0 && percentSellers <= 1.0,'Assert: Percentage Sellers Out Of Range!')
 numberOfSellers = round(percentSellers*N);
 
-fprintf("Num Sellers = %d <= %d agents\n", numberOfSellers, N);
-
 % Seller Inventory
-inventoryInitialUnits = 200;
+inventoryInitialUnits = parseInputString(fgetl(fileId)); % Inital Inventory (Input 8)
 inventoryInitialValue = inventoryInitialUnits*price;
 sellerInventoryUnits = zeros(N,1);
+
+fprintf("Num Sellers = %d <= %d agents; Inital Inventory = %.2f Units\n", numberOfSellers, N, inventoryInitialUnits);
 
 % Buyers 1 = Buyer, = No Buyer
 B = zeros(N,1);
 unitsBought = zeros(N,1);
-percentBuyers = 0.8;
+percentBuyers = parseInputString(fgetl(fileId)); % Percentage Buyers (Input 9)
 assert(percentBuyers > 0 && percentBuyers <= 1.0,'Assert: Percentage Buyers Out Of Range!')
 numberOfBuyers = round(percentBuyers*N);
 
 fprintf("Num Buyers  = %d <= %d agents\n", numberOfBuyers, N);
+
+fclose(fileId);
 
 % Randomely select sellers
 % TODO - Make preferrential selection
