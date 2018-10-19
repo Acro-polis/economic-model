@@ -13,59 +13,59 @@ fprintf(fileId,'\nCommerce Model Input Parameters\n\n');
 
 fprintf(fileId,'1) Number of Time Steps (dt): %.0f\n',150.0);
 fprintf(fileId,'2) Number of Agents: %d\n',20);
-fprintf(fileId,'3) Initial Wallet Size (drachma): %.1f\n',100.0);
+fprintf(fileId,'3) Initial Wallet Size (drachma): %.1f\n',150.0);
 fprintf(fileId,'4) UBI Rate (drachma / dt): %.1f\n',1.0);
 fprintf(fileId,'5) Percent Demurrage (/dt): %.2f\n',0.05);
 fprintf(fileId,'6) Price of Goods (drachma): %.1f\n',1.0);
 fprintf(fileId,'7) Percentage of Agents Selling: %.2f\n',0.50);
-fprintf(fileId,'8) Initual Inventory (# units): %.1f\n',200.0);
+fprintf(fileId,'8) Initual Inventory (# units): %.1f\n',300.0);
 fprintf(fileId,'9) Percentage of Agents Buying: %.2f\n',0.80);
 
 fclose(fileId);
 
-fildId = fopen(fileName, "r");
+fileId = fopen(fileName, "r");
 
 %
 % Header
 % 
 for i = 1:3
-    fgetl(fildId);
+    fgetl(fileId);
 end
 
-line = fgetl(fildId);
+line = fgetl(fileId);
 inputValue = parseInputString(line);
 fprintf('%.2f\n',inputValue);
 
-line = fgetl(fildId);
+line = fgetl(fileId);
 inputValue = parseInputString(line);
 fprintf('%.2f\n',inputValue);
 
-line = fgetl(fildId);
+line = fgetl(fileId);
 inputValue = parseInputString(line);
 fprintf('%.2f\n',inputValue);
 
-line = fgetl(fildId);
+line = fgetl(fileId);
 inputValue = parseInputString(line);
 fprintf('%.2f\n',inputValue);
 
-line = fgetl(fildId);
+line = fgetl(fileId);
 inputValue = parseInputString(line);
 fprintf('%.2f\n',inputValue);
 
-line = fgetl(fildId);
+line = fgetl(fileId);
 inputValue = parseInputString(line);
 fprintf('%.2f\n',inputValue);
 
-line = fgetl(fildId);
+line = fgetl(fileId);
 inputValue = parseInputString(line);
 fprintf('%.2f\n',inputValue);
 
-line = fgetl(fildId);
+line = fgetl(fileId);
 inputValue = parseInputString(line);
 fprintf('%.2f\n',inputValue);
 
-line = fgetl(fildId);
+line = fgetl(fileId);
 inputValue = parseInputString(line);
 fprintf('%.2f\n',inputValue);
 
-fclose(fildId);
+fclose(fileId);

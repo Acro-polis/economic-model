@@ -18,7 +18,7 @@ addpath lib
 fileName = 'InputCommerce.txt';
 fileId = fopen(fileName, "r");
 for i = 1:3
-    fgetl(fildId);
+    fgetl(fileId);
 end
 
 % Initializations
@@ -319,16 +319,67 @@ ylabel('Drachma');
 title('Money Supply');
 legend('Net', 'Seed','UBI', 'Dumurrage');
 
+% 
+
+buysellW = [];
+buyW = [];
+sellW = [];
+npW = [];
+
+buysellD = [];
+buyD = [];
+sellD = [];
+npD = [];
+
+for a = 1:N
+    if B(a) == 1 && S(a) == 1
+        buysellW = [buysellW; Wallet(a,1:time)];
+        buysellD = [buysellD; Demurrage(a,1:time)];
+    elseif B(a) == 1 && S(a) == 0
+        buyW = [buyW; Wallet(a,1:time)];
+        buyD = [buyD; Demurrage(a,1:time)];
+    elseif S(a) == 1 && B(a) == 0
+        sellW = [sellW; Wallet(a,1:time)];
+        sellD = [sellD; Demurrage(a,1:time)];
+    else
+        npW = [npW; Wallet(a,1:time)];
+        npD = [npD; Demurrage(a,1:time)];
+    end
+end
+
 figure;
 x = 1:time;
-plot(x, Wallet(:,1:time),'-o');
+plot(x, buysellW(:,1:time),'b-o');
+hold on;
+plot(x, sellW(:,1:time),'g-*');
+hold on;
+plot(x, buyW(:,1:time),'m-x');
+hold on;
+plot(x, npW(:,1:time),'r-d');
+hold off;
 xlabel('Time');
 ylabel('Drachma');
 title('Wallet');
 
+% figure;
+% x = 1:time;
+% plot(x, Wallet(:,1:time),'-o');
+% xlabel('Time');
+% ylabel('Drachma');
+% title('Wallet');
+
 figure;
 x = 1:time;
-plot(x, UBI(:,1:time),'-o', x, Demurrage(:,1:time),'-x');
+plot(x, buysellD(:,1:time),'b-o');
+hold on;
+plot(x, sellD(:,1:time),'g-*');
+hold on;
+plot(x, buyD(:,1:time),'m-x');
+hold on;
+plot(x, npD(:,1:time),'r-d');
+hold on;
+plot(x, UBI(:,1:time),'-o');
+hold off;
 xlabel('Time');
 ylabel('Drachma');
 title('UBI & Demurrage');
