@@ -159,7 +159,7 @@ for time = 1:numSteps
        end
        
        % Skip agents out of money
-       if Wallet(buyer,time) <= price
+       if Wallet(buyer,time) < price
            fprintf("- B(%d) is out of money\n",buyer);
            continue;
        end
@@ -351,11 +351,17 @@ figure;
 x = 1:time;
 plot(x, buysellW(:,1:time),'b-o');
 hold on;
-plot(x, sellW(:,1:time),'g-*');
+if ~isempty(sellW)
+    plot(x, sellW(:,1:time),'g-*'); 
+end
 hold on;
-plot(x, buyW(:,1:time),'m-x');
+if ~isempty(buyW)
+    plot(x, buyW(:,1:time),'m-x');
+end
 hold on;
-plot(x, npW(:,1:time),'r-d');
+if ~isempty(npW)
+    plot(x, npW(:,1:time),'r-d');
+end
 hold off;
 xlabel('Time');
 ylabel('Drachma');
@@ -372,11 +378,17 @@ figure;
 x = 1:time;
 plot(x, buysellD(:,1:time),'b-o');
 hold on;
-plot(x, sellD(:,1:time),'g-*');
+if ~isempty(sellD)
+    plot(x, sellD(:,1:time),'g-*');
+end
 hold on;
-plot(x, buyD(:,1:time),'m-x');
+if ~isempty(buyW)
+    plot(x, buyD(:,1:time),'m-x');
+end
 hold on;
-plot(x, npD(:,1:time),'r-d');
+if ~isempty(npD)
+    plot(x, npD(:,1:time),'r-d');
+end
 hold on;
 plot(x, UBI(:,1:time),'-o');
 hold off;
