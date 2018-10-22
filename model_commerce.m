@@ -94,6 +94,7 @@ fclose(fileId);
 selectedNodes = randsample(N,numberOfSellers);
 if (numberOfSellers == N) 
     S = ones(N,1);
+    sellerInventoryUnits(:,1) = inventoryInitialUnits;
 else   
     for i = 1:numberOfSellers
         sellerInventoryUnits(selectedNodes(i,1)) = inventoryInitialUnits;
@@ -212,6 +213,7 @@ for time = 1:numSteps
            
        else
            % No sale :-(
+           fprintf("No sellers available");
        end
    end
    
