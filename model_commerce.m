@@ -6,7 +6,7 @@
 % Created: 2018.08.30
 %===================================================
 
-version_number = 1.1; % Tracking state in time
+version_number = "1.0.1"; % Tracking state in time
 	
 % Setup
 fprintf("\n===========================================================\n");
@@ -134,17 +134,22 @@ for time = 1:numSteps
        
        fprintf("----- Start of time step = %d, money supply = %.2f -----\n\n", time, sum(Wallet(:,time - 1)));
        
-       % Subtract Demurrage
-       incrementalDemurrage = percentDemurrage * Wallet(:,time - 1);
-       Demurrage(:,time) = Demurrage(:,time - 1) + incrementalDemurrage;
-       Wallet(:,time) = Wallet(:,time - 1) - incrementalDemurrage;
+       % Prepare For Next Step
+       Wallet(:,time) = Wallet(:,time - 1);
+       %Demurrage(:,time) = Demurrage(:,time - 1);
+       %UBI(:,time) = UBI(:,time - 1);
+       
+       % Subtract the demurrage from each wallet and accumulate total demurrange 
+       incrementalDemurrage = Wallet(:,time) * percentDemurrage;
+       Wallet(:,time) = Wallet(:,time) - incrementalDemurrage;
+       Demurrage(:,time) = Demurrage(:,time) + incrementalDemurrage;
 
        % Wallet cannot be reduced below zero due to demurrage
        Wallet(Wallet < 0) = 0;
        
-       % Add UBI
+       % Add UBI to each wallet and accumulate total UBI
        Wallet(:,time) = Wallet(:,time) + incrementalUBI;
-       UBI(:,time) = UBI(:,time - 1) + incrementalUBI;
+       UBI(:,time) = UBI(:,time) + incrementalUBI;
        
    end
    
@@ -221,20 +226,24 @@ for time = 1:numSteps
    % Report Incremental Statistics
    
    sumWallets = sum(Wallet(:,time));
+   sumDemurrage = sum(Demurrage(:,time));
+   sumUBI = sum(UBI(:,time));
    sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
    sumSellerInventoryValue = sumSellerInventoryUnits*price;
    sumBought = sum(unitsBought(:,1));
    sumSold = sum(unitsSold(:,1));
    fprintf("\n----- End of time step   = %d -----\n\n",time);
-   fprintf("* Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
-   fprintf("* Total units purchased = %.2f, total units sold = %.2f\n\n", sumBought, sumSold);
+   fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (delta = %.2f)\n", sumWallets, sumDemurrage, sumUBI, (sumUBI - sumDemurrage));
+   fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = %.2f\n",sumSellerInventoryUnits, sumSellerInventoryValue);
+   fprintf("* Total Units Purchased = %.2f, Total Units Sold = %.2f\n\n", sumBought, sumSold);
 
    if sumSellerInventoryUnits <= 0
        SuspendCode = OutOfInventory;
        break;
    end
    
-   if sumWallets <= 0
+   % Break if out of money any time other than time = 1
+   if sumWallets <= 0 && time ~= 1
        SuspendCode = OutOfMoney;
        break;
    end   
