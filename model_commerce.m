@@ -149,13 +149,14 @@ for time = 1:numSteps
    end
    
    % Randomly order buyers before each time step
-   numBuyerIndex = 1:numberOfBuyers;
+   numBuyerIndex = 1:N;
    randBuyerIndex = numBuyerIndex(randperm(length(numBuyerIndex)));
    
    for buyer = 1:numel(randBuyerIndex)
        
        % Skip non-buying agents
        if B(buyer,1) ~= 1
+           fprintf("+ B(%d) is not a buyer\n",buyer);
            continue;
        end
        
@@ -213,7 +214,7 @@ for time = 1:numSteps
            
        else
            % No sale :-(
-           fprintf("No sellers available");
+           fprintf("No sellers available\n");
        end
    end
    
