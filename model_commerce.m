@@ -226,16 +226,15 @@ for time = 1:numSteps
    % Report Incremental Statistics
    
    sumWallets = sum(Wallet(:,time));
-   sumDemurrage = sum(Demurrage(:,time));
-   sumUBI = sum(UBI(:,time));
+   sumDemurrage = sum(sum(Demurrage(:,1:time)));
+   sumUBI = sum(sum(UBI(:,1:time)));
    sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
    sumSellerInventoryValue = sumSellerInventoryUnits*price;
    sumBought = sum(unitsBought(:,1));
    sumSold = sum(unitsSold(:,1));
    fprintf("\n----- End of time step   = %d -----\n\n",time);
-   fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (delta = %.2f)\n", sumWallets, sumDemurrage, sumUBI, (sumUBI - sumDemurrage));
-   fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = %.2f\n",sumSellerInventoryUnits, sumSellerInventoryValue);
-   fprintf("* Total Units Purchased = %.2f, Total Units Sold = %.2f\n\n", sumBought, sumSold);
+   fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. UBI-Demurrage = TMS = %.2f)\n", sumWallets, sumDemurrage, sumUBI, (sumUBI - sumDemurrage));
+   fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = %.2f, (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, (sumBought - sumSold));
 
    if sumSellerInventoryUnits <= 0
        SuspendCode = OutOfInventory;
@@ -331,7 +330,7 @@ ylabel('Drachma');
 title('Money Supply');
 legend('Net', 'Seed','UBI', 'Dumurrage');
 
-% 
+% Split data by B+S, B, S and NP
 
 buysellW = [];
 buyW = [];
@@ -359,51 +358,50 @@ for a = 1:N
     end
 end
 
+% Plot Wallet
 figure;
+p2 = "Line";
+p3 = "Line";
+p4 = "Line";
 x = 1:time;
-plot(x, buysellW(:,1:time),'b-o');
+p1 = plot(x, buysellW(:,1:time),'b-o');
 hold on;
 if ~isempty(sellW)
-    plot(x, sellW(:,1:time),'g-*'); 
+    p2 = plot(x, sellW(:,1:time),'g-*'); 
 end
-hold on;
 if ~isempty(buyW)
-    plot(x, buyW(:,1:time),'m-x');
+    p3 = plot(x, buyW(:,1:time),'m-x');
 end
-hold on;
 if ~isempty(npW)
-    plot(x, npW(:,1:time),'r-d');
+    p4 = plot(x, npW(:,1:time),'r-d');
 end
+%plot(x,(sum(Wallet(:,1:time)) ./ N),'k--+');
 hold off;
+legend([p1(1) p2(1) p3(1) p4(1)],{'Buy-Sell','Sell','Buy','NP'});
 xlabel('Time');
 ylabel('Drachma');
-title('Wallet');
+title('Agent Wallets');
 
-% figure;
-% x = 1:time;
-% plot(x, Wallet(:,1:time),'-o');
-% xlabel('Time');
-% ylabel('Drachma');
-% title('Wallet');
-
+% Plot incremental UBI & Demurrage
 figure;
+p2 = "Line";
+p3 = "Line";
+p4 = "Line";
 x = 1:time;
-plot(x, buysellD(:,1:time),'b-o');
+p1 = plot(x, buysellD(:,1:time),'b-o');
 hold on;
 if ~isempty(sellD)
-    plot(x, sellD(:,1:time),'g-*');
+    p2 = plot(x, sellD(:,1:time),'g-*');
 end
-hold on;
-if ~isempty(buyW)
-    plot(x, buyD(:,1:time),'m-x');
+if ~isempty(buyD)
+    p3 = plot(x, buyD(:,1:time),'m-x');
 end
-hold on;
 if ~isempty(npD)
-    plot(x, npD(:,1:time),'r-d');
+    p4 = plot(x, npD(:,1:time),'r-d');
 end
-hold on;
-plot(x, UBI(:,1:time),'-o');
+p5 = plot(x, UBI(:,1:time),'c--x');
 hold off;
+legend([p1(1) p2(1) p3(1) p4(1) p5(1)],{'D Buy-Sell','D Sell','D Buy','NP','UBI'});
 xlabel('Time');
 ylabel('Drachma');
 title('UBI & Demurrage');
