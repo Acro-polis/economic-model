@@ -136,8 +136,6 @@ for time = 1:numSteps
        
        % Prepare For Next Step
        Wallet(:,time) = Wallet(:,time - 1);
-       %Demurrage(:,time) = Demurrage(:,time - 1);
-       %UBI(:,time) = UBI(:,time - 1);
        
        % Subtract the demurrage from each wallet and accumulate total demurrange 
        incrementalDemurrage = Wallet(:,time) * percentDemurrage;
@@ -227,13 +225,13 @@ for time = 1:numSteps
    
    sumWallets = sum(Wallet(:,time));
    sumDemurrage = sum(sum(Demurrage(:,1:time)));
-   sumUBI = sum(sum(UBI(:,1:time)));
+   cumUBI = sum(sum(UBI(:,1:time)));
    sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
    sumSellerInventoryValue = sumSellerInventoryUnits*price;
    sumBought = sum(unitsBought(:,1));
    sumSold = sum(unitsSold(:,1));
    fprintf("\n----- End of time step   = %d -----\n\n",time);
-   fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. UBI-Demurrage = TMS = %.2f)\n", sumWallets, sumDemurrage, sumUBI, (sumUBI - sumDemurrage));
+   fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. UBI-Demurrage = TMS = %.2f)\n", sumWallets, sumDemurrage, cumUBI, (cumUBI - sumDemurrage));
    fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = %.2f, Total Inventory Exchanged %2.f (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, sumBought, (sumBought - sumSold));
 
    if sumSellerInventoryUnits <= 0
@@ -370,7 +368,7 @@ green  = [  4.0/255.0, 255.0/255.0,   0.0/255,0];
 figure;
 x = 1:time;
 p1 = plot(x, buysellW(:,1:time),'b-diamond');
-%p1 = plot(x, buysellW(:,1:time),'Color',blue,'LineStyle','-','Marker','Diamond','LineWidth',0.5);
+%set(p1,'color',blue); %TODO - Matlab bug?
 ps = p1(1);
 psnames = {'Buy-Sell'};
 hold on;
@@ -380,7 +378,7 @@ if ~isempty(sellW)
     psnames = [psnames , {'Sell'}];
 end
 if ~isempty(buyW)
-    p3 = plot(x, buyW(:,1:time),'Color',green,'LineStyle','-','Marker','+','LineWidth',0.5);
+    p3 = plot(x, buyW(:,1:time),'Color',green,'LineStyle','--','Marker','+','LineWidth',0.5);
     ps = [ps ; p3(1)];
     psnames = [psnames , {'Buy'}];
 end
@@ -401,7 +399,7 @@ figure;
 x = 1:time;
 hold on;
 p1 = plot(x, buysellD(:,1:time),'b-diamond');
-%set(p1,'color',blue);
+%set(p1,'color',blue); %TODO - Matlab bug?
 ps = p1(1);
 psnames = {'D Buy-Sell'};
 if ~isempty(sellD)
@@ -428,12 +426,23 @@ xlabel('Time');
 ylabel('Drachma');
 title('Incremental Demurrage By Agent & Type + UBI');
 
+% Calculate the cumulative Demurrage & UBI as a function of time (we have been
+% storing incremental values)
+cumDemurrage = cumsum(Demurrage,2);
+cumUBI = cumsum(UBI,2);
+
 % Total Money Suppy
 figure;
+hold on;
 x = 1:time;
-p1 = plot(x, sum(Wallet(:,1:time)),'b-diamond');
+p1 = plot(x, sum(Wallet(:,1:time)),'k-diamond');
+p2 = plot(x, sum(cumDemurrage(:,1:time)),'b-o');
+p3 = plot(x, sum(cumUBI(:,1:time)),'c-x');
+set(p3,'color',gold);
+hold off;
+legend([p1, p2, p3],{'Money Supply','Demurrage','UBI'});
 xlabel('Time');
 ylabel('Drachma');
-title('Total Money Supply');
+title('Cumulative Money Supply, Demurrage & UBI');
 
 
