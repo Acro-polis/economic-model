@@ -234,7 +234,7 @@ for time = 1:numSteps
    sumSold = sum(unitsSold(:,1));
    fprintf("\n----- End of time step   = %d -----\n\n",time);
    fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. UBI-Demurrage = TMS = %.2f)\n", sumWallets, sumDemurrage, sumUBI, (sumUBI - sumDemurrage));
-   fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = %.2f, (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, (sumBought - sumSold));
+   fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = %.2f, Total Inventory Exchanged %2.f (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, sumBought, (sumBought - sumSold));
 
    if sumSellerInventoryUnits <= 0
        SuspendCode = OutOfInventory;
@@ -358,6 +358,7 @@ for a = 1:N
     end
 end
 
+% Custom colors
 gold   = [255.0/255.0, 171.0/255.0,  23.0/255.0];
 orange = [232.0/255.0,  85.0/255.0,  12.0/255.0];
 red    = [255.0/255.0,   0.0/255.0,   0.0/255.0];
@@ -367,50 +368,72 @@ green  = [  4.0/255.0, 255.0/255.0,   0.0/255,0];
 
 % Plot Wallet
 figure;
-p2 = "Line";
-p3 = "Line";
-p4 = "Line";
 x = 1:time;
-p1 = plot(x, buysellW(:,1:time),'b-o');
+p1 = plot(x, buysellW(:,1:time),'b-diamond');
 %p1 = plot(x, buysellW(:,1:time),'Color',blue,'LineStyle','-','Marker','Diamond','LineWidth',0.5);
+ps = p1(1);
+psnames = {'Buy-Sell'};
 hold on;
 if ~isempty(sellW)
     p2 = plot(x, sellW(:,1:time),'Color',violet,'LineStyle','-','Marker','*','LineWidth',0.5); 
+    ps = [ps ; p2(1)];
+    psnames = [psnames , {'Sell'}];
 end
 if ~isempty(buyW)
-    p3 = plot(x, buyW(:,1:time),'Color',green,'LineStyle','-','Marker','x','LineWidth',0.5);
+    p3 = plot(x, buyW(:,1:time),'Color',green,'LineStyle','-','Marker','+','LineWidth',0.5);
+    ps = [ps ; p3(1)];
+    psnames = [psnames , {'Buy'}];
 end
 if ~isempty(npW)
-    p4 = plot(x, npW(:,1:time),'Color',red,'LineStyle','-','Marker','Diamond','LineWidth',0.5);
+    p4 = plot(x, npW(:,1:time),'Color',red,'LineStyle','-','Marker','x','LineWidth',0.5);
+    ps = [ps ; p4(1)];
+    psnames = [psnames , {'NP'}];
 end
 %plot(x,(sum(Wallet(:,1:time)) ./ N),'k--+');
 hold off;
-legend([p1(1) p2(1) p3(1) p4(1)],{'Buy-Sell','Sell','Buy','NP'});
+legend(ps,psnames);
 xlabel('Time');
 ylabel('Drachma');
 title('Agent Wallets');
 
 % Plot incremental UBI & Demurrage
 figure;
-p2 = "Line";
-p3 = "Line";
-p4 = "Line";
 x = 1:time;
-p1 = plot(x, buysellD(:,1:time),'b-o');
-%p1 = plot(x, buysellD(:,1:time),'Color',blue,'LineStyle','-.','Marker','Diamond','LineWidth',0.5);
 hold on;
+p1 = plot(x, buysellD(:,1:time),'b-diamond');
+%set(p1,'color',blue);
+ps = p1(1);
+psnames = {'D Buy-Sell'};
 if ~isempty(sellD)
-    p2 = plot(x, sellD(:,1:time),'Color',violet,'LineStyle','-','Marker','*','LineWidth',0.5);
+    p2 = plot(x, sellD(:,1:time),'color',violet,'linestyle','-','marker','*','linewidth',0.5);
+    ps = [ps ; p2(1)];
+    psnames = [psnames , {'D Sell'}];
 end
 if ~isempty(buyD)
-    p3 = plot(x, buyD(:,1:time),'Color',green,'LineStyle','-','Marker','x','LineWidth',0.5);
+    p3 = plot(x, buyD(:,1:time),'color',green,'linestyle','-','marker','+','linewidth',0.5);
+    ps = [ps ; p3(1)];
+    psnames = [psnames , {'D Buy'}];
 end
 if ~isempty(npD)
-    p4 = plot(x, npD(:,1:time),'Color',red,'LineStyle','-','Marker','Diamond','LineWidth',0.5);
+    p4 = plot(x, npD(:,1:time),'color',red,'linestyle','-','marker','x','linewidth',0.5);
+    ps = [ps ; p4(1)];
+    psnames = [psnames , {'D NP'}];
 end
-p5 = plot(x, UBI(:,1:time),'Color',gold,'LineStyle','-','Marker','+','LineWidth',0.5);
+p5 = plot(x, UBI(:,1:time),'color',gold,'linestyle','-','marker','o','linewidth',0.5);
+ps = [ps ; p5(1)];
+psnames = [psnames , {'UBI'}];
 hold off;
-legend([p1(1) p2(1) p3(1) p4(1) p5(1)],{'D Buy-Sell','D Sell','D Buy','D NP','UBI'});
+legend(ps,psnames);
 xlabel('Time');
 ylabel('Drachma');
 title('Incremental Demurrage By Agent & Type + UBI');
+
+% Total Money Suppy
+figure;
+x = 1:time;
+p1 = plot(x, sum(Wallet(:,1:time)),'b-diamond');
+xlabel('Time');
+ylabel('Drachma');
+title('Total Money Supply');
+
+
