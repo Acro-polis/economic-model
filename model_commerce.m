@@ -90,7 +90,7 @@ fprintf("Num Buyers  = %d <= %d agents\n", numberOfBuyers, N);
 fclose(fileId);
 
 % Randomely select sellers
-% TODO - Make preferrential selection
+% TODO - Make preferrential selection?
 selectedNodes = randsample(N,numberOfSellers);
 if (numberOfSellers == N) 
     S = ones(N,1);
@@ -426,12 +426,13 @@ xlabel('Time');
 ylabel('Drachma');
 title('Incremental Demurrage By Agent & Type + UBI');
 
+% Cumulative Money Suppy, Demurrage & UBI
+
 % Calculate the cumulative Demurrage & UBI as a function of time (we have been
 % storing incremental values)
 cumDemurrage = cumsum(Demurrage,2);
 cumUBI = cumsum(UBI,2);
 
-% Total Money Suppy
 figure;
 hold on;
 x = 1:time;
@@ -445,4 +446,4 @@ xlabel('Time');
 ylabel('Drachma');
 title('Cumulative Money Supply, Demurrage & UBI');
 
-
+% 
