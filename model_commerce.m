@@ -6,7 +6,7 @@
 % Created: 2018.08.30
 %===================================================
 
-version_number = "1.0.1"; % Tracking state in time
+version_number = "1.0.2"; % Tracking state in time
 	
 % Setup
 fprintf("\n===========================================================\n");
@@ -25,13 +25,12 @@ end
 T =  parseInputString(fgetl(fileId));   % Max Time (Input 1)
 dt = 1;                                 % Time Step 
 numSteps = round(T / dt);               % Number of time steps (integer)
-
-fprintf("Simulation has %d time steps\n", numSteps);
+assert(numSteps >= 1,'Assert: Number of time steps must be >= 1!');
 
 N =  round(parseInputString(fgetl(fileId)));    % Number of Agents (nodes) (Input 2)
 AM = connectedGraph(N);                         % The WOT network
 
-fprintf("Network consists of %d agents.\n", N);
+fprintf("Simulation has %d agents and will run for %d time steps\n\n", N, numSteps);
 
 % Unit of currency
 drachma = 1;
@@ -41,7 +40,7 @@ seedWalletSize = parseInputString(fgetl(fileId)); % Wallet Size (Input 3)
 Wallet = newATMatrix(N,T,seedWalletSize);
 initialWallet = Wallet(:,1); % time = 0
 
-fprintf("Starting Wallet Size = %.2f\n", seedWalletSize);
+fprintf("Starting wallet size per agent = %.2f drachma\n", seedWalletSize);
 
 % Rate of UBI
 a = parseInputString(fgetl(fileId)); % UBI Rate (Input 4)
@@ -56,13 +55,16 @@ d = 1;
 percentDemurrage = percentDemurrage*drachma / d*dt;
 Demurrage = newATMatrix(N,T,0.0);
 
-fprintf("UBI = %.2f drachmas / dt, Demurrage = %.2f percent / dt\n", incrementalUBI, percentDemurrage*100);
+fprintf("UBI = %.2f drachmas / agent / dt, Demurrage = %.2f percent / agent / dt\n", incrementalUBI, percentDemurrage*100);
 
-% Cost of goods
-p = parseInputString(fgetl(fileId)); % Price Goods (Input 6);
-price = p*drachma;
+% Buyers 1 = Buyer, 0 = No Buyer
+B = zeros(N,1);
+unitsBought = zeros(N,1);
+percentBuyers = parseInputString(fgetl(fileId)); % Percentage Buyers (Input 6)
+assert(percentBuyers > 0 && percentBuyers <= 1.0,'Assert: Percentage Buyers Out Of Range!')
+numberOfBuyers = round(percentBuyers*N);
 
-fprintf("Price of goods = %.2f drachmas\n", price);
+fprintf("Num buyers   = %d <= %d agents\n", numberOfBuyers, N);
 
 % Sellers 1 = Seller, 0 = No Seller
 S = zeros(N,1);
@@ -71,21 +73,20 @@ percentSellers = parseInputString(fgetl(fileId)); % Percentage Sellers (Input 7)
 assert(percentSellers > 0 && percentSellers <= 1.0,'Assert: Percentage Sellers Out Of Range!')
 numberOfSellers = round(percentSellers*N);
 
+fprintf("Num sellers  = %d <= %d agents\n", numberOfSellers, N);
+
+% Cost of goods
+p = parseInputString(fgetl(fileId)); % Price Goods (Input 8);
+price = p*drachma;
+
+fprintf("Price of goods = %.2f drachmas\n", price);
+
 % Seller Inventory
-inventoryInitialUnits = parseInputString(fgetl(fileId)); % Inital Inventory (Input 8)
+inventoryInitialUnits = parseInputString(fgetl(fileId)); % Inital Inventory (Input 9)
 inventoryInitialValue = inventoryInitialUnits*price;
 sellerInventoryUnits = zeros(N,1);
 
-fprintf("Num Sellers = %d <= %d agents; Inital Inventory = %.2f Units\n", numberOfSellers, N, inventoryInitialUnits);
-
-% Buyers 1 = Buyer, = No Buyer
-B = zeros(N,1);
-unitsBought = zeros(N,1);
-percentBuyers = parseInputString(fgetl(fileId)); % Percentage Buyers (Input 9)
-assert(percentBuyers > 0 && percentBuyers <= 1.0,'Assert: Percentage Buyers Out Of Range!')
-numberOfBuyers = round(percentBuyers*N);
-
-fprintf("Num Buyers  = %d <= %d agents\n", numberOfBuyers, N);
+fprintf("Inital inventory = %.2f units / selling agent\n", inventoryInitialUnits);
 
 fclose(fileId);
 
@@ -102,7 +103,8 @@ else
     end
 end
 
-% Select buyers
+% Randomely select buyers
+% TODO - Make preferrential selection?
 if (numberOfBuyers == N) 
     B = ones(N,1);
 else
@@ -116,7 +118,7 @@ end
 sumWallets = sum(Wallet(:,1));
 sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
 sumSellerInventoryValue = sum(sellerInventoryUnits(:,1))*price;
-fprintf("Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
+fprintf("\nInitial Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
 
 %--------------------------------------------------------------------------
 % Simulation finish states
@@ -165,7 +167,7 @@ for time = 1:numSteps
        
        % Skip agents out of money
        if Wallet(buyer,time) < price
-           fprintf("- B(%d) is out of money\n",buyer);
+           fprintf("- B(%d) is a buyer out of money\n",buyer);
            continue;
        end
        
@@ -311,7 +313,7 @@ net = initialWallet + totalUBI - totalDemurrage;
 yHeights = sort([max(net) max(initialWallet) max(totalUBI) max(totalDemurrage)],'descend');
 maxYHeight = yHeights(1)*yScale;
 if (maxYHeight <= 0) 
-    maxmaxYHeight = 1; 
+    maxYHeight = 1; 
 end
 minyLim = 0;
 if min(net) < 0

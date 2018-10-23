@@ -11,15 +11,15 @@ fileId = fopen(fileName, "w");
 
 fprintf(fileId,'\nCommerce Model Input Parameters\n\n');
 
-fprintf(fileId,'1) Number of Time Steps (dt): %.0f\n',150.0);
-fprintf(fileId,'2) Number of Agents: %d\n',20);
-fprintf(fileId,'3) Initial Wallet Size (drachma / agent): %.1f\n',150.0);
-fprintf(fileId,'4) UBI Rate (drachma / dt): %.1f\n',1.0);
+fprintf(fileId,'1) Number of Time Steps (dt): %.0f\n',300.0);
+fprintf(fileId,'2) Number of Agents: %d\n',25.0);
+fprintf(fileId,'3) Initial Wallet Size (drachma / agent): %.1f\n',0.0);
+fprintf(fileId,'4) UBI Rate (drachma / dt): %.1f\n',100.0);
 fprintf(fileId,'5) Percent Demurrage (/dt): %.2f\n',0.05);
-fprintf(fileId,'6) Price of Goods (drachma / unit): %.1f\n',1.0);
-fprintf(fileId,'7) Percentage of Agents Selling: %.2f\n',0.50);
-fprintf(fileId,'8) Initual Inventory (# units / agent): %.1f\n',300.0);
-fprintf(fileId,'9) Percentage of Agents Buying: %.2f\n',0.80);
+fprintf(fileId,'6) Percentage of Agents Buying: %.2f\n',0.75);
+fprintf(fileId,'7) Percentage of Agents Selling: %.2f\n',0.75);
+fprintf(fileId,'8) Price of Goods (drachma / unit): %.1f\n',75.0);
+fprintf(fileId,'9) Initual Inventory (# units / agent): %.1f\n',300.0);
 
 fclose(fileId);
 
