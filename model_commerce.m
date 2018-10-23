@@ -358,6 +358,13 @@ for a = 1:N
     end
 end
 
+gold   = [255.0/255.0, 171.0/255.0,  23.0/255.0];
+orange = [232.0/255.0,  85.0/255.0,  12.0/255.0];
+red    = [255.0/255.0,   0.0/255.0,   0.0/255.0];
+violet = [215.0/255.0,  12.0/255.0, 232.0/255.0];
+blue   = [ 86.0/255.0,  13.0/255.0, 255.0/255,0];
+green  = [  4.0/255.0, 255.0/255.0,   0.0/255,0];
+
 % Plot Wallet
 figure;
 p2 = "Line";
@@ -365,15 +372,16 @@ p3 = "Line";
 p4 = "Line";
 x = 1:time;
 p1 = plot(x, buysellW(:,1:time),'b-o');
+%p1 = plot(x, buysellW(:,1:time),'Color',blue,'LineStyle','-','Marker','Diamond','LineWidth',0.5);
 hold on;
 if ~isempty(sellW)
-    p2 = plot(x, sellW(:,1:time),'g-*'); 
+    p2 = plot(x, sellW(:,1:time),'Color',violet,'LineStyle','-','Marker','*','LineWidth',0.5); 
 end
 if ~isempty(buyW)
-    p3 = plot(x, buyW(:,1:time),'m-x');
+    p3 = plot(x, buyW(:,1:time),'Color',green,'LineStyle','-','Marker','x','LineWidth',0.5);
 end
 if ~isempty(npW)
-    p4 = plot(x, npW(:,1:time),'r-d');
+    p4 = plot(x, npW(:,1:time),'Color',red,'LineStyle','-','Marker','Diamond','LineWidth',0.5);
 end
 %plot(x,(sum(Wallet(:,1:time)) ./ N),'k--+');
 hold off;
@@ -389,19 +397,20 @@ p3 = "Line";
 p4 = "Line";
 x = 1:time;
 p1 = plot(x, buysellD(:,1:time),'b-o');
+%p1 = plot(x, buysellD(:,1:time),'Color',blue,'LineStyle','-.','Marker','Diamond','LineWidth',0.5);
 hold on;
 if ~isempty(sellD)
-    p2 = plot(x, sellD(:,1:time),'g-*');
+    p2 = plot(x, sellD(:,1:time),'Color',violet,'LineStyle','-','Marker','*','LineWidth',0.5);
 end
 if ~isempty(buyD)
-    p3 = plot(x, buyD(:,1:time),'m-x');
+    p3 = plot(x, buyD(:,1:time),'Color',green,'LineStyle','-','Marker','x','LineWidth',0.5);
 end
 if ~isempty(npD)
-    p4 = plot(x, npD(:,1:time),'r-d');
+    p4 = plot(x, npD(:,1:time),'Color',red,'LineStyle','-','Marker','Diamond','LineWidth',0.5);
 end
-p5 = plot(x, UBI(:,1:time),'c--x');
+p5 = plot(x, UBI(:,1:time),'Color',gold,'LineStyle','-','Marker','+','LineWidth',0.5);
 hold off;
-legend([p1(1) p2(1) p3(1) p4(1) p5(1)],{'D Buy-Sell','D Sell','D Buy','NP','UBI'});
+legend([p1(1) p2(1) p3(1) p4(1) p5(1)],{'D Buy-Sell','D Sell','D Buy','D NP','UBI'});
 xlabel('Time');
 ylabel('Drachma');
-title('UBI & Demurrage');
+title('Incremental Demurrage By Agent & Type + UBI');
