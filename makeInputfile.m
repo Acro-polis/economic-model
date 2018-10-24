@@ -19,7 +19,7 @@ fprintf(fileId,'5) Percent Demurrage (/dt): %.2f\n',0.05);
 fprintf(fileId,'6) Percentage of Agents Buying: %.2f\n',0.75);
 fprintf(fileId,'7) Percentage of Agents Selling: %.2f\n',0.75);
 fprintf(fileId,'8) Price of Goods (drachma / unit): %.1f\n',75.0);
-fprintf(fileId,'9) Initual Inventory (# units / agent): %.1f\n',300.0);
+fprintf(fileId,'9) Initial Inventory (# units / agent): %.1f\n',300.0);
 
 fclose(fileId);
 

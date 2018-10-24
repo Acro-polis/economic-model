@@ -87,7 +87,7 @@ inventoryInitialUnits = parseInputString(fgetl(fileId)); % Inital Inventory (Inp
 inventoryInitialValue = inventoryInitialUnits*price;
 sellerInventoryUnits = newATMatrix(N,numSteps,0.0);
 
-fprintf("Inital inventory = %.2f units / selling agent and value = %.2f\n", inventoryInitialUnits, inventoryInitialValue);
+fprintf("Initial inventory = %.2f units / selling agent and value = %.2f\n", inventoryInitialUnits, inventoryInitialValue);
 
 fclose(fileId);
 
@@ -114,6 +114,13 @@ else
         Buyers(selectedNodes(i,1)) = 1;
     end
 end
+
+% Report roles
+[bs, b, s, np] = parseRoles(Buyers, Sellers, N);
+fprintf("\nNum Buyers+Sellers = %d\n",bs);
+fprintf("Num Buyers Only    = %d\n",b);
+fprintf("Num Sellers Only   = %d\n",s);
+fprintf("Non-Participants   = %d\n",np);
 
 % Report Initial Statistics
 sumWallets = sum(Wallet(:,1));
@@ -349,19 +356,19 @@ buyD = [];
 sellD = [];
 npD = [];
 
-for amountUBI = 1:N
-    if Buyers(amountUBI) == 1 && Sellers(amountUBI) == 1
-        buysellW = [buysellW; Wallet(amountUBI,1:time)];
-        buysellD = [buysellD; Demurrage(amountUBI,1:time)];
-    elseif Buyers(amountUBI) == 1 && Sellers(amountUBI) == 0
-        buyW = [buyW; Wallet(amountUBI,1:time)];
-        buyD = [buyD; Demurrage(amountUBI,1:time)];
-    elseif Sellers(amountUBI) == 1 && Buyers(amountUBI) == 0
-        sellW = [sellW; Wallet(amountUBI,1:time)];
-        sellD = [sellD; Demurrage(amountUBI,1:time)];
+for agentId = 1:N
+    if Buyers(agentId) == 1 && Sellers(agentId) == 1
+        buysellW = [buysellW; Wallet(agentId,1:time)];
+        buysellD = [buysellD; Demurrage(agentId,1:time)];
+    elseif Buyers(agentId) == 1 && Sellers(agentId) == 0
+        buyW = [buyW; Wallet(agentId,1:time)];
+        buyD = [buyD; Demurrage(agentId,1:time)];
+    elseif Sellers(agentId) == 1 && Buyers(agentId) == 0
+        sellW = [sellW; Wallet(agentId,1:time)];
+        sellD = [sellD; Demurrage(agentId,1:time)];
     else
-        npW = [npW; Wallet(amountUBI,1:time)];
-        npD = [npD; Demurrage(amountUBI,1:time)];
+        npW = [npW; Wallet(agentId,1:time)];
+        npD = [npD; Demurrage(agentId,1:time)];
     end
 end
 
@@ -472,5 +479,27 @@ ylabel('Inventory');
 title('Inventory by Agent');
 
 
+%
+% Supporting Functions
+%
 
+function [bs, b, s, np] = parseRoles(Buyers, Sellers, N)
+
+    bs = 0;
+    b = 0;
+    s = 0;
+    np = 0;
+    
+    for i = 1:N
+        if Buyers(i) == 1 && Sellers(i) == 1
+            bs = bs + 1;
+        elseif Buyers(i) == 1 
+            b = b + 1;
+        elseif Sellers(i) == 1
+            s = s + 1;
+        else
+            np = np + 1;
+        end    
+    end
+end
 
