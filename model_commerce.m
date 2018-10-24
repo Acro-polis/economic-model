@@ -60,7 +60,7 @@ fprintf("UBI = %.2f drachmas / agent / dt, Demurrage = %.2f percent / agent / dt
 
 % Buyers 1 = Buyer, 0 = No Buyer
 Buyers = zeros(N,1);
-unitsBought = zeros(N,1);
+unitsBought = newATMatrix(N,numSteps,0.0);
 percentBuyers = parseInputString(fgetl(fileId)); % Percentage Buyers (Input 6)
 assert(percentBuyers > 0 && percentBuyers <= 1.0,'Assert: Percentage Buyers Out Of Range!')
 numberOfBuyers = round(percentBuyers*N);
@@ -69,7 +69,7 @@ fprintf("Num buyers   = %d <= %d agents\n", numberOfBuyers, N);
 
 % Sellers 1 = Seller, 0 = No Seller
 Sellers = zeros(N,1);
-unitsSold = zeros(N,1);
+unitsSold = newATMatrix(N,numSteps,0.0);
 percentSellers = parseInputString(fgetl(fileId)); % Percentage Sellers (Input 7)
 assert(percentSellers > 0 && percentSellers <= 1.0,'Assert: Percentage Sellers Out Of Range!')
 numberOfSellers = round(percentSellers*N);
@@ -85,7 +85,7 @@ fprintf("Price of goods = %.2f drachmas\n", price);
 % Seller Inventory
 inventoryInitialUnits = parseInputString(fgetl(fileId)); % Inital Inventory (Input 9)
 inventoryInitialValue = inventoryInitialUnits*price;
-sellerInventoryUnits = zeros(N,1);
+sellerInventoryUnits = newATMatrix(N,numSteps,0.0);
 
 fprintf("Inital inventory = %.2f units / selling agent and value = %.2f\n", inventoryInitialUnits, inventoryInitialValue);
 
@@ -139,6 +139,7 @@ for time = 1:numSteps
        
        % Prepare For Next Step
        Wallet(:,time) = Wallet(:,time - 1);
+       sellerInventoryUnits(:,time) = sellerInventoryUnits(:,time - 1);
        
        % Subtract the demurrage from each wallet and accumulate total demurrange 
        incrementalDemurrage = Wallet(:,time) * percentDemurrage;
@@ -181,7 +182,7 @@ for time = 1:numSteps
            i = connections(1,connection);
            if Sellers(i) == 1
                % Collect the sellers that have inventory
-               if sellerInventoryUnits(i) > 0
+               if sellerInventoryUnits(i,time) > 0
                    availableSellers = [availableSellers ; i];
                end
            end
@@ -204,16 +205,18 @@ for time = 1:numSteps
            % Seller
            
            % Decrement Inventory
-           sellerInventoryUnits(sellerIndex) = sellerInventoryUnits(sellerIndex) - numUnits;
-           unitsSold(sellerIndex) = unitsSold(sellerIndex) + numUnits;
+           sellerInventoryUnits(sellerIndex,time) = sellerInventoryUnits(sellerIndex,time) - numUnits;
+           
+           % Record units sold (can have more than one sale per dt)
+           unitsSold(sellerIndex,time) = unitsSold(sellerIndex,time) + numUnits;
            
            % Increment Wallet
            Wallet(sellerIndex,time) = Wallet(sellerIndex,time) + numUnits*price;
            
            % Buyer
            
-           % Increment Amount Bought
-           unitsBought(buyer,1) = unitsBought(buyer,1) + numUnits;
+           % Record units bought (just one purchase per dt)
+           unitsBought(buyer,time) = numUnits;
            
            % Decrement Wallet
            Wallet(buyer,time) = Wallet(buyer,time) - numUnits*price;
@@ -227,14 +230,16 @@ for time = 1:numSteps
    % Report Incremental Statistics
    
    sumWallets = sum(Wallet(:,time));
-   sumDemurrage = sum(sum(Demurrage(:,1:time)));
+   cumDemurrage = sum(sum(Demurrage(:,1:time)));
    cumUBI = sum(sum(UBI(:,1:time)));
-   sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
+   
+   sumSellerInventoryUnits = sum(sellerInventoryUnits(:,time));
    sumSellerInventoryValue = sumSellerInventoryUnits*price;
-   sumBought = sum(unitsBought(:,1));
-   sumSold = sum(unitsSold(:,1));
+   sumBought = sum(sum(unitsBought(:,1:time)));
+   sumSold = sum(sum(unitsSold(:,1:time)));
+   
    fprintf("\n----- End of time step   = %d -----\n\n",time);
-   fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. UBI-Demurrage = TMS = %.2f)\n", sumWallets, sumDemurrage, cumUBI, (cumUBI - sumDemurrage));
+   fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. UBI-Demurrage = TMS = %.2f)\n", sumWallets, cumDemurrage, cumUBI, (cumUBI - cumDemurrage));
    fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = %.2f, Total Inventory Exchanged %2.f (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, sumBought, (sumBought - sumSold));
 
    if sumSellerInventoryUnits <= 0
@@ -280,7 +285,7 @@ title('Remaining Money');
 legend('Wallet Size');
 
 % 2. Bought / Sold Distribution
-yHeights = sort([max(unitsBought(1:end,1)) max(unitsSold(1:end,1)) max(sellerInventoryUnits)],'descend');
+yHeights = sort([max(sum(unitsBought,2)) max(sum(unitsSold,2)) max(sellerInventoryUnits(:,time))],'descend');
 maxYHeight = yHeights(1)*yScale;
 if (maxYHeight <= 0) 
     maxYHeight = 1; 
@@ -288,7 +293,7 @@ end
 
 ax2 = subplot(4,1,2);
 x = 1:N;
-plot(ax2, x, unitsBought, '--o', x, unitsSold, '-o', x, sellerInventoryUnits, 'c--*');
+plot(ax2, x, sum(unitsBought,2), '--o', x, sum(unitsSold,2), '-o', x, sellerInventoryUnits(:,time), 'c--*');
 xlim([1 N]);
 ylim([0 maxYHeight]);
 xlabel('Agent');
@@ -450,4 +455,22 @@ xlabel('Time');
 ylabel('Drachma');
 title('Cumulative Money Supply, Demurrage & UBI');
 
-% 
+% Plot Inventory, Buying and Selling over time
+cumBought = cumsum(unitsBought,2);
+cumSold = cumsum(unitsSold,2);
+
+figure;
+hold on;
+x = 1:time;
+p1 = plot(x, sellerInventoryUnits(:,1:time),'b-o');
+p2 = plot(x, cumSold(:,1:time),'r-+');
+p3 = plot(x, cumBought(:,1:time),'g-x');
+hold off;
+legend([p1(1), p2(1), p3(1)],{'Inventory','Cum. Sold','Cum. Bought'});
+xlabel('Time');
+ylabel('Inventory');
+title('Inventory by Agent');
+
+
+
+
