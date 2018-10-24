@@ -5,7 +5,7 @@ Commerce Model Input Parameters
 2) Number of Agents: 25
 3) Initial Wallet Size (drachma / agent): 0.0
 4) UBI Rate (drachma / dt): 100.0
-5) Percent Demurrage (/dt): 0.05
+5) Percent Demurrage (/dt): 0.01
 6) Percentage of Agents Buying: 0.75
 7) Percentage of Agents Selling: 0.75
 8) Price of Goods (drachma / unit): 75.0

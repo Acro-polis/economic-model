@@ -6,7 +6,7 @@
 % Created: 2018.08.30
 %===================================================
 
-version_number = "1.0.2"; % Tracking state in time
+version_number = "1.1.0"; % Tagged version in githum
 	
 % Setup
 fprintf("\n===========================================================\n");
@@ -29,36 +29,37 @@ assert(numSteps >= 1,'Assert: Number of time steps must be >= 1!');
 
 N =  round(parseInputString(fgetl(fileId)));    % Number of Agents (nodes) (Input 2)
 AM = connectedGraph(N);                         % The WOT network
+assert(N >= 2,'Assert: Number of agemts must be >= 2!');
 
-fprintf("Simulation has %d agents and will run for %d time steps\n\n", N, numSteps);
+fprintf("This simulation has %d agents and a duration of %d time steps\n\n", N, numSteps);
 
 % Unit of currency
 drachma = 1;
 
 % Wallet
 seedWalletSize = parseInputString(fgetl(fileId)); % Wallet Size (Input 3)
-Wallet = newATMatrix(N,T,seedWalletSize);
-initialWallet = Wallet(:,1); % time = 0
+Wallet = newATMatrix(N,numSteps,seedWalletSize);
 
 fprintf("Starting wallet size per agent = %.2f drachma\n", seedWalletSize);
 
 % Rate of UBI
-a = parseInputString(fgetl(fileId)); % UBI Rate (Input 4)
+amountUBI = parseInputString(fgetl(fileId)); % UBI amount (Input 4)
+assert(amountUBI > 0,'Assert: UBI must be > 0!');
 b = 1.0;
-incrementalUBI = a*drachma / b*dt; 
-UBI = newATMatrix(N,T,0.0);
+amountUBI = amountUBI*drachma / b*dt; 
+UBI = newATMatrix(N,numSteps,0.0);
 
 % Percentage of Demurrage
 percentDemurrage = parseInputString(fgetl(fileId)); % Percentage Demurrage (Input 5)
 assert(percentDemurrage >= 0 && percentDemurrage <= 1.0,'Assert: Percentage Demurrage Out Of Range!');
 d = 1;
 percentDemurrage = percentDemurrage*drachma / d*dt;
-Demurrage = newATMatrix(N,T,0.0);
+Demurrage = newATMatrix(N,numSteps,0.0);
 
-fprintf("UBI = %.2f drachmas / agent / dt, Demurrage = %.2f percent / agent / dt\n", incrementalUBI, percentDemurrage*100);
+fprintf("UBI = %.2f drachmas / agent / dt, Demurrage = %.2f percent / agent / dt\n", amountUBI, percentDemurrage*100);
 
 % Buyers 1 = Buyer, 0 = No Buyer
-B = zeros(N,1);
+Buyers = zeros(N,1);
 unitsBought = zeros(N,1);
 percentBuyers = parseInputString(fgetl(fileId)); % Percentage Buyers (Input 6)
 assert(percentBuyers > 0 && percentBuyers <= 1.0,'Assert: Percentage Buyers Out Of Range!')
@@ -67,7 +68,7 @@ numberOfBuyers = round(percentBuyers*N);
 fprintf("Num buyers   = %d <= %d agents\n", numberOfBuyers, N);
 
 % Sellers 1 = Seller, 0 = No Seller
-S = zeros(N,1);
+Sellers = zeros(N,1);
 unitsSold = zeros(N,1);
 percentSellers = parseInputString(fgetl(fileId)); % Percentage Sellers (Input 7)
 assert(percentSellers > 0 && percentSellers <= 1.0,'Assert: Percentage Sellers Out Of Range!')
@@ -76,8 +77,8 @@ numberOfSellers = round(percentSellers*N);
 fprintf("Num sellers  = %d <= %d agents\n", numberOfSellers, N);
 
 % Cost of goods
-p = parseInputString(fgetl(fileId)); % Price Goods (Input 8);
-price = p*drachma;
+price = parseInputString(fgetl(fileId)); % Price Goods (Input 8);
+price = price*drachma;
 
 fprintf("Price of goods = %.2f drachmas\n", price);
 
@@ -86,7 +87,7 @@ inventoryInitialUnits = parseInputString(fgetl(fileId)); % Inital Inventory (Inp
 inventoryInitialValue = inventoryInitialUnits*price;
 sellerInventoryUnits = zeros(N,1);
 
-fprintf("Inital inventory = %.2f units / selling agent\n", inventoryInitialUnits);
+fprintf("Inital inventory = %.2f units / selling agent and value = %.2f\n", inventoryInitialUnits, inventoryInitialValue);
 
 fclose(fileId);
 
@@ -94,23 +95,23 @@ fclose(fileId);
 % TODO - Make preferrential selection?
 selectedNodes = randsample(N,numberOfSellers);
 if (numberOfSellers == N) 
-    S = ones(N,1);
+    Sellers = ones(N,1);
     sellerInventoryUnits(:,1) = inventoryInitialUnits;
 else   
     for i = 1:numberOfSellers
         sellerInventoryUnits(selectedNodes(i,1)) = inventoryInitialUnits;
-        S(selectedNodes(i,1)) = 1;
+        Sellers(selectedNodes(i,1)) = 1;
     end
 end
 
 % Randomely select buyers
 % TODO - Make preferrential selection?
 if (numberOfBuyers == N) 
-    B = ones(N,1);
+    Buyers = ones(N,1);
 else
     selectedNodes = randsample(N,numberOfBuyers);
     for i = 1:numberOfBuyers
-        B(selectedNodes(i,1)) = 1;
+        Buyers(selectedNodes(i,1)) = 1;
     end
 end
 
@@ -148,8 +149,8 @@ for time = 1:numSteps
        Wallet(Wallet < 0) = 0;
        
        % Add UBI to each wallet and accumulate total UBI
-       Wallet(:,time) = Wallet(:,time) + incrementalUBI;
-       UBI(:,time) = UBI(:,time) + incrementalUBI;
+       Wallet(:,time) = Wallet(:,time) + amountUBI;
+       UBI(:,time) = UBI(:,time) + amountUBI;
        
    end
    
@@ -160,7 +161,7 @@ for time = 1:numSteps
    for buyer = 1:numel(randBuyerIndex)
        
        % Skip non-buying agents
-       if B(buyer,1) ~= 1
+       if Buyers(buyer,1) ~= 1
            fprintf("+ B(%d) is not a buyer\n",buyer);
            continue;
        end
@@ -178,7 +179,7 @@ for time = 1:numSteps
        availableSellers = [];
        for connection = 1:size(connections,2)
            i = connections(1,connection);
-           if S(i) == 1
+           if Sellers(i) == 1
                % Collect the sellers that have inventory
                if sellerInventoryUnits(i) > 0
                    availableSellers = [availableSellers ; i];
@@ -298,7 +299,7 @@ legend('Bought','Sold','Ending Inventory');
 % 3. Buyers & Sellers Plot
 ax3 = subplot(4,1,3);
 x = 1:N;
-plot(ax3, x, B, 'x', x, S, 'o');
+plot(ax3, x, Buyers, 'x', x, Sellers, 'o');
 xlim([1 N]);
 ylim([0.9 1.1]);
 xlabel('Agent');
@@ -309,6 +310,7 @@ legend('Buyers','Sellers');
 % 4. Money Supply
 totalUBI = UBI(:,time);
 totalDemurrage = Demurrage(:,time);
+initialWallet = Wallet(:,1);
 net = initialWallet + totalUBI - totalDemurrage;
 yHeights = sort([max(net) max(initialWallet) max(totalUBI) max(totalDemurrage)],'descend');
 maxYHeight = yHeights(1)*yScale;
@@ -342,19 +344,19 @@ buyD = [];
 sellD = [];
 npD = [];
 
-for a = 1:N
-    if B(a) == 1 && S(a) == 1
-        buysellW = [buysellW; Wallet(a,1:time)];
-        buysellD = [buysellD; Demurrage(a,1:time)];
-    elseif B(a) == 1 && S(a) == 0
-        buyW = [buyW; Wallet(a,1:time)];
-        buyD = [buyD; Demurrage(a,1:time)];
-    elseif S(a) == 1 && B(a) == 0
-        sellW = [sellW; Wallet(a,1:time)];
-        sellD = [sellD; Demurrage(a,1:time)];
+for amountUBI = 1:N
+    if Buyers(amountUBI) == 1 && Sellers(amountUBI) == 1
+        buysellW = [buysellW; Wallet(amountUBI,1:time)];
+        buysellD = [buysellD; Demurrage(amountUBI,1:time)];
+    elseif Buyers(amountUBI) == 1 && Sellers(amountUBI) == 0
+        buyW = [buyW; Wallet(amountUBI,1:time)];
+        buyD = [buyD; Demurrage(amountUBI,1:time)];
+    elseif Sellers(amountUBI) == 1 && Buyers(amountUBI) == 0
+        sellW = [sellW; Wallet(amountUBI,1:time)];
+        sellD = [sellD; Demurrage(amountUBI,1:time)];
     else
-        npW = [npW; Wallet(a,1:time)];
-        npD = [npD; Demurrage(a,1:time)];
+        npW = [npW; Wallet(amountUBI,1:time)];
+        npD = [npD; Demurrage(amountUBI,1:time)];
     end
 end
 
