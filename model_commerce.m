@@ -6,7 +6,7 @@
 % Created: 2018.08.30
 %===================================================
 
-version_number = "1.1.0"; % Tagged version in githum
+version_number = "1.1.1"; % Tagged version in githum
 	
 % Setup
 fprintf("\n===========================================================\n");
@@ -116,11 +116,11 @@ else
 end
 
 % Report roles
-[bs, b, s, np] = parseRoles(Buyers, Sellers, N);
-fprintf("\nNum Buyers+Sellers = %d\n",bs);
-fprintf("Num Buyers Only    = %d\n",b);
-fprintf("Num Sellers Only   = %d\n",s);
-fprintf("Non-Participants   = %d\n",np);
+[numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents] = parseRoles(Buyers, Sellers, N);
+fprintf("\nNum Buyers+Sellers = %d\n",numBuySellAgents);
+fprintf("Num Buyers Only    = %d\n",numBuyAgents);
+fprintf("Num Sellers Only   = %d\n",numSellAgents);
+fprintf("Non-Participants   = %d\n",numNonparticipatingAgents);
 
 % Report Initial Statistics
 sumWallets = sum(Wallet(:,1));

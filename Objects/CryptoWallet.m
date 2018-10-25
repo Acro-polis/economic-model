@@ -22,7 +22,7 @@ classdef CryptoWallet < handle
         end
         
         function addTransaction(obj, newTransaction)
-            obj.transactions = [obj.transactions newTransaction]; % Adding to end of array
+            obj.transactions = [obj.transactions ; newTransaction]; % Adding to end of the vector
         end
         
         function CurrentBalance = get.currentBalance(obj)
@@ -46,9 +46,9 @@ classdef CryptoWallet < handle
         
         function dump(obj)
             fprintf('\nLedger for Agent Id = %d\n',obj.agentId);
-            fprintf('id\t type amount\t a/s/d\t date\n');
-            [~, col] = size(obj.transactions);
-            for i = 1:col
+            fprintf('id\t type amount\t a/s/d/t\t note\t date\n');
+            [rows, ~] = size(obj.transactions);
+            for i = 1:rows
                 obj.transactions(i).dump();
             end
         end

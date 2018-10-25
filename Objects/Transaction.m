@@ -10,8 +10,10 @@ classdef Transaction < handle
         type
         amount
         agentId
+        transactionId
         sourceAgentId
         destinationAgentId
+        note
         dateCreated
     end
         
@@ -20,18 +22,20 @@ classdef Transaction < handle
         %
         % Constructor
         %
-        function obj = Transaction(type, amount, agentId, sourceAgentId, destinationAgentId, dateCreated)
+        function obj = Transaction(type, amount, agentId, transactionId, sourceAgentId, destinationAgentId, note, dateCreated)
             obj.id = 1; % TODO make a unique number
             obj.type = type;
             obj.amount = amount;
             obj.agentId = agentId;
+            obj.transactionId = transactionId;
             obj.sourceAgentId = sourceAgentId;
             obj.destinationAgentId = destinationAgentId;
+            obj.note = note;
             obj.dateCreated = dateCreated;
         end
         
         function dump(obj)
-            fprintf('%d\t %s %+.2f\t %d %d %d\t %s\n', obj.id, obj.type, obj.amount, obj.agentId, obj.sourceAgentId, obj.destinationAgentId, datestr(obj.dateCreated));
+            fprintf('%d\t %s %+.2f\t %d %d %d %d\t %s\t %s\n', obj.id, obj.type, obj.amount, obj.agentId, obj.sourceAgentId, obj.destinationAgentId, obj.transactionId, obj.note, datestr(obj.dateCreated));
         end
         
     end
