@@ -35,7 +35,7 @@ classdef Transaction < handle
         end
         
         function dump(obj)
-            fprintf('%d\t %s %+.2f\t %d %d %d %d\t %s\t %s\n', obj.id, obj.type, obj.amount, obj.agentId, obj.sourceAgentId, obj.destinationAgentId, obj.transactionId, obj.note, datestr(obj.dateCreated));
+            fprintf('%d\t %d %+.2f\t %d %d %d %d\t %s\t %s\n', obj.id, obj.type, obj.amount, obj.agentId, obj.sourceAgentId, obj.destinationAgentId, obj.transactionId, obj.note, datestr(obj.dateCreated));
         end
         
     end

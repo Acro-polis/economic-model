@@ -21,10 +21,14 @@ classdef CryptoWallet < handle
             obj.transactions = Transaction.empty;
         end
         
-        function addTransaction(obj, newTransaction)
-            obj.transactions = [obj.transactions ; newTransaction]; % Adding to end of the vector
+        function submitTransaction(obj, newTransaction)
+            if newTransaction.type == TransactionType.DEMURRAGE
+                obj.applyDemurrage(newTransaction);
+            else
+                obj.addTransaction(newTransaction);
+            end
         end
-        
+                
         function CurrentBalance = get.currentBalance(obj)
             CurrentBalance = sum([obj.transactions.amount]);
         end
@@ -52,7 +56,24 @@ classdef CryptoWallet < handle
                 obj.transactions(i).dump();
             end
         end
-                        
+        
     end
+    
+    methods (Access = private)
+        
+        function applyDemurrage(obj, demurrageTransaction)
+            %
+            % TODO - Implement
+            %
+            obj.addTransaction(demurrageTransaction);
+        end
+        
+        function addTransaction(obj, newTransaction)
+            % Building vector
+            obj.transactions = [obj.transactions ; newTransaction]; 
+        end
+
+    end
+
 end
 
