@@ -2,8 +2,34 @@ classdef CryptoWallet < handle
 %================================================================
 % Class CryptoWallet
 %
-% Created by Jess 09.13.18
+% Created by Jess 10.15.18
 %================================================================    
+%{ 
+
+Transaction conventions
+
+UBI - Adding UBI
+    - currencyAgentId correspnds to the currency type 
+    - sourceAgentId is Polis
+    - destinationAgentId is the recipient agent
+    - quantity is positive
+Demurrage - Subtracting Demurrage
+    - currencyAgentId correspnds to the currency type 
+    - sourceAgentId is Polis
+    - destinationAgentId is the recipient agent
+    - quantity is negative
+Selling - subtracting currency
+    - currencyAgentId correspnds to the currency type 
+    - sourceAgentId coressponds to the buying agent
+    - destinationAgentId is the recipient agent
+    - quantity is positive
+Buying - adding currency
+    - currencyAgentId correspnds to the currency type 
+    - sourceAgentId coressponds to the selling agent
+    - destinationAgentId is the recipient agent
+    - quantity is negative
+
+%}
 
     properties (SetAccess=private)
         agentId             
@@ -21,9 +47,42 @@ classdef CryptoWallet < handle
             obj.transactions = Transaction.empty;
         end
         
-        function submitTransaction(obj, newTransaction)
-            if newTransaction.type == TransactionType.DEMURRAGE
-                obj.applyDemurrage(newTransaction);
+        function depositUBI(obj, amount)
+            % TODO - make transaction id unique
+            obj.addTransaction(Transaction(TransactionType.UBI, amount, obj.agentId, 1, Polis.PolisId, obj.agentId, "UBI", datetime('now')));
+        end
+        
+        function applyDemurrage(obj, percentage)
+            %
+            % Find the unique set of agent currency types
+            %
+            agentIds = unique(cell2mat(get(obj.transactions,'currencyAgentId')));
+            
+            %
+            % Loop over each type and apply demurrage
+            %
+            [agents, ~] = size(agentIds);
+            for caId = 1:agents
+                %
+                % Calculate the balance for this agent
+                %
+                amount = -1.0*percentage*obj.balanceForCurrencyAgentId(caId);
+                
+                %
+                % Record the transaction
+                %
+                % TODO - make transaction id unique
+                t = Transaction(TransactionType.DEMURRAGE, amount, caId, 1, Polis.PolisId, obj.agentId, "DEMURRAGE", datetime('now'));
+                obj.addTransaction(t);
+            end
+        end
+        
+        function submitBuySellTransaction(obj, newTransaction)
+            % TODO - encapsulate more of the setup here
+            if newTransaction.type ~= TransactionType.BUY && newTransaction.type ~= TransactionType.SELL
+                %
+                % TODO - Raise error
+                %
             else
                 obj.addTransaction(newTransaction);
             end
@@ -32,22 +91,12 @@ classdef CryptoWallet < handle
         function CurrentBalance = get.currentBalance(obj)
             CurrentBalance = sum([obj.transactions.amount]);
         end
-        
-        function balance = balanceForSourceAgentId(obj, agentId)
-            results = findobj(obj.transactions,'soureAgentId', agentId);
-            balance = sum([results.Amount]);
-        end
 
-        function balance = balanceForTransactionType(obj, transactionType)
-            results = findobj(obj.transactions,'type', transactionType);
-            balance = sum([results.Amount]);
+        function balance = balanceForCurrencyAgentId(obj, agentId)
+            results = findobj(obj.transactions,'currencyAgentId', agentId);
+            balance = sum([results.amount]);
         end
-        
-        % '-and' & '-or' are logical operations that can be added
-        % Function getBalanceForSource
-        % Function getBalanceForDestination
-        % etc.
-        
+       
         function dump(obj)
             fprintf('\nLedger for Agent Id = %d\n',obj.agentId);
             fprintf('id\t type amount\t a/s/d/t\t note\t date\n');
@@ -60,36 +109,7 @@ classdef CryptoWallet < handle
     end
     
     methods (Access = private)
-        
-        function applyDemurrage(obj, demurrageTransaction)
-            %
-            % Find the unique set of agent id's representing the
-            % unique types of currencies contained in the wallet
-            %
-            agentIds = unique(cell2mat(get(obj.transactions,'currencyAgentId')));
-            
-            %
-            % Loop over each type and apply demurrage
-            %
-            [rows, ~] = size(agentIds);
-            for i = 1:rows
-                %
-                % Calculate the balance
-                %
-                % TODO
                 
-                %
-                % Create the demurrage transaction for this balance
-                %
-                % TODO
-                
-                %
-                % Record the transaction
-                %
-                %obj.addTransaction(demurrageTransaction);
-            end
-        end
-        
         function addTransaction(obj, newTransaction)
             % Building a vector (N x 1 transactions)
             obj.transactions = [obj.transactions ; newTransaction]; 

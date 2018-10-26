@@ -6,10 +6,10 @@ classdef TransactionType
 %================================================================
 
     properties (Constant)
-        BUY         = 6001
-        SELL        = 6002
-        DEMURRAGE   = 6003
-        UBI         = 6004
+        UBI         = 6001
+        DEMURRAGE   = 6002
+        BUY         = 6003
+        SELL        = 6004
     end
     
 end
