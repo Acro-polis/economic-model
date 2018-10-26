@@ -43,7 +43,7 @@ classdef CryptoWallet < handle
             balance = sum([results.Amount]);
         end
         
-            % '-and' & '-or' are logical operations that can be added
+        % '-and' & '-or' are logical operations that can be added
         % Function getBalanceForSource
         % Function getBalanceForDestination
         % etc.
@@ -63,13 +63,35 @@ classdef CryptoWallet < handle
         
         function applyDemurrage(obj, demurrageTransaction)
             %
-            % TODO - Implement
+            % Find the unique set of agent id's representing the
+            % unique types of currencies contained in the wallet
             %
-            obj.addTransaction(demurrageTransaction);
+            agentIds = unique(cell2mat(get(obj.transactions,'agentId')));
+            
+            %
+            % Loop over each type and apply demurrage
+            %
+            [rows, ~] = size(agentIds);
+            for i = 1:rows
+                %
+                % Calculate the balance
+                %
+                % TODO
+                
+                %
+                % Create the demurrage transaction for this balance
+                %
+                % TODO
+                
+                %
+                % Record the transaction
+                %
+                %obj.addTransaction(demurrageTransaction);
+            end
         end
         
         function addTransaction(obj, newTransaction)
-            % Building vector
+            % Building a vector (N x 1 transactions)
             obj.transactions = [obj.transactions ; newTransaction]; 
         end
 

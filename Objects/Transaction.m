@@ -1,4 +1,4 @@
-classdef Transaction < handle
+classdef Transaction < matlab.mixin.SetGet
 %================================================================
 % Class Transaction
 %
@@ -6,15 +6,15 @@ classdef Transaction < handle
 %================================================================
 
     properties (SetAccess=private)
-        id
-        type
-        amount
-        agentId
-        transactionId
-        sourceAgentId
-        destinationAgentId
-        note
-        dateCreated
+        id                          % Ledger Id
+        type                        % Transaction Type
+        amount                      % Transaction Amount
+        agentId                     % Transaction Agent Id
+        transactionId               % Transaction Id
+        sourceAgentId               % Source Agent Id
+        destinationAgentId          % Destination Agent Id
+        note                        % Note (optional)
+        dateCreated                 % Transaction Date + Time
     end
         
     methods
@@ -32,6 +32,10 @@ classdef Transaction < handle
             obj.destinationAgentId = destinationAgentId;
             obj.note = note;
             obj.dateCreated = dateCreated;
+        end
+        
+        function value = get.agentId(obj)
+            value = obj.agentId;
         end
         
         function dump(obj)
