@@ -62,6 +62,11 @@ agent1.wallet.applyDemurrage(Polis.PercentDemurage);
 agent2.wallet.applyDemurrage(Polis.PercentDemurage);
 agent3.wallet.applyDemurrage(Polis.PercentDemurage);
 
+% Test / Output Results
+fprintf('\nAgent1 Current Balnace = %d\n', agent1.wallet.currentBalance);
+fprintf('Agent2 Current Balnace = %d\n', agent2.wallet.currentBalance);
+fprintf('Agent3 Current Balnace = %d\n', agent3.wallet.currentBalance);
+
 agent1.wallet.dump();
 fprintf('\n');
 agent2.wallet.dump();
