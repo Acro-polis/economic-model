@@ -66,7 +66,7 @@ classdef CryptoWallet < handle
             % Find the unique set of agent id's representing the
             % unique types of currencies contained in the wallet
             %
-            agentIds = unique(cell2mat(get(obj.transactions,'agentId')));
+            agentIds = unique(cell2mat(get(obj.transactions,'currencyAgentId')));
             
             %
             % Loop over each type and apply demurrage

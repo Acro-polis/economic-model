@@ -2,19 +2,19 @@ classdef Transaction < matlab.mixin.SetGet
 %================================================================
 % Class Transaction
 %
-% Created by Jess 09.13.18
+% Created by Jess 20.10.18
 %================================================================
 
     properties (SetAccess=private)
-        id                          % Ledger Id
-        type                        % Transaction Type
-        amount                      % Transaction Amount
-        agentId                     % Transaction Agent Id
-        transactionId               % Transaction Id
-        sourceAgentId               % Source Agent Id
-        destinationAgentId          % Destination Agent Id
-        note                        % Note (optional)
-        dateCreated                 % Transaction Date + Time
+        id                          % Ledger Id                 - unique id for this wallet
+        type                        % Transaction Type          - type of transaction, see TransactionType
+        amount                      % Transaction Amount        - amount of crypto currency
+        currencyAgentId             % Currency Agent Id         - agent id representing the currency for this transaction
+        transactionId               % Transaction Id            - unique transaction id common to every ledger record associated to this transaction, spanning multiple agents
+        sourceAgentId               % Source Agent Id           - agent id for source of this crypto currency (an agent or Polis)
+        destinationAgentId          % Destination Agent Id      - agent id for the destination of this crypto currency (same as currencyAgentId?)
+        note                        % Note                      - Optional note
+        dateCreated                 % Transaction Date + Time   - Transcation time
     end
         
     methods
@@ -22,11 +22,11 @@ classdef Transaction < matlab.mixin.SetGet
         %
         % Constructor
         %
-        function obj = Transaction(type, amount, agentId, transactionId, sourceAgentId, destinationAgentId, note, dateCreated)
+        function obj = Transaction(type, amount, currencyAgentId, transactionId, sourceAgentId, destinationAgentId, note, dateCreated)
             obj.id = 1; % TODO make a unique number
             obj.type = type;
             obj.amount = amount;
-            obj.agentId = agentId;
+            obj.currencyAgentId = currencyAgentId;
             obj.transactionId = transactionId;
             obj.sourceAgentId = sourceAgentId;
             obj.destinationAgentId = destinationAgentId;
@@ -34,12 +34,12 @@ classdef Transaction < matlab.mixin.SetGet
             obj.dateCreated = dateCreated;
         end
         
-        function value = get.agentId(obj)
-            value = obj.agentId;
+        function value = get.currencyAgentId(obj)
+            value = obj.currencyAgentId;
         end
         
         function dump(obj)
-            fprintf('%d\t %d %+.2f\t %d %d %d %d\t %s\t %s\n', obj.id, obj.type, obj.amount, obj.agentId, obj.sourceAgentId, obj.destinationAgentId, obj.transactionId, obj.note, datestr(obj.dateCreated));
+            fprintf('%d\t %d %+.2f\t %d %d %d %d\t %s\t %s\n', obj.id, obj.type, obj.amount, obj.currencyAgentId, obj.sourceAgentId, obj.destinationAgentId, obj.transactionId, obj.note, datestr(obj.dateCreated));
         end
         
     end

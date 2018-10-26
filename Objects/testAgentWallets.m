@@ -8,6 +8,26 @@
 % Created: 2018.10.15
 %=====================================================
 
+%{
+UBI - Adding currency 
+    - currencyAgentId is the owner of the currency (the agent affected)
+    - sourceAgentId is Polis
+    - destinationAgentId is the recipientof the addition to their currency
+    - quantity is negative
+Demurrage - Subtracting curreny
+    - currencyAgentId is the owner of the currency (the agent affected)
+    - sourceAgentId is Polis
+    - destinationAgentId is the recipient of the subtraction of their currency
+    - quantity is negative
+Selling - subtracting currency
+    - TODO
+Buying - adding currency
+    - currencyAgentId is the owner of the of the currency (the agent affected)
+    - sourceAgentId is the agent id from where the currency is coming
+    - destinationAgentId is the agent id that is deducting her currency
+    - quantity is negative
+%}
+
 agent1 = Agent(1, datetime('now'));
 agent2 = Agent(2, datetime('now'));
 agent3 = Agent(3, datetime('now'));

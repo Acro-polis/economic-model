@@ -12,7 +12,7 @@ classdef Agent < handle
     end
     
     properties (Constant)
-        PolisId = 0 % TODO - harden this approach (see assert below)
+        PolisId = 100 % TODO - harden this approach (see assert below)
     end
     
     methods
