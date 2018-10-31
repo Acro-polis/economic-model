@@ -42,6 +42,9 @@ Buying - adding currency
     
     methods
         
+        %
+        % Transactional Functions
+        %
         function obj = CryptoWallet(agentId)
             obj.agentId = agentId;
             obj.transactions = Transaction.empty;
@@ -88,8 +91,11 @@ Buying - adding currency
             end
         end
                 
-        function CurrentBalance = get.currentBalance(obj)
-            CurrentBalance = sum([obj.transactions.amount]);
+        %
+        % Balance Calculations
+        %
+        function currentBalance = get.currentBalance(obj)
+            currentBalance = sum([obj.transactions.amount]);
         end
 
         function balance = balanceForCurrencyAgentId(obj, agentId)
@@ -97,6 +103,9 @@ Buying - adding currency
             balance = sum([results.amount]);
         end
        
+        %
+        % Output
+        %
         function dump(obj)
             fprintf('\nLedger for Agent Id = %d\n',obj.agentId);
             fprintf('id\t type amount\t a/s/d/t\t note\t date\n');

@@ -14,7 +14,7 @@ classdef Transaction < matlab.mixin.SetGet
         sourceAgentId               % Source Agent Id           - agent id for source of this crypto currency (an agent or Polis)
         destinationAgentId          % Destination Agent Id      - agent id for the destination of this crypto currency (same as currencyAgentId?)
         note                        % Note                      - Optional note
-        dateCreated                 % Transaction Date + Time   - Transcation time
+        dateCreated                 % Transaction Date + Time   - Transcation time (TODO - should probably be the iteration time dt)
     end
         
     methods
