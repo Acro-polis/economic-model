@@ -10,8 +10,11 @@ classdef Polis < handle
         PercentDemurage = 0.05
     end
     
-    methods
-                
+    methods (Static)
+        function uid = uniqueId()
+            %TODO - return a unique number
+            uid = 100;
+        end
     end
 end
 

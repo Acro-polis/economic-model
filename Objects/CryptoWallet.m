@@ -56,7 +56,7 @@ Buying - adding currency
             % Deposit UBI into this wallet
             % TODO - make transaction id unique and the datetime = dt
             % (time)
-            obj.addTransaction(Transaction(TransactionType.UBI, amount, obj.agentId, 1, Polis.PolisId, obj.agentId, "UBI", timeStep));
+            obj.addTransaction(Transaction(TransactionType.UBI, amount, obj.agentId, Polis.uniqueId(), Polis.PolisId, obj.agentId, "UBI", timeStep));
         end
         
         function applyDemurrage(obj, percentage, timeStep)
@@ -70,18 +70,18 @@ Buying - adding currency
             %
             % Loop over each type and apply demurrage
             %
-            [agents, ~] = size(agentIds);
-            for caId = 1:agents
+            [indices, ~] = size(agentIds);
+            for index = 1:indices
                 %
                 % Calculate the balance for this agent
                 %
-                amount = -1.0*percentage*obj.balanceForCurrencyAgentId(caId);
+                amount = -1.0*percentage*obj.balanceForCurrencyAgentId(agentIds(index));
                 
                 %
                 % Record the transaction
                 %
                 % TODO - make transaction id unique
-                t = Transaction(TransactionType.DEMURRAGE, amount, caId, 1, Polis.PolisId, obj.agentId, "DEMURRAGE", timeStep);
+                t = Transaction(TransactionType.DEMURRAGE, amount, agentIds(index), Polis.uniqueId(), Polis.PolisId, obj.agentId, "DEMURRAGE", timeStep);
                 obj.addTransaction(t);
             end
         end
