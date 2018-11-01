@@ -6,7 +6,7 @@ classdef Transaction < matlab.mixin.SetGet
 %================================================================
 
     properties (SetAccess=private)
-        id                          % Ledger Id                 - unique id for this wallet
+        id                   uint32 % Ledger Id                 - unique id for this wallet
         type                        % Transaction Type          - type of transaction, see TransactionType
         amount                      % Transaction Amount        - amount of crypto currency
         currencyAgentId             % Currency Agent Id         - agent id representing the currency for this transaction
@@ -14,7 +14,7 @@ classdef Transaction < matlab.mixin.SetGet
         sourceAgentId               % Source Agent Id           - agent id for source of this crypto currency (an agent or Polis)
         destinationAgentId          % Destination Agent Id      - agent id for the destination of this crypto currency (same as currencyAgentId?)
         note                        % Note                      - Optional note
-        dateCreated                 % Transaction Date + Time   - Transcation time (TODO - should probably be the iteration time dt)
+        dateCreated          uint32 % Transaction Date + Time   - For now this equales dt in the simulation time loop
     end
         
     methods
@@ -22,7 +22,8 @@ classdef Transaction < matlab.mixin.SetGet
         %
         % Constructor
         %
-        function obj = Transaction(type, amount, currencyAgentId, transactionId, sourceAgentId, destinationAgentId, note, dateCreated)
+        function obj = Transaction(type, amount, currencyAgentId, transactionId, sourceAgentId, destinationAgentId, note, timeStep)
+            % 
             obj.id = 1; % TODO make a unique number
             obj.type = type;
             obj.amount = amount;
@@ -31,7 +32,7 @@ classdef Transaction < matlab.mixin.SetGet
             obj.sourceAgentId = sourceAgentId;
             obj.destinationAgentId = destinationAgentId;
             obj.note = note;
-            obj.dateCreated = dateCreated;
+            obj.dateCreated = timeStep;
         end
         
         function value = get.currencyAgentId(obj)
@@ -39,7 +40,8 @@ classdef Transaction < matlab.mixin.SetGet
         end
         
         function dump(obj)
-            fprintf('%d\t %d %+.2f\t %d %d %d %d\t %s\t %s\n', obj.id, obj.type, obj.amount, obj.currencyAgentId, obj.sourceAgentId, obj.destinationAgentId, obj.transactionId, obj.note, datestr(obj.dateCreated));
+            % Print data for this transaction
+            fprintf('%d\t %d %+.2f\t %d %d %d %d\t %s\t %d\n', obj.id, obj.type, obj.amount, obj.currencyAgentId, obj.sourceAgentId, obj.destinationAgentId, obj.transactionId, obj.note, obj.dateCreated);
         end
         
     end

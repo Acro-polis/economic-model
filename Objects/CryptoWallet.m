@@ -32,30 +32,36 @@ Buying - adding currency
 %}
 
     properties (SetAccess=private)
-        agentId             
-        transactions        
+        agentId         % Agent who owns this wallet            
+        transactions    % This wallets ledger
     end
     
     properties (Dependent)
-        currentBalance
+        currentBalanceAllCurrencies  % Current balance for all currencies
     end
     
     methods
         
-        %
-        % Transactional Functions
-        %
         function obj = CryptoWallet(agentId)
+            % The agentId is the agent who owns this wallet
             obj.agentId = agentId;
             obj.transactions = Transaction.empty;
         end
         
-        function depositUBI(obj, amount)
-            % TODO - make transaction id unique
-            obj.addTransaction(Transaction(TransactionType.UBI, amount, obj.agentId, 1, Polis.PolisId, obj.agentId, "UBI", datetime('now')));
+        %
+        % Transactional Functions
+        %
+
+        function depositUBI(obj, amount, timeStep)
+            % Deposit UBI into this wallet
+            % TODO - make transaction id unique and the datetime = dt
+            % (time)
+            obj.addTransaction(Transaction(TransactionType.UBI, amount, obj.agentId, 1, Polis.PolisId, obj.agentId, "UBI", timeStep));
         end
         
-        function applyDemurrage(obj, percentage)
+        function applyDemurrage(obj, percentage, timeStep)
+            % Subtract demurrage from this account
+            
             %
             % Find the unique set of agent currency types
             %
@@ -75,13 +81,13 @@ Buying - adding currency
                 % Record the transaction
                 %
                 % TODO - make transaction id unique
-                t = Transaction(TransactionType.DEMURRAGE, amount, caId, 1, Polis.PolisId, obj.agentId, "DEMURRAGE", datetime('now'));
+                t = Transaction(TransactionType.DEMURRAGE, amount, caId, 1, Polis.PolisId, obj.agentId, "DEMURRAGE", timeStep);
                 obj.addTransaction(t);
             end
         end
         
         function submitBuySellTransaction(obj, newTransaction)
-            % TODO - encapsulate more of the setup here
+            % TODO - rewrite for transitive trust
             if newTransaction.type ~= TransactionType.BUY && newTransaction.type ~= TransactionType.SELL
                 %
                 % TODO - Raise error
@@ -94,11 +100,26 @@ Buying - adding currency
         %
         % Balance Calculations
         %
-        function currentBalance = get.currentBalance(obj)
+        
+        function balance = availableBalanceForTransactionWithAgent(obj, agentId, mutualAgentIds)
+            % Total balance available to transact from common agents
+            % including target agent (agentId) and oneself (obj.Id)
+            balance = 0.0;
+            balance = balance + obj.balanceForCurrencyAgentId(obj.agentId);
+            balance = balance + obj.balanceForCurrencyAgentId(agentId);
+            [~, numIndexes] = size(mutualAgentIds);
+            for index = 1:numIndexes
+                balance = balance + obj.balanceForCurrencyAgentId(mutualAgentIds(index));
+            end
+        end
+        
+        function currentBalance = get.currentBalanceAllCurrencies(obj)
+            % Total balance, irrespective of agent dependencies
             currentBalance = sum([obj.transactions.amount]);
         end
 
         function balance = balanceForCurrencyAgentId(obj, agentId)
+            % Total balance of this agents currency
             results = findobj(obj.transactions,'currencyAgentId', agentId);
             balance = sum([results.amount]);
         end
@@ -106,7 +127,9 @@ Buying - adding currency
         %
         % Output
         %
+        
         function dump(obj)
+            % Log this agents complete ledger
             fprintf('\nLedger for Agent Id = %d\n',obj.agentId);
             fprintf('id\t type amount\t a/s/d/t\t note\t date\n');
             [rows, ~] = size(obj.transactions);
@@ -120,7 +143,7 @@ Buying - adding currency
     methods (Access = private)
                 
         function addTransaction(obj, newTransaction)
-            % Building a vector (N x 1 transactions)
+            % Add a ledger record (building a vector (N x 1 transactions))
             obj.transactions = [obj.transactions ; newTransaction]; 
         end
 
