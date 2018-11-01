@@ -14,7 +14,7 @@ classdef Transaction < matlab.mixin.SetGet
         sourceAgentId               % Source Agent Id           - agent id for source of this crypto currency (an agent or Polis)
         destinationAgentId          % Destination Agent Id      - agent id for the destination of this crypto currency (same as currencyAgentId?)
         note                        % Note                      - Optional note
-        dateCreated          uint32 % Transaction Date + Time   - For now this equales dt in the simulation time loop
+        dateCreated          uint32 % Transaction Date + Time   - For now this equals dt in the simulation time step
     end
         
     methods

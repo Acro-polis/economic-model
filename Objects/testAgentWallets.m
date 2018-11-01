@@ -8,38 +8,40 @@
 % Created: 2018.10.15
 %=====================================================
 
-agent1 = Agent(1, 1);
-agent2 = Agent(2, 1);
-agent3 = Agent(3, 1);
+time = 1;
+
+agent1 = Agent(1, time);
+agent2 = Agent(2, time);
+agent3 = Agent(3, time);
 
 agent1.wallet.depositUBI(500,1);
 agent2.wallet.depositUBI(500,1);
 agent3.wallet.depositUBI(500,1);
 
 % A1 buys from A2
-t12 = Transaction(TransactionType.BUY, -100, agent1.id, 4, agent2.id, agent1.id, "Tran 4", 1);
-t21 = Transaction(TransactionType.SELL, 100, agent1.id, 4, agent1.id, agent2.id, "Tran 4", 1);
+t12 = Transaction(TransactionType.BUY, -100, agent1.id, 4, agent2.id, agent1.id, "Tran 4", time);
+t21 = Transaction(TransactionType.SELL, 100, agent1.id, 4, agent1.id, agent2.id, "Tran 4", time);
 
 agent1.wallet.submitBuySellTransaction(t12);
 agent2.wallet.submitBuySellTransaction(t21);
 
 % A2 buys from A3
-t23 = Transaction(TransactionType.BUY, -200, agent2.id, 5, agent3.id, agent2.id, "Tran 5", 1);
-t32 = Transaction(TransactionType.SELL, 200, agent2.id, 5, agent2.id, agent3.id, "Tran 5", 1);
+t23 = Transaction(TransactionType.BUY, -200, agent2.id, 5, agent3.id, agent2.id, "Tran 5", time);
+t32 = Transaction(TransactionType.SELL, 200, agent2.id, 5, agent2.id, agent3.id, "Tran 5", time);
 
 agent2.wallet.submitBuySellTransaction(t23);
 agent3.wallet.submitBuySellTransaction(t32);
 
 % A1 buys from A3
-t13 = Transaction(TransactionType.BUY, -50, agent1.id, 6, agent3.id, agent1.id, "Tran 6", 1);
-t31 = Transaction(TransactionType.SELL, 50, agent1.id, 6, agent1.id, agent3.id, "Tran 6", 1);
+t13 = Transaction(TransactionType.BUY, -50, agent1.id, 6, agent3.id, agent1.id, "Tran 6", time);
+t31 = Transaction(TransactionType.SELL, 50, agent1.id, 6, agent1.id, agent3.id, "Tran 6", time);
 
 agent1.wallet.submitBuySellTransaction(t13);
 agent3.wallet.submitBuySellTransaction(t31);
 
 % A3 buys from A1
-t31 = Transaction(TransactionType.BUY, -75, agent3.id, 7, agent1.id, agent3.id, "Tran 7", 1);
-t13 = Transaction(TransactionType.SELL, 75, agent3.id, 7, agent3.id, agent1.id, "Tran 7", 1);
+t31 = Transaction(TransactionType.BUY, -75, agent3.id, 7, agent1.id, agent3.id, "Tran 7", time);
+t13 = Transaction(TransactionType.SELL, 75, agent3.id, 7, agent3.id, agent1.id, "Tran 7", time);
 
 agent3.wallet.submitBuySellTransaction(t31);
 agent1.wallet.submitBuySellTransaction(t13);
@@ -57,10 +59,12 @@ assert(a1bal == 425,'Error in Agent 1 balance, %d != 425', a1bal);
 assert(a2bal == 400,'Error in Agent 2 balance, %d != 400', a2bal);
 assert(a3bal == 675,'Error in Agent 3 balance, %d != 675', a3bal);
 
+time = 2;
+
 % TODO - update asserts
-agent1.wallet.applyDemurrage(Polis.PercentDemurage,2);
-agent2.wallet.applyDemurrage(Polis.PercentDemurage,2);
-agent3.wallet.applyDemurrage(Polis.PercentDemurage,2);
+agent1.wallet.applyDemurrage(Polis.PercentDemurage,time);
+agent2.wallet.applyDemurrage(Polis.PercentDemurage,time);
+agent3.wallet.applyDemurrage(Polis.PercentDemurage,time);
 
 % Test / Output Results
 fprintf('\nAgent1 Current Balnace = %d\n', agent1.wallet.currentBalanceAllCurrencies);

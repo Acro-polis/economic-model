@@ -87,7 +87,8 @@ Buying - adding currency
         end
         
         function submitBuySellTransaction(obj, newTransaction)
-            % TODO - rewrite for transitive trust
+            % TODO - rewrite for transitive trust, encapusulate the sell
+            % portion and make the method just a buy signature
             if newTransaction.type ~= TransactionType.BUY && newTransaction.type ~= TransactionType.SELL
                 %
                 % TODO - Raise error

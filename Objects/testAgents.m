@@ -7,10 +7,12 @@
 % Created: 10.31.2018
 %=====================================================
 
-agent1 = Agent(1,1);
-agent2 = Agent(2,1);
-agent3 = Agent(3,1);
-agent4 = Agent(4,1);
+time = 1;
+
+agent1 = Agent(1,time);
+agent2 = Agent(2,time);
+agent3 = Agent(3,time);
+agent4 = Agent(4,time);
 
 AM = connectedGraph(4);
 
