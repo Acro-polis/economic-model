@@ -22,7 +22,7 @@ classdef Agent < handle
             assert(id ~= Polis.PolisId,'Error: Agent Id equals reserved PolisId!');
             obj.id = id;
             obj.birthdate = timeStep;
-            obj.wallet = CryptoWallet(obj.id);
+            obj.wallet = CryptoWallet(obj);
         end
         
         function buildSellerPaths(obj, AM)

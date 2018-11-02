@@ -31,8 +31,11 @@ agent2.wallet.submitBuySellTransaction(t21);
 
 mutualConnections = agent1.findMutualConnectionsWithAgent(AM, agent2.id);
 availableBalance1 = agent1.wallet.availableBalanceForTransactionWithAgent(agent2.id, mutualConnections);
+balances1 = agent1.wallet.individualBalancesForTransactionWithAgent(agent2.id, mutualConnections);
+
 mutualConnections = agent2.findMutualConnectionsWithAgent(AM, agent1.id);
 availableBalance2 = agent2.wallet.availableBalanceForTransactionWithAgent(agent1.id, mutualConnections);
+balances2 = agent2.wallet.individualBalancesForTransactionWithAgent(agent1.id, mutualConnections);
 
 fprintf("Available balance of agent 1 to transact with agent 2 = %.2f\n",availableBalance1);
 agent1.wallet.dump;

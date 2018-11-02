@@ -32,7 +32,7 @@ Buying - adding currency
 %}
 
     properties (SetAccess=private)
-        agentId         % Agent who owns this wallet            
+        agent           % Agent who owns this wallet            
         transactions    % This wallets ledger
     end
     
@@ -42,9 +42,9 @@ Buying - adding currency
     
     methods
         
-        function obj = CryptoWallet(agentId)
-            % The agentId is the agent who owns this wallet
-            obj.agentId = agentId;
+        function obj = CryptoWallet(agent)
+            % This wallet belongs to this agent
+            obj.agent = agent;
             obj.transactions = Transaction.empty;
         end
         
@@ -54,9 +54,8 @@ Buying - adding currency
 
         function depositUBI(obj, amount, timeStep)
             % Deposit UBI into this wallet
-            % TODO - make transaction id unique and the datetime = dt
-            % (time)
-            obj.addTransaction(Transaction(TransactionType.UBI, amount, obj.agentId, Polis.uniqueId(), Polis.PolisId, obj.agentId, "UBI", timeStep));
+            t = Transaction(TransactionType.UBI, amount, obj.agent.id, Polis.uniqueId(), Polis.PolisId, obj.agent.id, "UBI", timeStep);
+            obj.addTransaction(t);
         end
         
         function applyDemurrage(obj, percentage, timeStep)
@@ -80,7 +79,7 @@ Buying - adding currency
                 %
                 % Record the transaction
                 %
-                t = Transaction(TransactionType.DEMURRAGE, amount, agentIds(index), Polis.uniqueId(), Polis.PolisId, obj.agentId, "DEMURRAGE", timeStep);
+                t = Transaction(TransactionType.DEMURRAGE, amount, agentIds(index), Polis.uniqueId(), Polis.PolisId, obj.agent.id, "DEMURRAGE", timeStep);
                 obj.addTransaction(t);
             end
         end
@@ -97,31 +96,74 @@ Buying - adding currency
             end
         end
         
-        function submitPurchase(obj, amount, agentPath)
-            % Process a purchase transaction
-            
-            % 1. Test that there is enough money avaiable for each path
-            % 2. Build transaction set for each path (Buy and Sell)
+        function transacted = submitPurchaseWithDirectConnection(obj, amount, AM, agent, timeStep)
+            % Process a purchase transaction with a direct connection. 
+            % 1. Test that there is enough money for the transaction
+            % 2. Build the transaction set (Buy and Sell) for each currency
             % 3. Record transactions
+
+            mutualAgentIds = obj.agent.findMutualConnectionsWithAgent(AM, agent.id);
+            availableBalance = obj.availableBalanceForTransactionWithAgent(agent.id, mutualAgentIds);
+            
+            if availableBalance >= amount
+                
+                balances = obj.individualBalancesForTransactionWithAgent(agent.id, mutualAgentIds);
+                [indices, ~] = size(balances);
+                remainingAmount = amount;
+                
+                for index = 1:indices
+                    
+                    currencyAgentId = balances(index,1);
+                    balance = balances(index,2);
+                    
+                    if balance ~= 0 
+                        if remainingAmount > balance
+                            % Buy/Sell using balance and continue
+                            tAB = Transaction(TransactionType.BUY, -balance, currencyAgentId, Polis.uniqueId(), obj.agent.id, agent.id, "BUY", timeStep);
+                            obj.addTransaction(tAB);
+                            tBA = Transaction(TransactionType.SELL, balance, currencyAgentId, Polis.uniqueId(), agent.id, obj.agent.id, "SELL", timeStep);
+                            agent.wallet.addTransaction(tBA);
+                            remainingAmount = remainingAmount - balance;
+                        else
+                            % Buy/Sell using remainingAmount and break
+                            tAB = Transaction(TransactionType.BUY, -remainingAmount, currencyAgentId, Polis.uniqueId(), obj.agent.id, agent.id, "BUY", timeStep);
+                            obj.addTransaction(tAB);
+                            tBA = Transaction(TransactionType.SELL, remainingAmount, currencyAgentId, Polis.uniqueId(), agent.id, obj.agent.id, "SELL", timeStep);
+                            agent.wallet.addTransaction(tBA);
+                            break;
+                        end
+                    end
+                end
+                
+                transacted = true;
+            else
+                
+                transacted = false;
+            end
             
         end
-        
         
         %
         % Balance Calculations
         %
         function balances = individualBalancesForTransactionWithAgent(obj, agentId, mutualAgentIds)
-            % Return the balance for each individual currency from commen
-            % agents including the target agent (agentId) and oneself
-            % (obj.Id)
-            balances = [];
+            % Return the balance for each individual currency from common
+            % agents, the target agent (agentId) and oneself (obj.Id). 
+            % Order by agentId, common agents, then onself.
+            balances = [agentId, obj.balanceForAgentsCurrency(agentId)];
+            [~, numIndexes] = size(mutualAgentIds);
+            for index = 1:numIndexes
+                mutualAgentId = mutualAgentIds(index);
+                balances = [balances ; mutualAgentId obj.balanceForAgentsCurrency(mutualAgentId)];
+            end
+            balances = [balances ; obj.agent.id obj.balanceForAgentsCurrency(obj.agent.id)];
         end
         
         function balance = availableBalanceForTransactionWithAgent(obj, agentId, mutualAgentIds)
             % Total balance available to transact from common agents
             % including target agent (agentId) and oneself (obj.Id)
             balance = 0.0;
-            balance = balance + obj.balanceForAgentsCurrency(obj.agentId);
+            balance = balance + obj.balanceForAgentsCurrency(obj.agent.id);
             balance = balance + obj.balanceForAgentsCurrency(agentId);
             [~, numIndexes] = size(mutualAgentIds);
             for index = 1:numIndexes
@@ -134,13 +176,18 @@ Buying - adding currency
             currentBalance = sum([obj.transactions.amount]);
         end
 
+        function addTransaction(obj, newTransaction)
+            % Add a ledger record (building a vector (N x 1 transactions))
+            obj.transactions = [obj.transactions ; newTransaction]; 
+        end
+
         %
         % Output
         %
         
         function dump(obj)
             % Log this agents complete ledger
-            fprintf('\nLedger for Agent Id = %d\n',obj.agentId);
+            fprintf('\nLedger for Agent Id = %d\n',obj.agent.id);
             fprintf('id\t type amount\t a/s/d/t\t note\t date\n');
             [rows, ~] = size(obj.transactions);
             for i = 1:rows
@@ -152,11 +199,6 @@ Buying - adding currency
     
     methods (Access = private)
                 
-        function addTransaction(obj, newTransaction)
-            % Add a ledger record (building a vector (N x 1 transactions))
-            obj.transactions = [obj.transactions ; newTransaction]; 
-        end
-
         function balance = balanceForAgentsCurrency(obj, agentId)
             % Total balance of this agents currency
             results = findobj(obj.transactions,'currencyAgentId', agentId);

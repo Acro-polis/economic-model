@@ -11,6 +11,8 @@
 time = 1;
 fprintf("\nTest Agent Wallets: time = %d\n\n",time);
 
+AM = connectedGraph(3);
+
 agent1 = Agent(1, time);
 agent2 = Agent(2, time);
 agent3 = Agent(3, time);
@@ -92,4 +94,16 @@ fprintf('\n');
 agent2.wallet.dump();
 fprintf('\n');
 agent3.wallet.dump();
+
+time = 3;
+
+agent1.wallet.submitPurchaseWithDirectConnection(100.0, AM, agent2, time);
+
+fprintf('\n');
+agent1.wallet.dump();
+fprintf('\n');
+agent2.wallet.dump();
+fprintf('\n');
+agent3.wallet.dump();
+
 
