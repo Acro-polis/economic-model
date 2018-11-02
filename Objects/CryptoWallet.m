@@ -80,7 +80,6 @@ Buying - adding currency
                 %
                 % Record the transaction
                 %
-                % TODO - make transaction id unique
                 t = Transaction(TransactionType.DEMURRAGE, amount, agentIds(index), Polis.uniqueId(), Polis.PolisId, obj.agentId, "DEMURRAGE", timeStep);
                 obj.addTransaction(t);
             end
@@ -99,7 +98,7 @@ Buying - adding currency
         end
         
         function submitPurchase(obj, amount, agentPath)
-            % Process a purchase
+            % Process a purchase transaction
             
             % 1. Test that there is enough money avaiable for each path
             % 2. Build transaction set for each path (Buy and Sell)
@@ -111,13 +110,19 @@ Buying - adding currency
         %
         % Balance Calculations
         %
+        function balances = individualBalancesForTransactionWithAgent(obj, agentId, mutualAgentIds)
+            % Return the balance for each individual currency from commen
+            % agents including the target agent (agentId) and oneself
+            % (obj.Id)
+            balances = [];
+        end
         
         function balance = availableBalanceForTransactionWithAgent(obj, agentId, mutualAgentIds)
             % Total balance available to transact from common agents
             % including target agent (agentId) and oneself (obj.Id)
             balance = 0.0;
-            balance = balance + obj.balanceForCurrencyAgentId(obj.agentId);
-            balance = balance + obj.balanceForCurrencyAgentId(agentId);
+            balance = balance + obj.balanceForAgentsCurrency(obj.agentId);
+            balance = balance + obj.balanceForAgentsCurrency(agentId);
             [~, numIndexes] = size(mutualAgentIds);
             for index = 1:numIndexes
                 balance = balance + obj.balanceForAgentsCurrency(mutualAgentIds(index));
@@ -128,7 +133,7 @@ Buying - adding currency
             % Total balance, irrespective of agent dependencies
             currentBalance = sum([obj.transactions.amount]);
         end
-       
+
         %
         % Output
         %
