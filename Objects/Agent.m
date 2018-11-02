@@ -9,6 +9,7 @@ classdef Agent < handle
         id          uint32  % The agent id for this agent
         birthdate   uint32  % The birthdate for this agent = time dt
         wallet              % This agents wallet
+        sellerPaths         % Possible network paths to sellers
     end
     
     properties (Constant)
@@ -22,6 +23,11 @@ classdef Agent < handle
             obj.id = id;
             obj.birthdate = timeStep;
             obj.wallet = CryptoWallet(obj.id);
+        end
+        
+        function buildSellerPaths(obj, AM)
+            % Find all network paths to sellers available to this agent 
+            obj.sellerPaths = [];
         end
         
         %

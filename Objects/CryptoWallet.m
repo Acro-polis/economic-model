@@ -75,7 +75,7 @@ Buying - adding currency
                 %
                 % Calculate the balance for this agent
                 %
-                amount = -1.0*percentage*obj.balanceForCurrencyAgentId(agentIds(index));
+                amount = -1.0*percentage*obj.balanceForAgentsCurrency(agentIds(index));
                 
                 %
                 % Record the transaction
@@ -97,7 +97,17 @@ Buying - adding currency
                 obj.addTransaction(newTransaction);
             end
         end
-                
+        
+        function submitPurchase(obj, amount, agentPath)
+            % Process a purchase
+            
+            % 1. Test that there is enough money avaiable for each path
+            % 2. Build transaction set for each path (Buy and Sell)
+            % 3. Record transactions
+            
+        end
+        
+        
         %
         % Balance Calculations
         %
@@ -110,19 +120,13 @@ Buying - adding currency
             balance = balance + obj.balanceForCurrencyAgentId(agentId);
             [~, numIndexes] = size(mutualAgentIds);
             for index = 1:numIndexes
-                balance = balance + obj.balanceForCurrencyAgentId(mutualAgentIds(index));
+                balance = balance + obj.balanceForAgentsCurrency(mutualAgentIds(index));
             end
         end
         
         function currentBalance = get.currentBalanceAllCurrencies(obj)
             % Total balance, irrespective of agent dependencies
             currentBalance = sum([obj.transactions.amount]);
-        end
-
-        function balance = balanceForCurrencyAgentId(obj, agentId)
-            % Total balance of this agents currency
-            results = findobj(obj.transactions,'currencyAgentId', agentId);
-            balance = sum([results.amount]);
         end
        
         %
@@ -146,6 +150,12 @@ Buying - adding currency
         function addTransaction(obj, newTransaction)
             % Add a ledger record (building a vector (N x 1 transactions))
             obj.transactions = [obj.transactions ; newTransaction]; 
+        end
+
+        function balance = balanceForAgentsCurrency(obj, agentId)
+            % Total balance of this agents currency
+            results = findobj(obj.transactions,'currencyAgentId', agentId);
+            balance = sum([results.amount]);
         end
 
     end
