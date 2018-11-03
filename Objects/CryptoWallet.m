@@ -79,23 +79,13 @@ Buying - adding currency
                 %
                 % Record the transaction
                 %
-                t = Transaction(TransactionType.DEMURRAGE, amount, agentIds(index), Polis.uniqueId(), Polis.PolisId, obj.agent.id, "DEMURRAGE", timeStep);
-                obj.addTransaction(t);
+                if amount < 0.0
+                    t = Transaction(TransactionType.DEMURRAGE, amount, agentIds(index), Polis.uniqueId(), Polis.PolisId, obj.agent.id, "DEMURRAGE", timeStep);
+                    obj.addTransaction(t);
+                end
             end
         end
-        
-        function submitBuySellTransaction(obj, newTransaction)
-            % TODO - rewrite for transitive trust, encapusulate the sell
-            % portion and make the method just a buy signature
-            if newTransaction.type ~= TransactionType.BUY && newTransaction.type ~= TransactionType.SELL
-                %
-                % TODO - Raise error
-                %
-            else
-                obj.addTransaction(newTransaction);
-            end
-        end
-        
+               
         function transacted = submitPurchaseWithDirectConnection(obj, amount, AM, agent, timeStep)
             % Process a purchase transaction with a direct connection. 
             % 1. Test that there is enough money for the transaction

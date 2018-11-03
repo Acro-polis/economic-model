@@ -81,7 +81,7 @@ agent3.wallet.dump();
 
 time = 3;
 
-result = agent1.wallet.submitPurchaseWithDirectConnection(300.0, AM, agent2, time);
+result = agent2.wallet.submitPurchaseWithDirectConnection(300.0, AM, agent3, time);
 fprintf("\nTransaction Succeeded = %d\n",result);
 
 fprintf('\n');
