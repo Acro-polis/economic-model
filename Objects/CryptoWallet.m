@@ -101,20 +101,22 @@ Buying - adding currency
             % 1. Test that there is enough money for the transaction
             % 2. Build the transaction set (Buy and Sell) for each currency
             % 3. Record transactions
-
+            assert(obj.agent.id ~= agent.id,"Attempting a transaction with yourself - Boo!");
+            
             mutualAgentIds = obj.agent.findMutualConnectionsWithAgent(AM, agent.id);
             availableBalance = obj.availableBalanceForTransactionWithAgent(agent.id, mutualAgentIds);
             
             if availableBalance >= amount
                 
-                balances = obj.individualBalancesForTransactionWithAgent(agent.id, mutualAgentIds);
+                [agentIds, balances] = obj.individualBalancesForTransactionWithAgent(agent.id, mutualAgentIds);
                 [indices, ~] = size(balances);
                 remainingAmount = amount;
                 
                 for index = 1:indices
                     
-                    currencyAgentId = balances(index,1);
-                    balance = balances(index,2);
+                    currencyAgentId = agentIds(index);
+                    balance = balances(index);
+                    assert(balance >= 0,"Wallet.submitPurchase, balance < 0)!");
                     
                     if balance ~= 0 
                         if remainingAmount > balance
@@ -134,10 +136,8 @@ Buying - adding currency
                         end
                     end
                 end
-                
                 transacted = true;
             else
-                
                 transacted = false;
             end
             
@@ -146,17 +146,20 @@ Buying - adding currency
         %
         % Balance Calculations
         %
-        function balances = individualBalancesForTransactionWithAgent(obj, agentId, mutualAgentIds)
+        function [agentIds, balances] = individualBalancesForTransactionWithAgent(obj, agentId, mutualAgentIds)
             % Return the balance for each individual currency from common
             % agents, the target agent (agentId) and oneself (obj.Id). 
             % Order by agentId, common agents, then onself.
-            balances = [agentId, obj.balanceForAgentsCurrency(agentId)];
-            [~, numIndexes] = size(mutualAgentIds);
-            for index = 1:numIndexes
+            agentIds = agentId;
+            balances = obj.balanceForAgentsCurrency(agentId);
+            [~, indices] = size(mutualAgentIds);
+            for index = 1:indices
                 mutualAgentId = mutualAgentIds(index);
-                balances = [balances ; mutualAgentId obj.balanceForAgentsCurrency(mutualAgentId)];
+                agentIds = [agentIds ; mutualAgentId];
+                balances = [balances ; obj.balanceForAgentsCurrency(mutualAgentId)];
             end
-            balances = [balances ; obj.agent.id obj.balanceForAgentsCurrency(obj.agent.id)];
+            agentIds = [agentIds ; obj.agent.id];
+            balances = [balances ; obj.balanceForAgentsCurrency(obj.agent.id)];
         end
         
         function balance = availableBalanceForTransactionWithAgent(obj, agentId, mutualAgentIds)
@@ -188,7 +191,7 @@ Buying - adding currency
         function dump(obj)
             % Log this agents complete ledger
             fprintf('\nLedger for Agent Id = %d\n',obj.agent.id);
-            fprintf('id\t type amount\t a/s/d/t\t note\t date\n');
+            fprintf('id\t type amount\t c/s/d/t\t note\t date\n');
             [rows, ~] = size(obj.transactions);
             for i = 1:rows
                 obj.transactions(i).dump();

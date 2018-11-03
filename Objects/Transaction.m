@@ -7,7 +7,7 @@ classdef Transaction < matlab.mixin.SetGet
 
     properties (SetAccess=private)
         id                   uint32 % Ledger Id                 - unique id for this wallet
-        type                        % Transaction Type          - type of transaction, see TransactionType
+        type                 uint32 % Transaction Type          - type of transaction, see TransactionType
         amount               double % Transaction Amount        - amount of crypto currency
         currencyAgentId      uint32 % Currency Agent Id         - agent id representing the currency for this transaction
         transactionId               % Transaction Id            - unique transaction id common to every ledger record associated to this transaction, spanning multiple agents
@@ -33,7 +33,6 @@ classdef Transaction < matlab.mixin.SetGet
             obj.destinationAgentId = destinationAgentId;
             obj.note = note;
             obj.dateCreated = timeStep;
-            fprintf("object amount = %.2f amount = %.2f\n",obj.amount, amount);
         end
         
         function value = get.currencyAgentId(obj)

@@ -22,32 +22,16 @@ agent2.wallet.depositUBI(500,time);
 agent3.wallet.depositUBI(500,time);
 
 % A1 buys from A2
-t12 = Transaction(TransactionType.BUY, -100, agent1.id, Polis.uniqueId(), agent2.id, agent1.id, "Tran 4", time);
-t21 = Transaction(TransactionType.SELL, 100, agent1.id, Polis.uniqueId(), agent1.id, agent2.id, "Tran 4", time);
-
-agent1.wallet.submitBuySellTransaction(t12);
-agent2.wallet.submitBuySellTransaction(t21);
+agent1.wallet.submitPurchaseWithDirectConnection(100, AM, agent2, time);
 
 % A2 buys from A3
-t23 = Transaction(TransactionType.BUY, -200, agent2.id, Polis.uniqueId(), agent3.id, agent2.id, "Tran 5", time);
-t32 = Transaction(TransactionType.SELL, 200, agent2.id, Polis.uniqueId(), agent2.id, agent3.id, "Tran 5", time);
-
-agent2.wallet.submitBuySellTransaction(t23);
-agent3.wallet.submitBuySellTransaction(t32);
+agent2.wallet.submitPurchaseWithDirectConnection(200, AM, agent3, time);
 
 % A1 buys from A3
-t13 = Transaction(TransactionType.BUY, -50, agent1.id, Polis.uniqueId(), agent3.id, agent1.id, "Tran 6", time);
-t31 = Transaction(TransactionType.SELL, 50, agent1.id, Polis.uniqueId(), agent1.id, agent3.id, "Tran 6", time);
-
-agent1.wallet.submitBuySellTransaction(t13);
-agent3.wallet.submitBuySellTransaction(t31);
+agent1.wallet.submitPurchaseWithDirectConnection(50, AM, agent3, time);
 
 % A3 buys from A1
-t31 = Transaction(TransactionType.BUY, -75, agent3.id, Polis.uniqueId(), agent1.id, agent3.id, "Tran 7", time);
-t13 = Transaction(TransactionType.SELL, 75, agent3.id, Polis.uniqueId(), agent3.id, agent1.id, "Tran 7", time);
-
-agent3.wallet.submitBuySellTransaction(t31);
-agent1.wallet.submitBuySellTransaction(t13);
+agent3.wallet.submitPurchaseWithDirectConnection(75, AM, agent1, time);
 
 % Test / Output Results
 a1bal = agent1.wallet.currentBalanceAllCurrencies;
@@ -97,7 +81,8 @@ agent3.wallet.dump();
 
 time = 3;
 
-agent1.wallet.submitPurchaseWithDirectConnection(100.0, AM, agent2, time);
+result = agent1.wallet.submitPurchaseWithDirectConnection(300.0, AM, agent2, time);
+fprintf("\nTransaction Succeeded = %d\n",result);
 
 fprintf('\n');
 agent1.wallet.dump();
