@@ -24,10 +24,7 @@ agent3.wallet.depositUBI(100.0, time);
 agent4.wallet.depositUBI(100.0, time);
 
 % A1 buys from A2
-t12 = Transaction(TransactionType.BUY, -50, agent1.id, 1, agent2.id, agent1.id, "Tran 1", time);
-t21 = Transaction(TransactionType.SELL, 50, agent1.id, 1, agent1.id, agent2.id, "Tran 1", time);
-agent1.wallet.submitBuySellTransaction(t12);
-agent2.wallet.submitBuySellTransaction(t21);
+agent1.wallet.submitPurchaseWithDirectConnection(50, AM, agent2, time);
 
 mutualConnections = agent1.findMutualConnectionsWithAgent(AM, agent2.id);
 availableBalance1 = agent1.wallet.availableBalanceForTransactionWithAgent(agent2.id, mutualConnections);

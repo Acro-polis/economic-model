@@ -32,8 +32,8 @@ Buying - adding currency
 %}
 
     properties (SetAccess=private)
-        agent           % Agent who owns this wallet            
-        transactions    % This wallets ledger
+        agent         Agent % Agent who owns this wallet            
+        transactions        % This wallets ledger
     end
     
     properties (Dependent)
@@ -91,7 +91,7 @@ Buying - adding currency
             % 1. Test that there is enough money for the transaction
             % 2. Build the transaction set (Buy and Sell) for each currency
             % 3. Record transactions
-            assert(obj.agent.id ~= agent.id,"Attempting a transaction with yourself - Boo!");
+            assert(obj.agent.id ~= agent.id,"Attempting a transaction with yourself - Preposterous!");
             
             mutualAgentIds = obj.agent.findMutualConnectionsWithAgent(AM, agent.id);
             availableBalance = obj.availableBalanceForTransactionWithAgent(agent.id, mutualAgentIds);

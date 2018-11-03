@@ -6,10 +6,10 @@ classdef Agent < handle
 %================================================================
 
     properties (SetAccess = private)
-        id          uint32  % The agent id for this agent
-        birthdate   uint32  % The birthdate for this agent = time dt
-        wallet              % This agents wallet
-        sellerPaths         % Possible network paths to sellers
+        id          uint32          % The agent id for this agent
+        birthdate   uint32          % The birthdate for this agent = time dt
+        wallet      CryptoWallet    % This agents wallet
+        sellerPaths                 % Possible network paths to sellers
     end
     
     properties (Constant)
