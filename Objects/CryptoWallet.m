@@ -85,7 +85,10 @@ Buying - adding currency
                 end
             end
         end
-               
+
+        function transacted = submitPurchaseWithIndirectConnection(obj, amount, AM, agent, timeStep)
+        end
+
         function transacted = submitPurchaseWithDirectConnection(obj, amount, AM, agent, timeStep)
             % Process a purchase transaction with a direct connection. 
             % 1. Test that there is enough money for the transaction
