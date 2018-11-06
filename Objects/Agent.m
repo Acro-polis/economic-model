@@ -25,7 +25,7 @@ classdef Agent < handle
             obj.wallet = CryptoWallet(obj);
         end
         
-        function findAllPaths(obj, AM)
+        function output = findAllPaths(obj, AM)
             % Find all network paths to sellers available to this agent
             
             obj.paths = {};
@@ -44,14 +44,7 @@ classdef Agent < handle
                 % all uncommon connections until the end of each path 
                 % is reached
                 output = obj.addNextConnection(AM, [obj.id, connection], obj.id, connection);
-                [row, col] = size(output);
-                fprintf("Output is a (%d,%d) matrix\n",row,col);
-                for i = 1:row
-                    fprintf("row = %d\n",i);
-                    for j = 1:col
-                        fprintf("col=%d\n",output(i,j));
-                    end
-                end
+                            
             end
         end
         
@@ -60,22 +53,21 @@ classdef Agent < handle
             fprintf("Add next: This = %d, That = %d\n", thisAgentId, thatAgentId);
             uncommonConnections = obj.findAgentsUncommonConnections(AM, thisAgentId, thatAgentId);
             [~, indices] = size(uncommonConnections);
-            newPaths = [];
+            paths = {};
             if indices > 0
             fprintf("Uncommon connections = %d, starting recursion\n",indices);
                 for index = 1:indices
                     nextUncommonConnection = uncommonConnections(index);
                     fprintf("Searching uncommon connection = %d\n",nextUncommonConnection);
                     nextPath = [currentPath , nextUncommonConnection];
-                    newPaths = [newPaths ; obj.addNextConnection(AM, nextPath, thatAgentId, nextUncommonConnection)];
-                    fprintf("New Paths = %d\n",newPaths);
+                    paths = [paths ; {obj.addNextConnection(AM, nextPath, thatAgentId, nextUncommonConnection)}];
+                    %fprintf("New Paths = %d\n",newPaths);
                 end
-                paths = newPaths;
             else
-            fprintf("Uncommon connections = 0, returning\n");
+                fprintf("Uncommon connections = 0, returning\n");
                 paths = currentPath;
             end
-            fprintf("Paths = %d\n",paths);
+            %fprintf("Paths = %d\n",paths);
         end
         
         %
