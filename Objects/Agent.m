@@ -25,7 +25,7 @@ classdef Agent < handle
             obj.wallet = CryptoWallet(obj);
         end
         
-        function output = findAllPaths(obj, AM)
+        function findAllPaths(obj, AM)
             % Find all network paths to sellers available to this agent
             
             obj.paths = {};
@@ -43,7 +43,7 @@ classdef Agent < handle
                 % Build all paths to other agents by recursivly finding 
                 % all uncommon connections until the end of each path 
                 % is reached
-                output = obj.addNextConnection(AM, [obj.id, connection], obj.id, connection);
+                obj.paths = obj.addNextConnection(AM, [obj.id, connection], obj.id, connection);
                             
             end
         end
@@ -87,6 +87,23 @@ classdef Agent < handle
             % Return the index number of my connections using the Adjacency
             % Matrix
             connections = find(AM(obj.id,:) ~= 0);
+        end
+        
+        function ouputPaths(obj)
+            % Output all paths to the console
+            allPaths = obj.paths{:};
+            [totPaths, ~] = size(allPaths);
+            fprintf("\nThere are %d total paths\n", totPaths);
+            for i = 1:totPaths
+                fprintf("\nPath = %d\n",i);
+                aPath = cell2mat(allPaths(i,1));
+                [~, segments] = size(aPath);
+                fprintf("Path = ");
+                for j = 1:segments
+                    fprintf(" %d ",aPath(1,j));
+                end
+                fprintf("\n");
+            end
         end
         
     end
