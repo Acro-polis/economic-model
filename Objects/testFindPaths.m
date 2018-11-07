@@ -103,5 +103,5 @@ AM(7,8) = 0;
 % 1 6 7
 % 1 6 8
 
-agent1.findAllPaths(AM);
+agent1.findAllPathsToAgent(AM, 0);
 agent1.ouputPaths();

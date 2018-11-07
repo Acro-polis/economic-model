@@ -9,10 +9,11 @@ classdef Agent < handle
         id          uint32          % The agent id for this agent
         birthdate   uint32          % The birthdate for this agent = time dt
         wallet      CryptoWallet    % This agents wallet
-        paths                       % Possible network paths to sellers
+        allPaths                    % Possible network paths to sellers
     end
     
     properties (Constant)
+        maximumSearchLevels = 10;
     end
     
     methods
@@ -25,13 +26,11 @@ classdef Agent < handle
             obj.wallet = CryptoWallet(obj);
         end
         
-        function findAllPaths(obj, AM)
+        function findAllPathsToAgent(obj, AM, targetAgentId)
             % Find all network paths to sellers available to this agent
             
-            obj.paths = {};
-            
+            obj.allPaths = {};
             myConnections = obj.findMyConnections(AM);
-            
             [~, indices] = size(myConnections);
             fprintf("Found %d connection(s) to start\n",indices);
             for index = 1:indices
@@ -42,32 +41,51 @@ classdef Agent < handle
                 
                 % Build all paths to other agents by recursivly finding 
                 % all uncommon connections until the end of each path 
-                % is reached
-                obj.paths = obj.addNextConnection(AM, [obj.id, connection], obj.id, connection);
+                % is reached, or the maximum search level is reached or the
+                % buyer (this agent) is reached.
+                obj.findNextConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId);
                             
             end
         end
         
-        function paths = addNextConnection(obj, AM, currentPath, thisAgentId, thatAgentId)
+        function findNextConnection(obj, AM, searchLevel, currentPath, thisAgentId, thatAgentId, targetAgentId)
+            
+            searchLevel = searchLevel + 1;
+            if searchLevel > Agent.maximumSearchLevels
+                fprintf("Maximum Search Levels Reached = %d\n",searchLevel);
+                obj.allPaths = [obj.allPaths ; {currentPath}];
+                return;
+            end
+            
             fprintf("Add next: CurrentPath = %d\n", currentPath);
             fprintf("Add next: This = %d, That = %d\n", thisAgentId, thatAgentId);
+            
             uncommonConnections = obj.findAgentsUncommonConnections(AM, thisAgentId, thatAgentId);
+            uncommonConnections = obj.removeBuyerIfExists(uncommonConnections);
             [~, indices] = size(uncommonConnections);
-            paths = {};
-            if indices > 0
-            fprintf("Uncommon connections = %d, starting recursion\n",indices);
+            if indices > 0 
+            fprintf("----Uncommon connections = %d\n",uncommonConnections);
                 for index = 1:indices
                     nextUncommonConnection = uncommonConnections(index);
                     fprintf("Searching uncommon connection = %d\n",nextUncommonConnection);
                     nextPath = [currentPath , nextUncommonConnection];
-                    paths = [paths ; {obj.addNextConnection(AM, nextPath, thatAgentId, nextUncommonConnection)}];
-                    %fprintf("New Paths = %d\n",newPaths);
+                    obj.findNextConnection(AM, searchLevel, nextPath, thatAgentId, nextUncommonConnection, targetAgentId);
                 end
             else
                 fprintf("Uncommon connections = 0, returning\n");
-                paths = currentPath;
+                obj.allPaths = [obj.allPaths ; {currentPath}];
             end
-            %fprintf("Paths = %d\n",paths);
+        end
+        
+        function result = removeBuyerIfExists(obj, uncommonConnections)
+            % Remove this agent (the buyer) from the list, if present.
+            % This prevents infinite looping should a circle of connections
+            % exist (e.g A to B to C to D to A).
+            result = uncommonConnections;
+            indexOfMe = find(uncommonConnections(1,:) == obj.id);
+            if indexOfMe > 0
+                result(indexOfMe) = [];
+            end
         end
         
         %
@@ -91,12 +109,12 @@ classdef Agent < handle
         
         function ouputPaths(obj)
             % Output all paths to the console
-            allPaths = obj.paths{:};
-            [totPaths, ~] = size(allPaths);
+            thePaths = obj.allPaths;
+            [totPaths, ~] = size(thePaths);
             fprintf("\nThere are %d total paths\n", totPaths);
             for i = 1:totPaths
                 fprintf("\nPath = %d\n",i);
-                aPath = cell2mat(allPaths(i,1));
+                aPath = cell2mat(thePaths(i,1));
                 [~, segments] = size(aPath);
                 fprintf("Path = ");
                 for j = 1:segments
