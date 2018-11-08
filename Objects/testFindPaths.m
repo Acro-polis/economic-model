@@ -21,8 +21,6 @@ agent1.logPaths(paths);
 fprintf("Expecting one path = [1 8]\n");
 %TODO add assert
 
-fprintf("\nTest 2\n");
-
 % A1 does not know A4, A5, A7 & A8
 AM(1,4) = 0;
 AM(4,1) = 0;
@@ -168,4 +166,19 @@ agent1.logPaths(paths);
 
 fprintf("\nExpecting 1 Paths To Agent %d\n", targetAgentId);
 %TODO add asserts
+
+fprintf("\nTest 9\n");
+
+agent8 = Agent(8,birthday);
+targetAgentId = 1;
+paths = agent8.findAllNetworkPathsToAgent(AM, targetAgentId);
+agent8.logPaths(paths);
+
+fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
+%TODO add asserts
+
+% ------
+
+
+
 

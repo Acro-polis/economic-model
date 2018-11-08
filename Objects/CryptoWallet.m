@@ -86,7 +86,19 @@ Buying - adding currency
             end
         end
 
-        function transacted = submitPurchaseWithIndirectConnection(obj, amount, AM, agent, timeStep)
+        function transacted = submitPurchaseWithIndirectConnection(obj, amount, AM, paths, targetAgentId, timeStep)
+            % Process a transaction with an indirect connection
+            % 1. Find a path that can make the transaction (has enough
+            % money along the chain)
+            % 2. Build the transaction set
+            % 3. Record the transaction
+            % The target agent is the last id on each path
+            % Loop over paths
+            % Loop over each path segment to see if there is enough money,
+            % if so, use that path and break
+            % As we loop, set up each segent of the transation 
+            % Now that we exited the loop, we can record the transaction
+            transacted = false;
         end
 
         function transacted = submitPurchaseWithDirectConnection(obj, amount, AM, agent, timeStep)
@@ -94,6 +106,9 @@ Buying - adding currency
             % 1. Test that there is enough money for the transaction
             % 2. Build the transaction set (Buy and Sell) for each currency
             % 3. Record transactions
+            % TODO - fix this, I must have been high, we need to specify a
+            % specific connection, sigh ... or is the naming convention
+            % just bad ... check next.
             assert(obj.agent.id ~= agent.id,"Attempting a transaction with yourself - Preposterous!");
             
             mutualAgentIds = obj.agent.findMutualConnectionsWithAgent(AM, obj.agent.id, agent.id);

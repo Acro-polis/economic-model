@@ -28,7 +28,7 @@ classdef Agent < handle
         function allPaths = findAllNetworkPathsToAgent(obj, AM, targetAgentId)
             % For this agent, find all possible network paths to the 
             % target agent, avoiding circular loops and limited by the 
-            % maximum of search levels
+            % maximum of search levels. 
             assert(targetAgentId ~= 0 && targetAgentId ~= obj.id,"Error, invalid targetAgentId");
             
             % Use cells since we expect paths to be of unequal length
@@ -54,6 +54,8 @@ classdef Agent < handle
                 allPaths = [allPaths ; obj.findNextNetworkConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId, {})];
             end
             
+            allPaths = Agent.sortPaths(allPaths);
+                                   
         end
                                 
         function result = areWeConnected(obj, AM, targetAgentId)
@@ -152,6 +154,14 @@ classdef Agent < handle
     
     methods (Static)
         
+        function paths = sortPaths(paths)
+            % Order the the network paths shortest length to longest length
+            % (the expected format is that which is returned from 
+            % findAllNetworkPathsToAgent()).
+            [~, columns] = sort(cellfun(@length, paths));
+            paths = paths(columns);
+        end
+        
         function connections = findConnectionsForAgent(AM, agentId)
             % Return the index number of connections for agentId using the
             % Adjacency Matrix
@@ -194,7 +204,7 @@ classdef Agent < handle
             uncommonConnections = find((AM(thisAgentId,:) - AM(thatAgentId,:)) == 1);
             uncommonConnections = uncommonConnections(uncommonConnections ~= thatAgentId);
         end
-
+      
         function logPaths(paths)
             % Output all paths to the console (format is a cell array with
             % each element being an integer array signifying a path through
