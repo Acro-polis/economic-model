@@ -50,8 +50,10 @@ classdef Agent < handle
             
             for index = 1:indices
                 connection = myConnections(index);
+                % Concatenate the return paths
                 allPaths = [allPaths ; obj.findNextNetworkConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId, {})];
             end
+            
         end
                                 
         function result = areWeConnected(obj, AM, targetAgentId)
@@ -109,8 +111,8 @@ classdef Agent < handle
                 searchLevel = searchLevel + 1;
             end
             
-            % Find the uncommon connections (remove obj.id if it exists)
-            uncommonConnections = obj.removeBuyerIfExists(obj.findAgentsUncommonConnections(AM, thisAgentId, thatAgentId));
+            % Find the uncommon connections (remove this agent (obj.id), if it exists)
+            uncommonConnections = obj.removeMeIfIAmPresent(obj.findAgentsUncommonConnections(AM, thisAgentId, thatAgentId));
             [~, indices] = size(uncommonConnections);
             if indices > 0 
                 logIntegerArray("---- Uncommon Connections", uncommonConnections)
@@ -127,10 +129,10 @@ classdef Agent < handle
             end
         end
 
-       function result = removeBuyerIfExists(obj, uncommonConnections)
-            % Remove this agent (the buyer) from the list, if present.
+       function result = removeMeIfIAmPresent(obj, uncommonConnections)
+            % Remove this agent (me, the buyer) from the list, if present.
             % This prevents infinite looping should a circle of connections
-            % exist (e.g A to B to C to D to A).
+            % exist (for example: A to B to C to D to A).
             
             result = uncommonConnections;
             
