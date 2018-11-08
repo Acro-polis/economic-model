@@ -103,5 +103,6 @@ AM(7,8) = 0;
 % 1 6 7
 % 1 6 8
 
-agent1.findAllPathsToAgent(AM, 0);
+targetAgentId = 8;
+agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent1.ouputPaths();

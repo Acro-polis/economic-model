@@ -13,7 +13,7 @@ classdef Agent < handle
     end
     
     properties (Constant)
-        maximumSearchLevels = 10;
+        maximumSearchLevels = 30;
     end
     
     methods
@@ -26,54 +26,73 @@ classdef Agent < handle
             obj.wallet = CryptoWallet(obj);
         end
         
-        function findAllPathsToAgent(obj, AM, targetAgentId)
-            % Find all network paths to sellers available to this agent
+        function findAllNetworkPathsToAgent(obj, AM, targetAgentId)
+            % For this agent, find all possible network paths to the 
+            % target agent, avoiding circular loops and limited by the 
+            % maximum of search levels
+            assert(targetAgentId ~= 0 && targetAgentId ~= obj.id,"Error, invalid targetAgentId");
             
-            obj.allPaths = {};
+            % Use cells since we expect paths to be of unequal length
+            obj.allPaths = {}; 
+            
+            % Start with my connections and recursively discover each 
+            % neighbors uncommon connections thereby building the paths 
+            % to the target agent
             myConnections = obj.findMyConnections(AM);
             [~, indices] = size(myConnections);
-            fprintf("Found %d connection(s) to start\n",indices);
+            
             for index = 1:indices
                 connection = myConnections(index);
-                fprintf("Working on connection %d\n",connection);
-                
                 % TODO - if totally connected, take shortcut
-                
-                % Build all paths to other agents by recursivly finding 
-                % all uncommon connections until the end of each path 
-                % is reached, or the maximum search level is reached or the
-                % buyer (this agent) is reached.
-                obj.findNextConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId);
-                            
+                obj.findNextNetworkConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId);
             end
         end
         
-        function findNextConnection(obj, AM, searchLevel, currentPath, thisAgentId, thatAgentId, targetAgentId)
+        function findNextNetworkConnection(obj, AM, searchLevel, currentPath, thisAgentId, thatAgentId, targetAgentId)
+            % Recursively explore any uncommon connections between
+            % thisAgentId and thatAgentId until the targetAgentId is found
+            % or we run out of uncommon connections (and ensureing we do
+            % not traverse the object agent (obj.id))
             
-            searchLevel = searchLevel + 1;
-            if searchLevel > Agent.maximumSearchLevels
-                fprintf("Maximum Search Levels Reached = %d\n",searchLevel);
+            fprintf("\nStarting Path = [");
+            fprintf(" %d ", currentPath);
+            fprintf("]\nAgents: This = %d, That = %d, Target = %d, Search Level = %d\n\n", thisAgentId, thatAgentId, targetAgentId, searchLevel);
+            
+            if thatAgentId == targetAgentId
+                % Found it, we are done!
                 obj.allPaths = [obj.allPaths ; {currentPath}];
+                fprintf("!!!! Done: Found Target Agent = %d !!!!\n\n",targetAgentId);
                 return;
             end
             
-            fprintf("Add next: CurrentPath = %d\n", currentPath);
-            fprintf("Add next: This = %d, That = %d\n", thisAgentId, thatAgentId);
+            % If we run out of uncommon connections before we find the
+            % target then we are out of luck, they are not connected and we
+            % return (see below). Same if we run out of search levels
+            if searchLevel > Agent.maximumSearchLevels
+                % No luck, go home empty handed
+                fprintf("**** Abandon Ship - Max Level Reached ****\n\n");
+                return;
+            else
+                searchLevel = searchLevel + 1;
+            end
             
-            uncommonConnections = obj.findAgentsUncommonConnections(AM, thisAgentId, thatAgentId);
-            uncommonConnections = obj.removeBuyerIfExists(uncommonConnections);
+            % Find the uncommon connections (remove obj.id if it exists)
+            uncommonConnections = obj.removeBuyerIfExists(obj.findAgentsUncommonConnections(AM, thisAgentId, thatAgentId));
             [~, indices] = size(uncommonConnections);
             if indices > 0 
-            fprintf("----Uncommon connections = %d\n",uncommonConnections);
+                fprintf("----Uncommon Connections = [");
+                fprintf(" %d ", uncommonConnections);
+                fprintf("]\n");
                 for index = 1:indices
-                    nextUncommonConnection = uncommonConnections(index);
-                    fprintf("Searching uncommon connection = %d\n",nextUncommonConnection);
-                    nextPath = [currentPath , nextUncommonConnection];
-                    obj.findNextConnection(AM, searchLevel, nextPath, thatAgentId, nextUncommonConnection, targetAgentId);
+                    nextAgent = uncommonConnections(index);
+                    fprintf("----Searching Uncommon Connection = %d\n",nextAgent);
+                    nextPathSegment = [currentPath , nextAgent];
+                    obj.findNextNetworkConnection(AM, searchLevel, nextPathSegment, thatAgentId, nextAgent, targetAgentId);
                 end
             else
-                fprintf("Uncommon connections = 0, returning\n");
-                obj.allPaths = [obj.allPaths ; {currentPath}];
+                % No luck, go home empty handed
+                fprintf("**** Abandon Ship - No More Uncommon Connections ****\n\n");
+                return;
             end
         end
         
