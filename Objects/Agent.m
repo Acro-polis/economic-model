@@ -25,19 +25,19 @@ classdef Agent < handle
             obj.wallet = CryptoWallet(obj);
         end
         
-        function paths = findAllNetworkPathsToAgent(obj, AM, targetAgentId)
+        function allPaths = findAllNetworkPathsToAgent(obj, AM, targetAgentId)
             % For this agent, find all possible network paths to the 
             % target agent, avoiding circular loops and limited by the 
             % maximum of search levels
             assert(targetAgentId ~= 0 && targetAgentId ~= obj.id,"Error, invalid targetAgentId");
             
             % Use cells since we expect paths to be of unequal length
-            paths = {}; 
+            allPaths = {};
             
             % Check for a direct connection
-            if obj.isThisAgentCompletelyConnected(AM)
-                paths = {[obj.id targetAgentId]};
-                fprintf("\nAgent is completely connectd\n");
+            if obj.areWeConnected(AM, targetAgentId)
+                allPaths = {[obj.id targetAgentId]};
+                fprintf("\nAgents are directly connected\n");
                 return;
             end
             
@@ -49,12 +49,19 @@ classdef Agent < handle
             
             for index = 1:indices
                 connection = myConnections(index);
-                % TODO - if totally connected, take shortcut
-                paths = [paths ; obj.findNextNetworkConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId, paths)];
+                allPaths = [allPaths ; obj.findNextNetworkConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId, {})];
             end
         end
                                 
-        function result = isThisAgentCompletelyConnected(obj, AM)
+        function result = areWeConnected(obj, AM, targetAgentId)
+            % Is this agent directly connected to the target agent?
+            result = false;
+            if AM(obj.id,targetAgentId) == 1
+                result = true;
+            end
+        end
+        
+        function result = amICompletelyConnected(obj, AM)
             % Is this agent connected to everybody?
             result = false;
             [~, connections] = size(obj.findMyConnections(AM));
@@ -85,7 +92,7 @@ classdef Agent < handle
             
             if thatAgentId == targetAgentId
                 % Found it, we are done!
-                paths = currentPath;
+                paths = [paths ; {currentPath}];
                 fprintf("!!!! Done: Found Target Agent = %d !!!!\n\n",targetAgentId);
                 return;
             end

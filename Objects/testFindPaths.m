@@ -107,18 +107,65 @@ AM(4,8) = 0;
 AM(8,7) = 0;
 AM(7,8) = 0;
 
-targetAgentId = 8;
+fprintf("\nTest 2\n");
+
 paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent1.logPaths(paths);
 
-fprintf("Expecting 3 Paths");
-fprintf("[ 1 2 4 7 6 8 ]");
-fprintf("[ 1 3 5 8 ]");
-fprintf("[ 1 6 8 ]");
+fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
+%TODO add asserts
 
 fprintf("\nTest 3\n");
 
 targetAgentId = 7;
 paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent1.logPaths(paths);
+
+fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
+%TODO add asserts
+
+fprintf("\nTest 4\n");
+
+targetAgentId = 6;
+paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
+agent1.logPaths(paths);
+
+fprintf("\nExpecting 1 Paths To Agent %d\n", targetAgentId);
+%TODO add asserts
+
+fprintf("\nTest 5\n");
+
+targetAgentId = 5;
+paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
+agent1.logPaths(paths);
+
+fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
+%TODO add asserts
+
+fprintf("\nTest 6\n");
+
+targetAgentId = 4;
+paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
+agent1.logPaths(paths);
+
+fprintf("\nExpecting 5 Paths To Agent %d\n", targetAgentId);
+%TODO add asserts
+
+fprintf("\nTest 7\n");
+
+targetAgentId = 3;
+paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
+agent1.logPaths(paths);
+
+fprintf("\nExpecting 1 Paths To Agent %d\n", targetAgentId);
+%TODO add asserts
+
+fprintf("\nTest 8\n");
+
+targetAgentId = 2;
+paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
+agent1.logPaths(paths);
+
+fprintf("\nExpecting 1 Paths To Agent %d\n", targetAgentId);
+%TODO add asserts
 
