@@ -28,14 +28,16 @@ classdef Agent < handle
         function allPaths = findAllNetworkPathsToAgent(obj, AM, targetAgentId)
             % For this agent, find all possible network paths to the 
             % target agent, avoiding circular loops and limited by the 
-            % maximum of search levels. 
+            % maximum of search levels. Sort results from shortest path to
+            % the longest path
             assert(targetAgentId ~= 0 && targetAgentId ~= obj.id,"Error, invalid targetAgentId");
             
             % Use cells since we expect paths to be of unequal length
             allPaths = {};
             
             % Check for a direct connection, if it exists, that's all we
-            % need
+            % need (because anthing more complicated buy / sell situation 
+            % will fail too)
             if obj.areWeConnected(AM, targetAgentId)
                 allPaths = {[obj.id targetAgentId]};
                 fprintf("\nAgents are directly connected\n");
@@ -44,7 +46,7 @@ classdef Agent < handle
             
             % Start with my connections and recursively discover each 
             % neighbors uncommon connections thereby building the paths 
-            % to the target agent, if there is one
+            % to the target agent, if there is one.
             myConnections = obj.findMyConnections(AM);
             [~, indices] = size(myConnections);
             
