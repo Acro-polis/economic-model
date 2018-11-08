@@ -96,7 +96,7 @@ Buying - adding currency
             % 3. Record transactions
             assert(obj.agent.id ~= agent.id,"Attempting a transaction with yourself - Preposterous!");
             
-            mutualAgentIds = obj.agent.findMutualConnectionsWithAgent(AM, agent.id);
+            mutualAgentIds = obj.agent.findMutualConnectionsWithAgent(AM, obj.agent.id, agent.id);
             availableBalance = obj.availableBalanceForTransactionWithAgent(agent.id, mutualAgentIds);
             
             if availableBalance >= amount

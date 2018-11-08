@@ -34,7 +34,8 @@ classdef Agent < handle
             % Use cells since we expect paths to be of unequal length
             allPaths = {};
             
-            % Check for a direct connection
+            % Check for a direct connection, if it exists, that's all we
+            % need
             if obj.areWeConnected(AM, targetAgentId)
                 allPaths = {[obj.id targetAgentId]};
                 fprintf("\nAgents are directly connected\n");
@@ -43,7 +44,7 @@ classdef Agent < handle
             
             % Start with my connections and recursively discover each 
             % neighbors uncommon connections thereby building the paths 
-            % to the target agent
+            % to the target agent, if there is one
             myConnections = obj.findMyConnections(AM);
             [~, indices] = size(myConnections);
             
