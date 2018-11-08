@@ -12,6 +12,17 @@ agent1 = Agent(1,birthday);
 
 AM = connectedGraph(8);
 
+fprintf("\nTest 1\n");
+
+targetAgentId = 8;
+paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
+agent1.logPaths(paths);
+
+fprintf("Expecting one path = [1 8]\n");
+%TODO add assert
+
+fprintf("\nTest 2\n");
+
 % A1 does not know A4, A5, A7 & A8
 AM(1,4) = 0;
 AM(4,1) = 0;
@@ -96,13 +107,18 @@ AM(4,8) = 0;
 AM(8,7) = 0;
 AM(7,8) = 0;
 
-% expecting 
-% 1 2 4 7
-% 1 3 4 7
-% 1 3 5 8
-% 1 6 7
-% 1 6 8
-
 targetAgentId = 8;
-agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
-agent1.ouputPaths();
+paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
+agent1.logPaths(paths);
+
+fprintf("Expecting 3 Paths");
+fprintf("[ 1 2 4 7 6 8 ]");
+fprintf("[ 1 3 5 8 ]");
+fprintf("[ 1 6 8 ]");
+
+fprintf("\nTest 3\n");
+
+targetAgentId = 7;
+paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
+agent1.logPaths(paths);
+

@@ -9,14 +9,13 @@ classdef Agent < handle
         id          uint32          % The agent id for this agent
         birthdate   uint32          % The birthdate for this agent = time dt
         wallet      CryptoWallet    % This agents wallet
-        allPaths                    % Possible network paths to sellers
     end
     
     properties (Constant)
-        maximumSearchLevels = 30;
+        maximumSearchLevels = 10;
     end
     
-    methods
+    methods (Access = public)
         
         function obj = Agent(id, timeStep)
             % AgentId must corresponds to a row id in an associated Agency Matrix
@@ -26,14 +25,21 @@ classdef Agent < handle
             obj.wallet = CryptoWallet(obj);
         end
         
-        function findAllNetworkPathsToAgent(obj, AM, targetAgentId)
+        function paths = findAllNetworkPathsToAgent(obj, AM, targetAgentId)
             % For this agent, find all possible network paths to the 
             % target agent, avoiding circular loops and limited by the 
             % maximum of search levels
             assert(targetAgentId ~= 0 && targetAgentId ~= obj.id,"Error, invalid targetAgentId");
             
             % Use cells since we expect paths to be of unequal length
-            obj.allPaths = {}; 
+            paths = {}; 
+            
+            % Check for a direct connection
+            if obj.isThisAgentCompletelyConnected(AM)
+                paths = {[obj.id targetAgentId]};
+                fprintf("\nAgent is completely connectd\n");
+                return;
+            end
             
             % Start with my connections and recursively discover each 
             % neighbors uncommon connections thereby building the paths 
@@ -44,23 +50,42 @@ classdef Agent < handle
             for index = 1:indices
                 connection = myConnections(index);
                 % TODO - if totally connected, take shortcut
-                obj.findNextNetworkConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId);
+                paths = [paths ; obj.findNextNetworkConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId, paths)];
             end
         end
-        
-        function findNextNetworkConnection(obj, AM, searchLevel, currentPath, thisAgentId, thatAgentId, targetAgentId)
+                                
+        function result = isThisAgentCompletelyConnected(obj, AM)
+            % Is this agent connected to everybody?
+            result = false;
+            [~, connections] = size(obj.findMyConnections(AM));
+            [~, possibleConnections] = size(AM);
+            if connections == (possibleConnections - 1)
+                result = true;
+            end
+        end
+
+        function connections = findMyConnections(obj, AM)
+            % Return the index number of my connections using the Adjacency
+            % Matrix
+            connections = find(AM(obj.id,:) ~= 0);
+        end
+                
+    end
+    
+    methods (Access = private)
+
+       function paths = findNextNetworkConnection(obj, AM, searchLevel, currentPath, thisAgentId, thatAgentId, targetAgentId, paths)
             % Recursively explore any uncommon connections between
             % thisAgentId and thatAgentId until the targetAgentId is found
             % or we run out of uncommon connections (and ensureing we do
             % not traverse the object agent (obj.id))
             
-            fprintf("\nStarting Path = [");
-            fprintf(" %d ", currentPath);
-            fprintf("]\nAgents: This = %d, That = %d, Target = %d, Search Level = %d\n\n", thisAgentId, thatAgentId, targetAgentId, searchLevel);
+            logIntegerArray("Starting Path", currentPath)
+            fprintf("Agents: This = %d, That = %d, Target = %d, Search Level = %d\n\n", thisAgentId, thatAgentId, targetAgentId, searchLevel);
             
             if thatAgentId == targetAgentId
                 % Found it, we are done!
-                obj.allPaths = [obj.allPaths ; {currentPath}];
+                paths = currentPath;
                 fprintf("!!!! Done: Found Target Agent = %d !!!!\n\n",targetAgentId);
                 return;
             end
@@ -80,14 +105,12 @@ classdef Agent < handle
             uncommonConnections = obj.removeBuyerIfExists(obj.findAgentsUncommonConnections(AM, thisAgentId, thatAgentId));
             [~, indices] = size(uncommonConnections);
             if indices > 0 
-                fprintf("----Uncommon Connections = [");
-                fprintf(" %d ", uncommonConnections);
-                fprintf("]\n");
+                logIntegerArray("---- Uncommon Connections", uncommonConnections)
                 for index = 1:indices
                     nextAgent = uncommonConnections(index);
-                    fprintf("----Searching Uncommon Connection = %d\n",nextAgent);
+                    fprintf("---- Searching Uncommon Connection = %d\n",nextAgent);
                     nextPathSegment = [currentPath , nextAgent];
-                    obj.findNextNetworkConnection(AM, searchLevel, nextPathSegment, thatAgentId, nextAgent, targetAgentId);
+                    paths = obj.findNextNetworkConnection(AM, searchLevel, nextPathSegment, thatAgentId, nextAgent, targetAgentId, paths);
                 end
             else
                 % No luck, go home empty handed
@@ -95,54 +118,26 @@ classdef Agent < handle
                 return;
             end
         end
-        
-        function result = removeBuyerIfExists(obj, uncommonConnections)
+
+       function result = removeBuyerIfExists(obj, uncommonConnections)
             % Remove this agent (the buyer) from the list, if present.
             % This prevents infinite looping should a circle of connections
             % exist (e.g A to B to C to D to A).
+            
             result = uncommonConnections;
+            
+            [~, indices] = size(uncommonConnections);
+            if indices == 0
+                % Case of no connections at all
+                return;
+            end
+            
             indexOfMe = find(uncommonConnections(1,:) == obj.id);
             if indexOfMe > 0
                 result(indexOfMe) = [];
             end
-        end
-        
-        %
-        % Algorithm: Sum two rows of the Adjancey Matrix and any element
-        % that is equal to 2 is a mutual connection.
-        %
-        function mutualConnections = findMutualConnectionsWithAgent(obj, AM, otherAgentId)
-            % Return common connections this agent shares with another.
-            % The mutualConnections array contains the index numbers of
-            % other agents in the Agency Matrix and excludes the other
-            % agent.
-            mutualConnections = find((AM(obj.id,:) + AM(otherAgentId,:)) == 2);
-        end
-        
-        
-        function connections = findMyConnections(obj,AM)
-            % Return the index number of my connections using the Adjacency
-            % Matrix
-            connections = find(AM(obj.id,:) ~= 0);
-        end
-        
-        function ouputPaths(obj)
-            % Output all paths to the console
-            thePaths = obj.allPaths;
-            [totPaths, ~] = size(thePaths);
-            fprintf("\nThere are %d total paths\n", totPaths);
-            for i = 1:totPaths
-                fprintf("\nPath = %d\n",i);
-                aPath = cell2mat(thePaths(i,1));
-                [~, segments] = size(aPath);
-                fprintf("Path = ");
-                for j = 1:segments
-                    fprintf(" %d ",aPath(1,j));
-                end
-                fprintf("\n");
-            end
-        end
-        
+       end
+       
     end
     
     methods (Static)
@@ -152,7 +147,18 @@ classdef Agent < handle
             % Adjacency Matrix
             connections = find(AM(agentId,:) ~= 0);
         end
-        
+                
+        % Algorithm: Sum two rows of the Adjancey Matrix and any element
+        % that is equal to 2 is a mutual connection.
+        %
+        function mutualConnections = findMutualConnectionsWithAgent(AM, thisAgent, thatAgentId)
+            % Return common connections this agent shares with another 
+            % (that agent). The mutualConnections array contains the index 
+            % numbers of other agents in the Agency Matrix and excludes 
+            % the other agent.
+            mutualConnections = find((AM(thisAgent,:) + AM(thatAgentId,:)) == 2);
+        end
+
         %
         % Algorithm: Subtract other agents connections from mine using the
         % Agency Matrix. The uncommon agents will correspond to those 
@@ -177,6 +183,20 @@ classdef Agent < handle
             % index ids of other agents in the Adjacency Matrix. 
             uncommonConnections = find((AM(thisAgentId,:) - AM(thatAgentId,:)) == 1);
             uncommonConnections = uncommonConnections(uncommonConnections ~= thatAgentId);
+        end
+
+        function logPaths(paths)
+            % Output all paths to the console (format is a cell array with
+            % each element being an integer array signifying a path through
+            % the network from one agent to another and the path lentghs
+            % are expected to be different).
+            [totPaths, ~] = size(paths);
+            fprintf("\nThere are %d total paths\n", totPaths);
+            for i = 1:totPaths
+                fprintf("\nPath = %d\n",i);
+                aPath = cell2mat(paths(i,1));
+                logIntegerArray("Path",aPath);
+            end
         end
 
     end
