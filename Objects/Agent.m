@@ -30,23 +30,23 @@ classdef Agent < handle
             % target agent, avoiding circular loops and limited by the 
             % maximum of search levels. Sort results from shortest path to
             % the longest path
-            assert(targetAgentId ~= 0 && targetAgentId ~= obj.id,"Error, invalid targetAgentId");
+            assert(targetAgentId ~= 0 && targetAgentId ~= obj.id,"Error, Invalid targetAgentId");
             
             % Use cells since we expect paths to be of unequal length
             allPaths = {};
             
-            % Check for a direct connection, if it exists, that's all we
-            % need (because anthing more complicated buy / sell situation 
-            % will fail too)
+            % Check for a direct connection. If it exists, that's all we
+            % need (because if the direct connection fails then all more 
+            % complicated paths will fail in a buy / sell situation too)
             if obj.areWeConnected(AM, targetAgentId)
                 allPaths = {[obj.id targetAgentId]};
                 fprintf("\nAgents are directly connected\n");
                 return;
             end
             
-            % Start with my connections and recursively discover each 
-            % neighbors uncommon connections thereby building the paths 
-            % to the target agent, if there is one.
+            % Start with my connections (obj.id) and recursively discover 
+            % each neighbors uncommon connections thereby building the 
+            % paths to the target agent, if there is a path.
             myConnections = obj.findMyConnections(AM);
             [~, indices] = size(myConnections);
             
@@ -79,8 +79,8 @@ classdef Agent < handle
         end
 
         function connections = findMyConnections(obj, AM)
-            % Return the index number of my connections using the Adjacency
-            % Matrix
+            % Return the index number of my connections using the 
+            % Adjacency Matrix
             connections = find(AM(obj.id,:) ~= 0);
         end
                 
@@ -170,39 +170,43 @@ classdef Agent < handle
             connections = find(AM(agentId,:) ~= 0);
         end
                 
-        % Algorithm: Sum two rows of the Adjancey Matrix and any element
-        % that is equal to 2 is a mutual connection.
-        %
         function mutualConnections = findMutualConnectionsWithAgent(AM, thisAgent, thatAgentId)
             % Return common connections this agent shares with another 
             % (that agent). The mutualConnections array contains the index 
             % numbers of other agents in the Agency Matrix and excludes 
             % the other agent.
+            
+            %
+            % Algorithm: Sum two rows of the Adjancey Matrix and any element
+            % that is equal to 2 is a mutual connection.
+            %
             mutualConnections = find((AM(thisAgent,:) + AM(thatAgentId,:)) == 2);
         end
 
-        %
-        % Algorithm: Subtract other agents connections from mine using the
-        % Agency Matrix. The uncommon agents will correspond to those 
-        % possessing a quantity of +1 (excluding me)
-        %
         function uncommonConnections = findAgentsUncommonConnections(AM, thisAgentId, thatAgentId)
             % Return the uncommon connections that agent posseses from
             % this agent. The uncommonConnections array contains the 
             % index ids of other agents in the Adjacency Matrix. 
+
+            %
+            % Algorithm: Subtract other agents connections from mine using the
+            % Agency Matrix. The uncommon agents will correspond to those 
+            % possessing a quantity of +1 (excluding me)
+            %
             uncommonConnections = find((AM(thatAgentId,:) - AM(thisAgentId,:)) == 1);
             uncommonConnections = uncommonConnections(uncommonConnections ~= thisAgentId);
         end
 
-        %
-        % Algorithm: Subtract my connections from the other agents using 
-        % the Agency Matrix. The uncommon agents will correspond to those 
-        % possessing a quantity of +1 (excluding the agent being tested)
-        %
         function uncommonConnections = findMyUncommonConnectionsFromAgent(AM, thisAgentId, thatAgentId)
             % Return the uncommon connections this agent possesses from
             % that agent. The uncommonConnections array contains the 
             % index ids of other agents in the Adjacency Matrix. 
+
+            %
+            % Algorithm: Subtract my connections from the other agents using 
+            % the Agency Matrix. The uncommon agents will correspond to those 
+            % possessing a quantity of +1 (excluding the agent being tested)
+            %
             uncommonConnections = find((AM(thisAgentId,:) - AM(thatAgentId,:)) == 1);
             uncommonConnections = uncommonConnections(uncommonConnections ~= thatAgentId);
         end
