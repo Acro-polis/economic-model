@@ -18,7 +18,7 @@ classdef Polis < handle
     methods (Access = public)
         
         function obj = Polis(AM, birthday)
-            % Assign the adjacency matrix and instantiate the agents
+            % Zeus assigns the adjacency matrix and instantiates the agents
             obj.AM = AM;
             [rows, ~] = size(AM);
             for row = 1:rows

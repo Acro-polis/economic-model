@@ -64,7 +64,13 @@ Buying - adding currency
             %
             % Find the unique set of agent currency types
             %
-            agentIds = unique(cell2mat(get(obj.transactions,'currencyAgentId')));
+            agentIds = get(obj.transactions,'currencyAgentId');
+            if iscell(agentIds)
+                agentIds = unique(cell2mat(agentIds));
+            else
+                % Case one transaction only
+                agentIds = unique(agentIds);
+            end
             
             %
             % Loop over each type and apply demurrage

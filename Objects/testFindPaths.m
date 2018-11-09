@@ -186,7 +186,7 @@ timestep = birthday + 1;
 result = agent8.wallet.submitPurchase(10.0, AM, paths, targetAgentId, timestep);
 
 timestep = timestep + 1;
-%polis.applyDemurrage(timestep);
+polis.applyDemurrage(timestep);
 
 agent8.wallet.dump;
 
