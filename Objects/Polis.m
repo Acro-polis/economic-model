@@ -35,10 +35,18 @@ classdef Polis < handle
         end
         
         function applyDemurrage(obj, timestep)
-            % Apply Demurrage to all agents
+            % Apply Demurrage to all agents using the default percentage
              [rows, ~] = size(obj.AM);
              for row = 1:rows
                 obj.agents(row).wallet.applyDemurrage(Polis.PercentDemurage, timestep);
+             end
+        end
+        
+        function applyDemurrageWithPercentage(obj, percentage, timestep)
+            % Apply Demurrage to all agents using a specified percentage
+             [rows, ~] = size(obj.AM);
+             for row = 1:rows
+                obj.agents(row).wallet.applyDemurrage(percentage, timestep);
              end
         end
         
