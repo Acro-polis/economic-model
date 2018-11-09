@@ -7,10 +7,10 @@
 % Created: 2018.11.5
 %=====================================================
 
-birthday = 1;
-agent1 = Agent(1,birthday);
-
 AM = connectedGraph(8);
+birthday = 1;
+polis = Polis(AM, birthday);
+agent1 = polis.agents(1);
 
 fprintf("\nTest 1\n");
 
@@ -18,8 +18,10 @@ targetAgentId = 8;
 paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent1.logPaths(paths);
 
-fprintf("Expecting one path = [1 8]\n");
 %TODO add assert
+fprintf("Expecting one path = [1 8]\n");
+
+fprintf("\nTest 2\n");
 
 % A1 does not know A4, A5, A7 & A8
 AM(1,4) = 0;
@@ -37,9 +39,7 @@ AM(3,2) = 0;
 AM(2,5) = 0;
 AM(5,2) = 0;
 AM(2,6) = 0;
-AM(6,2) = 0;
 AM(2,7) = 0;
-AM(7,2) = 0;
 AM(2,8) = 0;
 AM(8,2) = 0;
 
@@ -59,7 +59,6 @@ AM(1,4) = 0;
 AM(4,5) = 0;
 AM(5,4) = 0;
 AM(4,6) = 0;
-AM(6,4) = 0;
 AM(4,8) = 0;
 AM(8,4) = 0;
 
@@ -105,13 +104,15 @@ AM(4,8) = 0;
 AM(8,7) = 0;
 AM(7,8) = 0;
 
-fprintf("\nTest 2\n");
+polis.delete;
+polis = Polis(AM, birthday);
+polis.depositUBI(100.0, birthday);
 
 paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent1.logPaths(paths);
 
-fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
 %TODO add asserts
+fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
 
 fprintf("\nTest 3\n");
 
@@ -119,8 +120,8 @@ targetAgentId = 7;
 paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent1.logPaths(paths);
 
-fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
 %TODO add asserts
+fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
 
 fprintf("\nTest 4\n");
 
@@ -128,8 +129,8 @@ targetAgentId = 6;
 paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent1.logPaths(paths);
 
-fprintf("\nExpecting 1 Paths To Agent %d\n", targetAgentId);
 %TODO add asserts
+fprintf("\nExpecting 1 Paths To Agent %d\n", targetAgentId);
 
 fprintf("\nTest 5\n");
 
@@ -137,8 +138,8 @@ targetAgentId = 5;
 paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent1.logPaths(paths);
 
-fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
 %TODO add asserts
+fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
 
 fprintf("\nTest 6\n");
 
@@ -146,8 +147,8 @@ targetAgentId = 4;
 paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent1.logPaths(paths);
 
-fprintf("\nExpecting 5 Paths To Agent %d\n", targetAgentId);
 %TODO add asserts
+fprintf("\nExpecting 5 Paths To Agent %d\n", targetAgentId);
 
 fprintf("\nTest 7\n");
 
@@ -155,8 +156,8 @@ targetAgentId = 3;
 paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent1.logPaths(paths);
 
-fprintf("\nExpecting 1 Paths To Agent %d\n", targetAgentId);
 %TODO add asserts
+fprintf("\nExpecting 1 Paths To Agent %d\n", targetAgentId);
 
 fprintf("\nTest 8\n");
 
@@ -164,20 +165,32 @@ targetAgentId = 2;
 paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent1.logPaths(paths);
 
-fprintf("\nExpecting 1 Paths To Agent %d\n", targetAgentId);
 %TODO add asserts
+fprintf("\nExpecting 1 Paths To Agent %d\n", targetAgentId);
 
 fprintf("\nTest 9\n");
 
-agent8 = Agent(8,birthday);
+agent8 = polis.agents(8);
 targetAgentId = 1;
 paths = agent8.findAllNetworkPathsToAgent(AM, targetAgentId);
 agent8.logPaths(paths);
 
-fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
 %TODO add asserts
+fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
 
-% ------
+% -----------------------
+
+fprintf("\nTest 10 - Submit a purchase\n");
+
+timestep = birthday + 1;
+result = agent8.wallet.submitPurchase(10.0, AM, paths, targetAgentId, timestep);
+
+timestep = timestep + 1;
+%polis.applyDemurrage(timestep);
+
+agent8.wallet.dump;
+
+
 
 
 

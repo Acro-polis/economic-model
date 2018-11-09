@@ -5,9 +5,43 @@ classdef Polis < handle
 % Created by Jess 10.26.18
 %================================================================
 
+    properties (SetAccess = private)
+        AM          % The system adjacency matrix
+        agents      % Array of all agents
+    end
+
     properties (Constant)
         PolisId = 999 
         PercentDemurage = 0.05
+    end
+    
+    methods (Access = public)
+        
+        function obj = Polis(AM, birthday)
+            % Assign the adjacency matrix and instantiate the agents
+            obj.AM = AM;
+            [rows, ~] = size(AM);
+            for row = 1:rows
+                obj.agents = [obj.agents ; Agent(row, birthday)];
+            end
+        end
+    
+        function depositUBI(obj, amount, timestep)
+            % Deposit an amount of UBI to all agents
+             [rows, ~] = size(obj.AM);
+             for row = 1:rows
+                 obj.agents(row).wallet.depositUBI(amount, timestep);
+             end
+        end
+        
+        function applyDemurrage(obj, timestep)
+            % Apply Demurrage to all agents
+             [rows, ~] = size(obj.AM);
+             for row = 1:rows
+                obj.agents(row).wallet.applyDemurrage(Polis.PercentDemurage, timestep);
+             end
+        end
+        
     end
     
     methods (Static)
@@ -17,5 +51,3 @@ classdef Polis < handle
         end
     end
 end
-
-

@@ -16,7 +16,7 @@ classdef Agent < handle
     end
     
     methods (Access = public)
-        
+
         function obj = Agent(id, timeStep)
             % AgentId must corresponds to a row id in an associated Agency Matrix
             assert(id ~= Polis.PolisId,'Error: Agent Id equals reserved PolisId!');
