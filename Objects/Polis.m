@@ -38,7 +38,7 @@ classdef Polis < handle
             % Apply Demurrage to all agents using the default percentage
              [rows, ~] = size(obj.AM);
              for row = 1:rows
-                obj.agents(row).wallet.applyDemurrage(Polis.PercentDemurage, timestep);
+                obj.agents(row).applyDemurrage(Polis.PercentDemurage, timestep);
              end
         end
         

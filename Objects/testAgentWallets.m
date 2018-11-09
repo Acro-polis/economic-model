@@ -17,9 +17,9 @@ agent1 = Agent(1, time);
 agent2 = Agent(2, time);
 agent3 = Agent(3, time);
 
-agent1.wallet.depositUBI(500,time);
-agent2.wallet.depositUBI(500,time);
-agent3.wallet.depositUBI(500,time);
+agent1.depositUBI(500,time);
+agent2.depositUBI(500,time);
+agent3.depositUBI(500,time);
 
 % A1 buys from A2
 agent1.wallet.submitPurchaseWithDirectConnection(100, AM, agent2, time);
@@ -55,9 +55,9 @@ agent3.wallet.dump();
 time = 2;
 fprintf("\nTest Agent Wallets: time = %d\n",time);
 
-agent1.wallet.applyDemurrage(Polis.PercentDemurage,time);
-agent2.wallet.applyDemurrage(Polis.PercentDemurage,time);
-agent3.wallet.applyDemurrage(Polis.PercentDemurage,time);
+agent1.applyDemurrage(Polis.PercentDemurage,time);
+agent2.applyDemurrage(Polis.PercentDemurage,time);
+agent3.applyDemurrage(Polis.PercentDemurage,time);
 
 % Test / Output Results
 

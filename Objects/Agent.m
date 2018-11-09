@@ -11,6 +11,9 @@ classdef Agent < handle
         wallet      CryptoWallet    % This agents wallet
     end
     
+    properties (GetAccess = private)
+    end
+    
     properties (Constant)
         maximumSearchLevels = 10;
     end
@@ -24,6 +27,10 @@ classdef Agent < handle
             obj.birthdate = timeStep;
             obj.wallet = CryptoWallet(obj);
         end
+               
+        %
+        % Network exploration methods
+        %
         
         function allPaths = findAllNetworkPathsToAgent(obj, AM, targetAgentId)
             % For this agent, find all possible network paths to the 
@@ -84,6 +91,20 @@ classdef Agent < handle
             connections = find(AM(obj.id,:) ~= 0);
         end
                 
+        %
+        % Wallet: Wrappers
+        %
+        
+        function depositUBI(obj, amount, timeStep)
+            % Deposit UBI
+            obj.wallet.depositUBI(amount, timeStep);
+        end
+        
+        function applyDemurrage(obj, percentage, timeStep)
+            % Apply Demurrage
+            obj.wallet.applyDemurrage(percentage, timeStep);
+        end
+        
     end
     
     methods (Access = private)

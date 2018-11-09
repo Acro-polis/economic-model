@@ -18,10 +18,10 @@ AM = connectedGraph(4);
 
 fprintf("\nTesting with Connected Graph of 4 Agents\n\n");
 
-agent1.wallet.depositUBI(100.0, time);
-agent2.wallet.depositUBI(100.0, time);
-agent3.wallet.depositUBI(100.0, time);
-agent4.wallet.depositUBI(100.0, time);
+agent1.depositUBI(100.0, time);
+agent2.depositUBI(100.0, time);
+agent3.depositUBI(100.0, time);
+agent4.depositUBI(100.0, time);
 
 % A1 buys from A2
 agent1.wallet.submitPurchaseWithDirectConnection(50, AM, agent2, time);
