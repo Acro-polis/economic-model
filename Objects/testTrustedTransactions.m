@@ -24,19 +24,19 @@ agent3.depositUBI(100.0, time);
 agent4.depositUBI(100.0, time);
 
 % A1 buys from A2
-Agent.submitPurchaseWithDirectConnection(AM, 50, agent1, agent2, time);
+agent1.submitPurchaseWithDirectConnection(AM, 50, agent2, time);
 
 mutualConnections = Agent.findMutualConnectionsWithAgent(AM, agent1.id, agent2.id);
 availableBalance1 = agent1.availableBalanceForTransactionWithAgent(agent2.id, mutualConnections);
-balances1 = agent1.wallet.individualBalancesForTransactionWithAgent(agent2.id, mutualConnections);
+balances1 = agent1.individualBalancesForTransactionWithAgent(agent2.id, mutualConnections);
 
 mutualConnections = Agent.findMutualConnectionsWithAgent(AM, agent2.id, agent1.id);
 availableBalance2 = agent2.availableBalanceForTransactionWithAgent(agent1.id, mutualConnections);
-balances2 = agent2.wallet.individualBalancesForTransactionWithAgent(agent1.id, mutualConnections);
+balances2 = agent2.individualBalancesForTransactionWithAgent(agent1.id, mutualConnections);
 
 fprintf("Available balance of agent 1 to transact with agent 2 = %.2f\n",availableBalance1);
-agent1.wallet.dump;
+agent1.dumpLedger;
 fprintf("\nAvailable balance of agent 2 to transact with agent 1 = %.2f\n",availableBalance2);
-agent2.wallet.dump;
+agent2.dumpLedger;
 
 

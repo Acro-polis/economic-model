@@ -8,11 +8,10 @@ classdef Agent < handle
     properties (SetAccess = private)
         id          uint32          % The agent id for this agent
         birthdate   uint32          % The birthdate for this agent = time dt
-        wallet      CryptoWallet    % This agents wallet
     end
     
     properties (GetAccess = private, SetAccess = private)
-        % TODO - make wallet private
+        wallet      CryptoWallet    % This agents wallet
     end
     
     properties (Constant)
@@ -117,13 +116,30 @@ classdef Agent < handle
             balance = obj.wallet.availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
         end
 
-
         function [agentIds, balances] = individualBalancesForTransactionWithAgent(obj, thatAgentId, mutualAgentIds)
             % Return the currency agents and their individual balances that
             % thatAgent will accept for a transaction
-            % TODO - fully implementing this causes an infinite loop. Opps
-            % need to figure this out to make the wallet private
-            [agentIds, balances] = obj.individualBalancesForTransactionWithAgent(thatAgentId, mutualAgentIds);
+            [agentIds, balances] = obj.wallet.individualBalancesForTransactionWithAgent(thatAgentId, mutualAgentIds);
+        end
+        
+        function transacted = submitPurchaseWithDirectConnection(obj, AM, amount, thatAgent, timeStep)
+            % submit a purchase transaction between two directly connected
+            % agents
+            % TODO - assert they are connected
+            transacted = obj.wallet.submitPurchaseWithDirectConnection(AM, amount, thatAgent, timeStep);
+        end
+
+        function transacted = submitPurchase(obj, AM, paths, amount, targetAgentId, timeStep)
+            % Submit a purachase - work in progress
+            transacted = obj.wallet.submitPurchase(AM, paths, amount, targetAgentId, timeStep);
+        end
+                    
+        function addTransaction(obj, transaction)
+            % Submit a transaction to be added to the agents wallet. Note
+            % this should never be called except by code written within the
+            % wallet. Someday I'll figure out how to close this hole, or
+            % not. TODO!
+            obj.wallet.addTransaction(transaction);
         end
         
         function dumpLedger(obj)
@@ -134,14 +150,7 @@ classdef Agent < handle
     end
         
     methods (Static)
-        
-        function transacted = submitPurchaseWithDirectConnection(AM, amount, thisAgent, thatAgent, timeStep)
-            % submit a purchase transaction between two directly connected
-            % agents
-            % TODO - assert they are connected
-            transacted = CryptoWallet.submitPurchaseWithDirectConnection(AM, amount, thisAgent, thatAgent, timeStep);
-        end
-        
+                
         function paths = sortPaths(paths)
             % Order the the network paths shortest length to longest length
             % (the expected format is that which is returned from 

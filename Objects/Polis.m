@@ -30,7 +30,7 @@ classdef Polis < handle
             % Deposit an amount of UBI to all agents
              [rows, ~] = size(obj.AM);
              for row = 1:rows
-                 obj.agents(row).wallet.depositUBI(amount, timestep);
+                 obj.agents(row).depositUBI(amount, timestep);
              end
         end
         
@@ -46,7 +46,7 @@ classdef Polis < handle
             % Apply Demurrage to all agents using a specified percentage
              [rows, ~] = size(obj.AM);
              for row = 1:rows
-                obj.agents(row).wallet.applyDemurrage(percentage, timestep);
+                obj.agents(row).applyDemurrage(percentage, timestep);
              end
         end
         

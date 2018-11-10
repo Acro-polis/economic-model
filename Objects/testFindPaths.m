@@ -183,12 +183,13 @@ fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
 fprintf("\nTest 10 - Submit a purchase\n");
 
 timestep = birthday + 1;
-result = agent8.wallet.submitPurchase(10.0, AM, paths, targetAgentId, timestep);
+result = agent8.submitPurchase(AM, paths, 10.0, targetAgentId, timestep);
 
 timestep = timestep + 1;
 polis.applyDemurrageWithPercentage(0.95, timestep);
-agent8.wallet.dump;
-result = agent8.wallet.submitPurchase(10.0, AM, paths, targetAgentId, timestep);
+agent8.dumpLedger();
+
+result = agent8.submitPurchase(AM, paths, 10.0, targetAgentId, timestep);
 
 
 
