@@ -219,7 +219,7 @@ Buying - adding currency
             % another using currencies from all mutual connections, that
             % agents curreny and ones own currency.
             mutualAgentIds = thisAgent.findMutualConnectionsWithAgent(AM, thisAgent.id, thatAgent.id);
-            availableBalance = thisAgent.wallet.availableBalanceForTransactionWithAgent(thatAgent.id, mutualAgentIds);
+            availableBalance = thisAgent.availableBalanceForTransactionWithAgent(thatAgent.id, mutualAgentIds);
 
             if availableBalance >= amount
                 % Commit the transaction

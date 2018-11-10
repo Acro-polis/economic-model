@@ -12,6 +12,8 @@ classdef Agent < handle
     end
     
     properties (GetAccess = private)
+        % TODO - make wallet private
+        %wallet      CryptoWallet    % This agents wallet
     end
     
     properties (Constant)
@@ -105,82 +107,37 @@ classdef Agent < handle
             obj.wallet.applyDemurrage(percentage, timeStep);
         end
         
-    end
-    
-    methods (Access = private)
-
-       function paths = findNextNetworkConnection(obj, AM, searchLevel, currentPath, thisAgentId, thatAgentId, targetAgentId, paths)
-            % Recursively explore any uncommon connections between
-            % thisAgentId and thatAgentId until the targetAgentId is found
-            % or we run out of uncommon connections (and ensureing we do
-            % not traverse the object agent (obj.id))
-            
-            logIntegerArray("Starting Path", currentPath)
-            fprintf("Agents: This = %d, That = %d, Target = %d, Search Level = %d\n\n", thisAgentId, thatAgentId, targetAgentId, searchLevel);
-            
-            if thatAgentId == targetAgentId
-                % Found it, we are done!
-                paths = [paths ; {currentPath}];
-                fprintf("!!!! Done: Found Target Agent = %d !!!!\n\n",targetAgentId);
-                return;
-            end
-            
-            % If we run out of uncommon connections before we find the
-            % target then we are out of luck, they are not connected and we
-            % return (see below). Same if we run out of search levels
-            if searchLevel > Agent.maximumSearchLevels
-                % No luck, go home empty handed
-                fprintf("**** Abandon Ship - Max Level Reached ****\n\n");
-                return;
-            else
-                searchLevel = searchLevel + 1;
-            end
-            
-            % Find the uncommon connections (remove this agent (obj.id), if it exists)
-            uncommonConnections = obj.removeMeIfIAmPresent(obj.findAgentsUncommonConnections(AM, thisAgentId, thatAgentId));
-            [~, indices] = size(uncommonConnections);
-            if indices > 0 
-                logIntegerArray("---- Uncommon Connections", uncommonConnections)
-                for index = 1:indices
-                    nextAgent = uncommonConnections(index);
-                    fprintf("---- Searching Uncommon Connection = %d\n",nextAgent);
-                    nextPathSegment = [currentPath , nextAgent];
-                    paths = obj.findNextNetworkConnection(AM, searchLevel, nextPathSegment, thatAgentId, nextAgent, targetAgentId, paths);
-                end
-            else
-                % No luck, go home empty handed
-                fprintf("**** Abandon Ship - No More Uncommon Connections ****\n\n");
-                return;
-            end
+        function balance = currentBalanceAllCurrencies(obj)
+            % Return current balance all currencies
+            balance = obj.wallet.currentBalanceAllCurrencies;
+        end
+        
+        function balance = availableBalanceForTransactionWithAgent(obj, thatAgentId, mutualAgentIds)
+            % Return the available balance for a proposed transaction with
+            % thatAgent
+            balance = obj.wallet.availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
         end
 
-       function result = removeMeIfIAmPresent(obj, uncommonConnections)
-            % Remove this agent (me, the buyer) from the list, if present.
-            % This prevents infinite looping should a circle of connections
-            % exist (for example: A to B to C to D to A).
-            
-            result = uncommonConnections;
-            
-            [~, indices] = size(uncommonConnections);
-            if indices == 0
-                % Case of no connections at all
-                return;
-            end
-            
-            indexOfMe = find(uncommonConnections(1,:) == obj.id);
-            if indexOfMe > 0
-                result(indexOfMe) = [];
-            end
-       end
-       
+
+        function [agentIds, balances] = individualBalancesForTransactionWithAgent(obj, thatAgentId, mutualAgentIds)
+            % Return the currency agents and their individual balances that
+            % thatAgent will accept for a transaction
+            [agentIds, balances] = obj.individualBalancesForTransactionWithAgent(thatAgentId, mutualAgentIds);
+        end
+        
+        function dumpLedger(obj)
+            % Write the contents of the wallet's ledger to the console
+            obj.wallet.dump;
+        end
+        
     end
-    
+        
     methods (Static)
         
         function transacted = submitPurchaseWithDirectConnection(AM, amount, thisAgent, thatAgent, timeStep)
             % submit a purchase transaction between two directly connected
             % agents
-            % TODO - ensure they are connected
+            % TODO - assert they are connected
             transacted = CryptoWallet.submitPurchaseWithDirectConnection(AM, amount, thisAgent, thatAgent, timeStep);
         end
         
@@ -255,5 +212,73 @@ classdef Agent < handle
 
     end
 
+    methods (Access = private)
+
+       function paths = findNextNetworkConnection(obj, AM, searchLevel, currentPath, thisAgentId, thatAgentId, targetAgentId, paths)
+            % Recursively explore any uncommon connections between
+            % thisAgentId and thatAgentId until the targetAgentId is found
+            % or we run out of uncommon connections (and ensureing we do
+            % not traverse the object agent (obj.id))
+            
+            logIntegerArray("Starting Path", currentPath)
+            fprintf("Agents: This = %d, That = %d, Target = %d, Search Level = %d\n\n", thisAgentId, thatAgentId, targetAgentId, searchLevel);
+            
+            if thatAgentId == targetAgentId
+                % Found it, we are done!
+                paths = [paths ; {currentPath}];
+                fprintf("!!!! Done: Found Target Agent = %d !!!!\n\n",targetAgentId);
+                return;
+            end
+            
+            % If we run out of uncommon connections before we find the
+            % target then we are out of luck, they are not connected and we
+            % return (see below). Same if we run out of search levels
+            if searchLevel > Agent.maximumSearchLevels
+                % No luck, go home empty handed
+                fprintf("**** Abandon Ship - Max Level Reached ****\n\n");
+                return;
+            else
+                searchLevel = searchLevel + 1;
+            end
+            
+            % Find the uncommon connections (remove this agent (obj.id), if it exists)
+            uncommonConnections = obj.removeMeIfIAmPresent(obj.findAgentsUncommonConnections(AM, thisAgentId, thatAgentId));
+            [~, indices] = size(uncommonConnections);
+            if indices > 0 
+                logIntegerArray("---- Uncommon Connections", uncommonConnections)
+                for index = 1:indices
+                    nextAgent = uncommonConnections(index);
+                    fprintf("---- Searching Uncommon Connection = %d\n",nextAgent);
+                    nextPathSegment = [currentPath , nextAgent];
+                    paths = obj.findNextNetworkConnection(AM, searchLevel, nextPathSegment, thatAgentId, nextAgent, targetAgentId, paths);
+                end
+            else
+                % No luck, go home empty handed
+                fprintf("**** Abandon Ship - No More Uncommon Connections ****\n\n");
+                return;
+            end
+        end
+
+       function result = removeMeIfIAmPresent(obj, uncommonConnections)
+            % Remove this agent (me, the buyer) from the list, if present.
+            % This prevents infinite looping should a circle of connections
+            % exist (for example: A to B to C to D to A).
+            
+            result = uncommonConnections;
+            
+            [~, indices] = size(uncommonConnections);
+            if indices == 0
+                % Case of no connections at all
+                return;
+            end
+            
+            indexOfMe = find(uncommonConnections(1,:) == obj.id);
+            if indexOfMe > 0
+                result(indexOfMe) = [];
+            end
+       end
+       
+    end
+    
 end
 
