@@ -9,7 +9,8 @@
 
 AM = connectedGraph(8);
 birthday = 1;
-polis = Polis(AM, birthday);
+polis = Polis(AM);
+polis.createAgents(birthday);
 agent1 = polis.agents(1);
 
 fprintf("\nTest 1\n");
@@ -105,7 +106,8 @@ AM(8,7) = 0;
 AM(7,8) = 0;
 
 polis.delete;
-polis = Polis(AM, birthday);
+polis = Polis(AM);
+polis.createAgents(birthday);
 polis.depositUBI(100.0, birthday);
 
 paths = agent1.findAllNetworkPathsToAgent(AM, targetAgentId);
@@ -182,14 +184,17 @@ fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
 
 fprintf("\nTest 10 - Submit a purchase\n");
 
-timestep = birthday + 1;
-result = agent8.submitPurchase(AM, paths, 10.0, targetAgentId, timestep);
+path = agent8.findAValidPathForTheTransactionAmount(AM, paths, 99.0);
+path
 
-timestep = timestep + 1;
-polis.applyDemurrageWithPercentage(0.95, timestep);
-agent8.dumpLedger();
-
-result = agent8.submitPurchase(AM, paths, 10.0, targetAgentId, timestep);
+% timestep = birthday + 1;
+% result = agent8.submitPurchase(AM, paths, 10.0, targetAgentId, timestep);
+% 
+% timestep = timestep + 1;
+% polis.applyDemurrageWithPercentage(0.95, timestep);
+% agent8.dumpLedger();
+% 
+% result = agent8.submitPurchase(AM, paths, 10.0, targetAgentId, timestep);
 
 
 

@@ -17,15 +17,18 @@ classdef Polis < handle
     
     methods (Access = public)
         
-        function obj = Polis(AM, birthday)
+        function obj = Polis(AM)
             % Zeus assigns the adjacency matrix and instantiates the agents
             obj.AM = AM;
-            [rows, ~] = size(AM);
-            for row = 1:rows
-                obj.agents = [obj.agents ; Agent(row, birthday)];
-            end
         end
     
+        function createAgents(obj, birthday)
+            [rows, ~] = size(obj.AM);
+            for row = 1:rows
+                obj.agents = [obj.agents ; Agent(row, obj, birthday)];
+            end
+        end
+        
         function depositUBI(obj, amount, timestep)
             % Deposit an amount of UBI to all agents
              [rows, ~] = size(obj.AM);

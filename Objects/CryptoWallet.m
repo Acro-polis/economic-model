@@ -52,49 +52,12 @@ Buying - adding currency
         % Transactional Functions
         %
         
-        function transacted = submitPurchase(obj, AM, paths, amount, targetAgentId, timeStep)
+        function transacted = submitPurchase(obj, AM, path, amount, targetAgentId, timeStep)
             % Process a buy transaction, if possible - work in progress
             assert(obj.agent.id ~= targetAgentId,"Attempting a transaction with yourself - Preposterous!");
             % TODO - ensure ends of the paths correspond to the agent id's
             % of the agents in question.
             
-            %
-            % Loop through paths and segments, seeking one that works
-            % TODO - maybe this should be its own method
-            %
-            [~, indices] = size(paths);
-            path = [];
-            for index = 1:indices
-                path = cell2mat(paths(1, index));
-                logIntegerArray("Working on path",path);
-                [~, segments] = size(path);
-                pathHasBalance = true;
-                for segment = 2:segments
-                    thisAgentId = path(segment - 1);
-                    thatAgentId = path(segment);
-                    fprintf("Checking segment %d to %d\n",thisAgentId, thatAgentId);
-                    mutualAgentIds = obj.agent.findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId);
-                    availableBalance = obj.availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
-                    fprintf("Available Balance = %.2f, Amount = %.2f\n",availableBalance, amount);
-                    if availableBalance < amount
-                        fprintf("Path failed, no balance\n");
-                        pathHasBalance = false;
-                        break;
-                    end
-                end
-                if pathHasBalance
-                    fprintf("Path Passed - Let's use it\n");
-                    break;
-                end
-            end
-            
-            if isempty(path)
-                fprintf("All Paths Failed - Goodbye\n");
-                transacted = false;
-                return;
-            end
-            
-            % Okay, let's record the puchase
             [~, segments] = size(path);
             for segment = 2:segments
                 thisAgentId = path(segment - 1);
@@ -174,6 +137,7 @@ Buying - adding currency
         %
         % Balance Calculations
         %
+        
         function [agentIds, balances] = individualBalancesForTransactionWithAgent(obj, agentId, mutualAgentIds)
             % Return the balance for each individual currency from common
             % agents, the target agent (agentId) and oneself (obj.Id). 

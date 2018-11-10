@@ -12,7 +12,8 @@ time = 1;
 fprintf("\nTest Agent Wallets: time = %d\n\n",time);
 
 AM = connectedGraph(3);
-polis = Polis(AM, time);
+polis = Polis(AM);
+polis.createAgents(time);
 
 agent1 = polis.agents(1);
 agent2 = polis.agents(2);

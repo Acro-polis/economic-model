@@ -12,6 +12,7 @@ classdef Agent < handle
     
     properties (GetAccess = private, SetAccess = private)
         wallet      CryptoWallet    % This agents wallet
+        polis       Polis           % Store a reference to God
     end
     
     properties (Constant)
@@ -20,12 +21,13 @@ classdef Agent < handle
     
     methods (Access = public)
 
-        function obj = Agent(id, timeStep)
+        function obj = Agent(id, polis, timeStep)
             % AgentId must corresponds to a row id in an associated Agency Matrix
             assert(id ~= Polis.PolisId,'Error: Agent Id equals reserved PolisId!');
             obj.id = id;
             obj.birthdate = timeStep;
             obj.wallet = CryptoWallet(obj);
+            obj.polis = polis;
         end
                
         %
@@ -66,11 +68,44 @@ classdef Agent < handle
             allPaths = Agent.sortPaths(allPaths);
                                    
         end
-                                
+               
+        function selectedPath = findAValidPathForTheTransactionAmount(obj, AM, paths, amount)
+            % Return the first path that supports the transaction
+            selectedPath = [];
+            [~, indices] = size(paths);
+            for index = 1:indices
+                path = cell2mat(paths(1, index));
+                if obj.checkIfPathIsValid(AM, path, amount) 
+                    selectedPath = path;
+                end
+            end
+        end
+        
+        function pathIsGood = checkIfPathIsValid(obj, AM, path, amount)
+            % Determine if this path carries enough balance to support the
+            % transaction amount
+            pathIsGood = true;
+            logIntegerArray("Working on path",path);
+            [~, segments] = size(path);
+            for segment = 2:segments
+                thisAgentId = path(segment - 1);
+                thatAgentId = path(segment);
+                fprintf("Checking segment %d to %d\n",thisAgentId, thatAgentId);
+                mutualAgentIds = obj.findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId);
+                availableBalance = obj.polis.agents(thisAgentId).availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
+                fprintf("Available Balance = %.2f, Amount = %.2f\n",availableBalance, amount);
+                if availableBalance <= amount
+                    fprintf("Path failed, no balance\n");
+                    pathIsGood = false;
+                    break;
+                end
+            end
+        end
+        
         function result = areWeConnected(obj, AM, targetAgentId)
             % Is this agent directly connected to the target agent?
             result = false;
-            if AM(obj.id,targetAgentId) == 1
+            if AM(obj.id, targetAgentId) == 1
                 result = true;
             end
         end
@@ -125,7 +160,7 @@ classdef Agent < handle
         function transacted = submitPurchaseWithDirectConnection(obj, AM, amount, thatAgent, timeStep)
             % submit a purchase transaction between two directly connected
             % agents
-            % TODO - assert they are connected
+            assert(obj.areWeConnected(AM, thatAgent.id),"Error: Agents are not connected");
             transacted = obj.wallet.submitPurchaseWithDirectConnection(AM, amount, thatAgent, timeStep);
         end
 

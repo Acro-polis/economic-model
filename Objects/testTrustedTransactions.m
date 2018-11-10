@@ -8,13 +8,14 @@
 %=====================================================
 
 time = 1;
-
-agent1 = Agent(1,time);
-agent2 = Agent(2,time);
-agent3 = Agent(3,time);
-agent4 = Agent(4,time);
-
 AM = connectedGraph(4);
+polis = Polis(AM);
+polis.createAgents(time);
+
+agent1 = polis.agents(1);
+agent2 = polis.agents(2);
+agent3 = polis.agents(3);
+agent4 = polis.agents(4);
 
 fprintf("\nTesting with Connected Graph of 4 Agents\n\n");
 
