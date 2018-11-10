@@ -23,16 +23,16 @@ agent2.depositUBI(500,time);
 agent3.depositUBI(500,time);
 
 % A1 buys from A2
-agent1.wallet.submitPurchaseWithDirectConnection(100, AM, agent2, time);
+Agent.submitPurchaseWithDirectConnection(AM, 100, agent1, agent2, time);
 
 % A2 buys from A3
-agent2.wallet.submitPurchaseWithDirectConnection(200, AM, agent3, time);
+Agent.submitPurchaseWithDirectConnection(AM, 200, agent2, agent3, time);
 
 % A1 buys from A3
-agent1.wallet.submitPurchaseWithDirectConnection(50, AM, agent3, time);
+Agent.submitPurchaseWithDirectConnection(AM, 50, agent1, agent3, time);
 
 % A3 buys from A1
-agent3.wallet.submitPurchaseWithDirectConnection(75, AM, agent1, time);
+Agent.submitPurchaseWithDirectConnection(AM, 75, agent3, agent1, time);
 
 % Test / Output Results
 a1bal = agent1.wallet.currentBalanceAllCurrencies;
@@ -83,7 +83,7 @@ agent3.wallet.dump();
 time = 3;
 fprintf("\nTest Agent Wallets: time = %d\n",time);
 
-result = agent2.wallet.submitPurchaseWithDirectConnection(300.0, AM, agent3, time);
+result = Agent.submitPurchaseWithDirectConnection(AM, 300.0, agent2, agent3, time);
 assert(result == 1,"Transaction Failed Unexpectedly");
 fprintf("\nTransaction Succeeded (A2 buys from A3) = %d\n",result);
 
@@ -105,9 +105,9 @@ fprintf('Agent3 Current Balnace = %.2f\n', a3bal);
 time = 4;
 fprintf("\nTest Agent Wallets: time = %d\n",time);
 
-result = agent3.wallet.submitPurchaseWithDirectConnection(80.0, AM, agent1, time);
+result = Agent.submitPurchaseWithDirectConnection(AM, 80.0, agent3, agent1, time);
 assert(result == 1,"Transaction Failed Unexpectedly");
-result = agent3.wallet.submitPurchaseWithDirectConnection(405.0, AM, agent2, time);
+result = Agent.submitPurchaseWithDirectConnection(AM, 405.0, agent3, agent2, time);
 assert(result == 1,"Transaction Failed Unexpectedly");
 fprintf("\nTransaction Succeeded (A3 buys from A1 & A2) = %d\n",result);
 

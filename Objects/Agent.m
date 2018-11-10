@@ -177,6 +177,13 @@ classdef Agent < handle
     
     methods (Static)
         
+        function transacted = submitPurchaseWithDirectConnection(AM, amount, thisAgent, thatAgent, timeStep)
+            % submit a purchase transaction between two directly connected
+            % agents
+            % TODO - ensure they are connected
+            transacted = CryptoWallet.submitPurchaseWithDirectConnection(AM, amount, thisAgent, thatAgent, timeStep);
+        end
+        
         function paths = sortPaths(paths)
             % Order the the network paths shortest length to longest length
             % (the expected format is that which is returned from 
