@@ -104,52 +104,26 @@ Buying - adding currency
             
             transacted = true;
         end
+        
+        function transacted = submitPurchaseWithDirectConnection(obj, amount, AM, thatAgent, timeStep)
+            % Process a purchase transaction with a direct connection (if
+            % there is enough currency to support it)
+            assert(obj.agent.id ~= thatAgent.id,"Attempting a transaction with yourself - Preposterous!");
 
-        function transacted = submitPurchaseWithDirectConnection(obj, amount, AM, directlyConnecteAgent, timeStep)
-            % Process a purchase transaction with a direct connection. 
-            % 1. Test that there is enough money for the transaction
-            % 2. Build the transaction set (Buy and Sell) for each currency
-            % 3. Record transactions
-            assert(obj.agent.id ~= directlyConnecteAgent.id,"Attempting a transaction with yourself - Preposterous!");
+            transacted = false;
             
-            mutualAgentIds = obj.agent.findMutualConnectionsWithAgent(AM, obj.agent.id, directlyConnecteAgent.id);
-            availableBalance = obj.availableBalanceForTransactionWithAgent(directlyConnecteAgent.id, mutualAgentIds);
-            
+            % Find available balance for this agent to transact with
+            % another using currencies from all mutual connections, that
+            % agents curreny and ones own currency.
+            mutualAgentIds = obj.agent.findMutualConnectionsWithAgent(AM, obj.agent.id, thatAgent.id);
+            availableBalance = obj.availableBalanceForTransactionWithAgent(thatAgent.id, mutualAgentIds);
+
             if availableBalance >= amount
-                
-                [agentIds, balances] = obj.individualBalancesForTransactionWithAgent(directlyConnecteAgent.id, mutualAgentIds);
-                [indices, ~] = size(balances);
-                remainingAmount = amount;
-                
-                for index = 1:indices
-                    
-                    currencyAgentId = agentIds(index);
-                    balance = balances(index);
-                    assert(balance >= 0,"Wallet.submitPurchase, balance < 0)!");
-                    
-                    if balance ~= 0 
-                        if remainingAmount > balance
-                            % Buy/Sell using balance and continue
-                            tAB = Transaction(TransactionType.BUY, -balance, currencyAgentId, Polis.uniqueId(), obj.agent.id, directlyConnecteAgent.id, "BUY", timeStep);
-                            obj.addTransaction(tAB);
-                            tBA = Transaction(TransactionType.SELL, balance, currencyAgentId, Polis.uniqueId(), directlyConnecteAgent.id, obj.agent.id, "SELL", timeStep);
-                            directlyConnecteAgent.wallet.addTransaction(tBA);
-                            remainingAmount = remainingAmount - balance;
-                        else
-                            % Buy/Sell using remainingAmount and break
-                            tAB = Transaction(TransactionType.BUY, -remainingAmount, currencyAgentId, Polis.uniqueId(), obj.agent.id, directlyConnecteAgent.id, "BUY", timeStep);
-                            obj.addTransaction(tAB);
-                            tBA = Transaction(TransactionType.SELL, remainingAmount, currencyAgentId, Polis.uniqueId(), directlyConnecteAgent.id, obj.agent.id, "SELL", timeStep);
-                            directlyConnecteAgent.wallet.addTransaction(tBA);
-                            break;
-                        end
-                    end
-                end
+                % Commit the transaction
+                obj.commitPurchaseWithDirectConnection(amount, thatAgent, mutualAgentIds, timeStep);
                 transacted = true;
-            else
-                transacted = false;
             end
-            
+       
         end
         
         %
@@ -255,6 +229,51 @@ Buying - adding currency
     
     methods (Access = private)
                 
+                function commitPurchaseWithDirectConnection(obj, amount, thatAgent, mutualAgentIds, timeStep)
+            % Record an approved transaction between two directly connected
+            % agents.
+            assert(obj.agent.id ~= thatAgent.id,"Attempting a transaction with yourself - Preposterous!");
+
+            % The money is available so let's get the balance for each
+            % individually available currency
+            [agentIds, balances] = obj.individualBalancesForTransactionWithAgent(thatAgent.id, mutualAgentIds);
+            [indices, ~] = size(balances);
+            remainingAmount = amount;
+
+            % Loop over each currency and satisfy the purchase amount
+            % in the order provided (e.g. thatAgent, mutual agents, finally
+            % ones own currenty
+            for index = 1:indices
+                currencyAgentId = agentIds(index);
+                balance = balances(index);
+                assert(balance >= 0,"Wallet.submitPurchase, balance < 0)!");
+                if balance ~= 0 
+                    if remainingAmount > balance
+                        % Record Buy/Sell using balance and continue
+                        % Buy
+                        tAB = Transaction(TransactionType.BUY, -balance, currencyAgentId, Polis.uniqueId(), obj.agent.id, thatAgent.id, "BUY", timeStep);
+                        obj.addTransaction(tAB);
+                        % Sell
+                        tBA = Transaction(TransactionType.SELL, balance, currencyAgentId, Polis.uniqueId(), thatAgent.id, obj.agent.id, "SELL", timeStep);
+                        thatAgent.wallet.addTransaction(tBA);
+                        remainingAmount = remainingAmount - balance;
+                    else
+                        % Record Buy/Sell using remainingAmount and
+                        % break, the purchase amount has been
+                        % satisfied.
+                        % Buy
+                        tAB = Transaction(TransactionType.BUY, -remainingAmount, currencyAgentId, Polis.uniqueId(), obj.agent.id, thatAgent.id, "BUY", timeStep);
+                        obj.addTransaction(tAB);
+                        % Sell
+                        tBA = Transaction(TransactionType.SELL, remainingAmount, currencyAgentId, Polis.uniqueId(), thatAgent.id, obj.agent.id, "SELL", timeStep);
+                        thatAgent.wallet.addTransaction(tBA);
+                        break;
+                    end
+                end
+            end
+
+        end
+
         function balance = balanceForAgentsCurrency(obj, agentId)
             % Total balance of this agents currency
             results = findobj(obj.transactions,'currencyAgentId', agentId);
