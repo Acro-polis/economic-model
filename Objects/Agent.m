@@ -11,9 +11,8 @@ classdef Agent < handle
         wallet      CryptoWallet    % This agents wallet
     end
     
-    properties (GetAccess = private)
+    properties (GetAccess = private, SetAccess = private)
         % TODO - make wallet private
-        %wallet      CryptoWallet    % This agents wallet
     end
     
     properties (Constant)
@@ -122,6 +121,8 @@ classdef Agent < handle
         function [agentIds, balances] = individualBalancesForTransactionWithAgent(obj, thatAgentId, mutualAgentIds)
             % Return the currency agents and their individual balances that
             % thatAgent will accept for a transaction
+            % TODO - fully implementing this causes an infinite loop. Opps
+            % need to figure this out to make the wallet private
             [agentIds, balances] = obj.individualBalancesForTransactionWithAgent(thatAgentId, mutualAgentIds);
         end
         
