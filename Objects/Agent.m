@@ -16,13 +16,15 @@ classdef Agent < handle
     end
     
     properties (Constant)
-        maximumSearchLevels = 10;
+        maximumSearchLevels = 6;
     end
     
     methods (Access = public)
 
         function obj = Agent(id, polis, timeStep)
-            % AgentId must corresponds to a row id in an associated Agency Matrix
+            % AgentId must corresponds to a row id in an associated 
+            % Adjacency Matrix. Agents should only be created by the Polis
+            % object which maintains the list of all agents in the system.
             assert(id ~= Polis.PolisId,'Error: Agent Id equals reserved PolisId!');
             obj.id = id;
             obj.birthdate = timeStep;
@@ -80,28 +82,7 @@ classdef Agent < handle
                 end
             end
         end
-        
-        function pathIsGood = checkIfPathIsValid(obj, AM, path, amount)
-            % Determine if this path carries enough balance to support the
-            % transaction amount
-            pathIsGood = true;
-            logIntegerArray("Working on path",path);
-            [~, segments] = size(path);
-            for segment = 2:segments
-                thisAgentId = path(segment - 1);
-                thatAgentId = path(segment);
-                fprintf("Checking segment %d to %d\n",thisAgentId, thatAgentId);
-                mutualAgentIds = obj.findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId);
-                availableBalance = obj.polis.agents(thisAgentId).availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
-                fprintf("Available Balance = %.2f, Amount = %.2f\n",availableBalance, amount);
-                if availableBalance <= amount
-                    fprintf("Path failed, no balance\n");
-                    pathIsGood = false;
-                    break;
-                end
-            end
-        end
-        
+                
         function result = areWeConnected(obj, AM, targetAgentId)
             % Is this agent directly connected to the target agent?
             result = false;
@@ -125,10 +106,59 @@ classdef Agent < handle
             % Adjacency Matrix
             connections = find(AM(obj.id,:) ~= 0);
         end
-                
+        
+        function transacted = submitPurchase(obj, AM, amount, targetAgent, timeStep)
+            % Submit a purachase between this agent (obj.id) and the 
+            % targetAgent. The transaction may require intermediary agents
+            % to complete the transaction. Validate the transaction and if
+            % it passes complete the transaction.
+
+            transacted = true;
+            
+            % Find all possible paths
+            paths = obj.findAllNetworkPathsToAgent(AM, targetAgent.id);
+            obj.logPaths(paths);
+            if isempty(paths)
+                transacted = false;
+                return;
+            end
+            
+            % Find a path that satisfies the transaction criteria (e.g. all
+            % agents have enough balance)
+            path = obj.findAValidPathForTheTransactionAmount(AM, paths, amount);
+            logIntegerArray("Ths selected path is",path);
+            if isempty(path) 
+                transacted = false;
+                return;
+            end
+            
+            % Okay, we are good to go.
+            [~, numberAgents] = size(path);
+            if numberAgents == 2
+                % Directly connected, commit the transaction TODO - turn
+                % into commin instead of submit ... doing double work
+                transacted = obj.submitPurchaseWithDirectConnection(AM, amount, targetAgent, timeStep);
+            else
+                % Create an array of Agents from the paths array
+                agents = Agent.empty;
+                for i = 2:numberAgents
+                    agents = [agents , obj.polis.agents(path(i))];
+                end
+                transacted = obj.wallet.commitPurchaseWithIndirectConnection(AM, amount, agents, timeStep);
+            end
+        end
+        
         %
         % Wallet: Wrappers
-        %
+        %        
+
+        function transacted = submitPurchaseWithDirectConnection(obj, AM, amount, thatAgent, timeStep)
+            % submit a purchase transaction between two directly connected
+            % agents
+            assert(obj.areWeConnected(AM, thatAgent.id),"Error: Agents are not connected");
+            
+            transacted = obj.wallet.submitPurchaseWithDirectConnection(AM, amount, thatAgent, timeStep);
+        end
         
         function depositUBI(obj, amount, timeStep)
             % Deposit UBI
@@ -155,28 +185,29 @@ classdef Agent < handle
             % Return the currency agents and their individual balances that
             % thatAgent will accept for a transaction
             [agentIds, balances] = obj.wallet.individualBalancesForTransactionWithAgent(thatAgentId, mutualAgentIds);
-        end
-        
-        function transacted = submitPurchaseWithDirectConnection(obj, AM, amount, thatAgent, timeStep)
-            % submit a purchase transaction between two directly connected
-            % agents
-            assert(obj.areWeConnected(AM, thatAgent.id),"Error: Agents are not connected");
-            transacted = obj.wallet.submitPurchaseWithDirectConnection(AM, amount, thatAgent, timeStep);
-        end
-
-        function transacted = submitPurchase(obj, AM, paths, amount, targetAgentId, timeStep)
-            % Submit a purachase - work in progress
-            transacted = obj.wallet.submitPurchase(AM, paths, amount, targetAgentId, timeStep);
-        end
+        end        
                     
         function addTransaction(obj, transaction)
             % Submit a transaction to be added to the agents wallet. Note
             % this should never be called except by code written within the
             % wallet. Someday I'll figure out how to close this hole, or
-            % not. TODO!
+            % not. It's due to the design appraoch to write into two
+            % different agents ledgers at the same time. One simplification
+            % creates a different hurdle. TODO!
             obj.wallet.addTransaction(transaction);
         end
+
         
+        function commitPurchaseSegment(obj, amount, thatAgent, mutualAgentIds, buyTransactionType, sellTransactionType, timeStep)
+            % Submit a transaction to be added to the agents wallet. Note
+            % this should never be called except by code written within the
+            % wallet. Someday I'll figure out how to close this hole, or
+            % not. It's due to the design appraoch to write into two
+            % different agents ledgers at the same time. One simplification
+            % creates a different hurdle. TODO!
+            obj.wallet.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, buyTransactionType, sellTransactionType, timeStep);
+        end
+
         function dumpLedger(obj)
             % Write the contents of the wallet's ledger to the console
             obj.wallet.dump;
@@ -259,6 +290,27 @@ classdef Agent < handle
 
     methods (Access = private)
 
+        function pathIsGood = checkIfPathIsValid(obj, AM, path, amount)
+            % Determine if this path carries enough balance to support the
+            % transaction amount
+            pathIsGood = true;
+            logIntegerArray("Working on path",path);
+            [~, segments] = size(path);
+            for segment = 2:segments
+                thisAgentId = path(segment - 1);
+                thatAgentId = path(segment);
+                fprintf("Checking segment %d to %d\n",thisAgentId, thatAgentId);
+                mutualAgentIds = obj.findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId);
+                availableBalance = obj.polis.agents(thisAgentId).availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
+                fprintf("Available Balance = %.2f, Amount = %.2f\n",availableBalance, amount);
+                if availableBalance <= amount
+                    fprintf("Path failed, no balance\n");
+                    pathIsGood = false;
+                    break;
+                end
+            end
+        end
+        
        function paths = findNextNetworkConnection(obj, AM, searchLevel, currentPath, thisAgentId, thatAgentId, targetAgentId, paths)
             % Recursively explore any uncommon connections between
             % thisAgentId and thatAgentId until the targetAgentId is found

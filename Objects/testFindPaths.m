@@ -184,12 +184,20 @@ fprintf("\nExpecting 6 Paths To Agent %d\n", targetAgentId);
 
 fprintf("\nTest 10 - Submit a purchase\n");
 
-path = agent8.findAValidPathForTheTransactionAmount(AM, paths, 99.0);
-path
+timestep = birthday + 1;
+transacted = agent8.submitPurchase(AM, 10.0, agent1, timestep);
+agent8.dumpLedger();
+polis.agents(6).dumpLedger();
+polis.agents(1).dumpLedger();
 
-% timestep = birthday + 1;
-% result = agent8.submitPurchase(AM, paths, 10.0, targetAgentId, timestep);
-% 
+timestep = timestep + 1;
+targetAgent = polis.agents(2);
+agent8.submitPurchase(AM, 8.0, targetAgent, timestep);
+agent8.dumpLedger()
+polis.agents(6).dumpLedger();
+polis.agents(1).dumpLedger();
+targetAgent.dumpLedger();
+
 % timestep = timestep + 1;
 % polis.applyDemurrageWithPercentage(0.95, timestep);
 % agent8.dumpLedger();
