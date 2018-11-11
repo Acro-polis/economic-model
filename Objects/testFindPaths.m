@@ -198,11 +198,16 @@ polis.agents(6).dumpLedger();
 polis.agents(1).dumpLedger();
 targetAgent.dumpLedger();
 
-% timestep = timestep + 1;
-% polis.applyDemurrageWithPercentage(0.95, timestep);
-% agent8.dumpLedger();
-% 
+timestep = timestep + 1;
+polis.applyDemurrageWithPercentage(0.5, timestep);
+agent8.dumpLedger();
+
+targetAgent = polis.agents(6);
+agent8.submitPurchase(AM, 5.0, targetAgent, timestep);
 % result = agent8.submitPurchase(AM, paths, 10.0, targetAgentId, timestep);
+agent8.dumpLedger()
+targetAgent.dumpLedger();
+
 
 
 
