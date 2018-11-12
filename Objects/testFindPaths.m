@@ -7,6 +7,8 @@
 % Created: 2018.11.5
 %=====================================================
 
+AM = importNetworkModelFromCSV(10,"test_network_10_agents.csv");
+
 AM = connectedGraph(8);
 birthday = 1;
 polis = Polis(AM);
