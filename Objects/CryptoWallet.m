@@ -63,19 +63,22 @@ Buying - adding currency
             [~, numberAgents] = size(agentsInPath);
             assert(numberAgents > 1,"Error: use submitPurchaseWithDirectConnection instead");
 
+            transactionId = obj.agent.polis.uniqueId();
+            
             % Record the first leg
             thatAgent = agentsInPath(1);
             mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, obj.agent.id, thatAgent.id);
             fprintf("\nFirst Leg:  id 1 = %d, id 2 = %d\n", obj.agent.id, thatAgent.id);
-            obj.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY, TransactionType.SELL_TRANSITIVE, timeStep);
+            obj.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY, TransactionType.SELL_TRANSITIVE, transactionId, timeStep);
             
             % Record the intermediate legs, if needed
             if numberAgents > 2
                 for leg = 1:(numberAgents - 2)
                     thisAgent = agentsInPath(leg);
                     thatAgent = agentsInPath(leg + 1);
+                    mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, that.agent.id, targetAgemt.id);
                     fprintf("Middle Leg: id %d = %d, id %d = %d\n", leg, thisAgent.id, leg + 1, thatAgent.id);
-                    thisAgent.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY_TRANSITIVE, TransactionType.SELL_TRANSITIVE, timeStep);            
+                    thisAgent.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY_TRANSITIVE, TransactionType.SELL_TRANSITIVE, transactionId, timeStep);            
                 end
             end
             
@@ -84,36 +87,19 @@ Buying - adding currency
             thatAgent = agentsInPath(numberAgents);
             mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, thisAgent.id, thatAgent.id);
             fprintf("Last Leg:   id %d = %d, id %d = %d\n", numberAgents - 1, thisAgent.id, numberAgents, thatAgent.id);
-            thisAgent.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY_TRANSITIVE, TransactionType.SELL, timeStep);            
+            thisAgent.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY_TRANSITIVE, TransactionType.SELL, transactionId, timeStep);            
             
         end
 
-        function transacted = submitPurchaseWithDirectConnection(obj, AM, amount, thatAgent, timeStep)
-            % Process a purchase transaction with a direct connection (if
-            % there is enough currency to support it)
-            assert(obj.agent.id ~= thatAgent.id,"Attempting a transaction with yourself - Preposterous!");
-
-            transacted = false;
-            
-            % Find available balance for this agent to transact with
-            % another using currencies from all mutual connections, that
-            % agents curreny and ones own currency.
-            mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, obj.agent.id, thatAgent.id);
-            availableBalance = obj.availableBalanceForTransactionWithAgent(thatAgent.id, mutualAgentIds);
-
-            if availableBalance >= amount
-                % Commit the transaction
-                obj.commitPurchaseWithDirectConnection(amount, thatAgent, mutualAgentIds, timeStep);
-                transacted = true;
-            end
-       
-        end
-
-        function commitPurchaseSegment(obj, amount, thatAgent, mutualAgentIds, buyTransactionType, sellTransactionType, timeStep)
+        function commitPurchaseWithDirectConnection(obj, amount, thatAgent, mutualAgentIds, timeStep)
+            % Record an approved transaction between two directly connected
+            obj.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY, TransactionType.SELL, obj.agent.polis.uniqueId(), timeStep);
+        end 
+        
+        function commitPurchaseSegment(obj, amount, thatAgent, mutualAgentIds, buyTransactionType, sellTransactionType, transactionId, timeStep)
             % Record an approved transaction segment between two agents 
             % (that will typically be a part of a larger set but could 
             % simply be between just two).
-            assert(obj.agent.id ~= thatAgent.id,"Attempting a transaction the same agent - Preposterous!");
             assert(buyTransactionType == TransactionType.BUY || TransactionType.BUY_TRANSITIVE,"Wrong BUY transaction type provided");
             assert(buyTransactionType == TransactionType.SELL || TransactionType.SELL_TRANSITIVE,"Wrong SELL transaction type provided");
             
@@ -134,10 +120,10 @@ Buying - adding currency
                     if remainingAmount > balance
                         % Record Buy/Sell using balance and continue
                         % Buy
-                        tAB = Transaction(buyTransactionType, -balance, currencyAgentId, Polis.uniqueId(), obj.agent.id, thatAgent.id, "BUY", timeStep);
+                        tAB = Transaction(buyTransactionType, -balance, currencyAgentId, transactionId, obj.agent.id, thatAgent.id, "BUY", timeStep);
                         obj.addTransaction(tAB);
                         % Sell
-                        tBA = Transaction(sellTransactionType, balance, currencyAgentId, Polis.uniqueId(), thatAgent.id, obj.agent.id, "SELL", timeStep);
+                        tBA = Transaction(sellTransactionType, balance, currencyAgentId, transactionId, thatAgent.id, obj.agent.id, "SELL", timeStep);
                         thatAgent.addTransaction(tBA);
                         remainingAmount = remainingAmount - balance;
                     else
@@ -145,10 +131,10 @@ Buying - adding currency
                         % break, the purchase amount has been
                         % satisfied.
                         % Buy
-                        tAB = Transaction(buyTransactionType, -remainingAmount, currencyAgentId, Polis.uniqueId(), obj.agent.id, thatAgent.id, "BUY", timeStep);
+                        tAB = Transaction(buyTransactionType, -remainingAmount, currencyAgentId, transactionId, obj.agent.id, thatAgent.id, "BUY", timeStep);
                         obj.addTransaction(tAB);
                         % Sell
-                        tBA = Transaction(sellTransactionType, remainingAmount, currencyAgentId, Polis.uniqueId(), thatAgent.id, obj.agent.id, "SELL", timeStep);
+                        tBA = Transaction(sellTransactionType, remainingAmount, currencyAgentId, transactionId, thatAgent.id, obj.agent.id, "SELL", timeStep);
                         thatAgent.addTransaction(tBA);
                         break;
                     end
@@ -163,7 +149,7 @@ Buying - adding currency
         
         function depositUBI(obj, amount, timeStep)
             % Deposit UBI into this wallet
-            t = Transaction(TransactionType.UBI, amount, obj.agent.id, Polis.uniqueId(), Polis.PolisId, obj.agent.id, "UBI", timeStep);
+            t = Transaction(TransactionType.UBI, amount, obj.agent.id, obj.agent.polis.uniqueId(), Polis.PolisId, obj.agent.id, "UBI", timeStep);
             obj.addTransaction(t);
         end
 
@@ -195,7 +181,7 @@ Buying - adding currency
                 % Record the transaction
                 %
                 if amount < 0.0
-                    t = Transaction(TransactionType.DEMURRAGE, amount, agentIds(index), Polis.uniqueId(), Polis.PolisId, obj.agent.id, "DEMURRAGE", timeStep);
+                    t = Transaction(TransactionType.DEMURRAGE, amount, agentIds(index), obj.agent.polis.uniqueId(), Polis.PolisId, obj.agent.id, "DEMURRAGE", timeStep);
                     obj.addTransaction(t);
                 end
             end
@@ -245,7 +231,7 @@ Buying - adding currency
         function dump(obj)
             % Log this agents complete ledger
             fprintf('\nLedger for Agent Id = %d\n',obj.agent.id);
-            fprintf('id\t type amount\t c/s/d/t\t note\t date\n');
+            fprintf('id\t tranId\t time\t type amount\t cur\t src\t dest\t note\t\n');
             [rows, ~] = size(obj.transactions);
             for i = 1:rows
                 obj.transactions(i).dump();
@@ -261,13 +247,6 @@ Buying - adding currency
     end
     
     methods (Access = private)
-
-        function commitPurchaseWithDirectConnection(obj, amount, thatAgent, mutualAgentIds, timeStep)
-            % Record an approved transaction between two directly connected
-            % agents.
-            assert(obj.agent.id ~= thatAgent.id,"Attempting a transaction with yourself - Preposterous!");
-            obj.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY, TransactionType.SELL, timeStep);
-        end
                 
         function balance = balanceForAgentsCurrency(obj, agentId)
             % Total balance of this agents currency
@@ -276,6 +255,6 @@ Buying - adding currency
         end
         
     end
-
-end
+    
+end    
 

@@ -41,7 +41,7 @@ classdef Transaction < matlab.mixin.SetGet
         
         function dump(obj)
             % Print data for this transaction
-            fprintf('%d\t %d %+.2f\t %d %d %d %d\t %s\t %d\n', obj.id, obj.type, obj.amount, obj.currencyAgentId, obj.sourceAgentId, obj.destinationAgentId, obj.transactionId, obj.note, obj.dateCreated);
+            fprintf('%d\t %d\t %d\t %d %+.2f\t %d\t %d\t %d\t  %s\t\n', obj.id, obj.transactionId, obj.dateCreated, obj.type, obj.amount, obj.currencyAgentId, obj.sourceAgentId, obj.destinationAgentId, obj.note);
         end
         
     end

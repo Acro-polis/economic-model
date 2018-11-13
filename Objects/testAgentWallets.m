@@ -25,16 +25,16 @@ agent3 = polis.agents(3);
 agent4 = polis.agents(4);
 
 % A1 buys from A2
-agent1.submitPurchaseWithDirectConnection(AM, 100, agent2, time);
+agent1.submitPurchase(AM, 100, agent2, time);
 
 % A1 buys from A3
-agent1.submitPurchaseWithDirectConnection(AM, 50, agent3, time);
+agent1.submitPurchase(AM, 50, agent3, time);
 
 % A3 buys from A1
-agent3.submitPurchaseWithDirectConnection(AM, 75, agent1, time);
+agent3.submitPurchase(AM, 75, agent1, time);
 
 % A2 buys from A4
-agent2.submitPurchaseWithDirectConnection(AM, 200, agent4, time);
+agent2.submitPurchase(AM, 200, agent4, time);
 
 % Test / Output Results
 a1bal = agent1.currentBalanceAllCurrencies;
@@ -96,7 +96,7 @@ time = time + 1;
 fprintf("\nTest Agent Wallets: time = %d\n",time);
 
 % A2 buys from A4
-result = agent2.submitPurchaseWithDirectConnection(AM, 250.0, agent4, time);
+result = agent2.submitPurchase(AM, 250.0, agent4, time);
 assert(result == 1,"Transaction Failed Unexpectedly");
 fprintf("\nTransaction Succeeded (A2 buys from A4) = %d\n",result);
 

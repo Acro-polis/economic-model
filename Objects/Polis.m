@@ -10,8 +10,12 @@ classdef Polis < handle
         agents      % Array of all agents
     end
 
+    properties (SetAccess = private, GetAccess = private)
+        lastTransactionId
+    end
+    
     properties (Constant)
-        PolisId = 999 
+        PolisId = 0 
         PercentDemurage = 0.05
     end
     
@@ -20,6 +24,7 @@ classdef Polis < handle
         function obj = Polis(AM)
             % Zeus assigns the adjacency matrix and instantiates the agents
             obj.AM = AM;
+            obj.lastTransactionId = 0;
         end
     
         function createAgents(obj, birthday)
@@ -52,13 +57,17 @@ classdef Polis < handle
                 obj.agents(row).applyDemurrage(percentage, timestep);
              end
         end
+
+        function uniqueId = uniqueId(obj)
+            % Poor mans unique id, just keep a counter. TODO - advance when
+            % the time comes, this will suffice for quite a while.
+            obj.lastTransactionId = obj.lastTransactionId + 1;
+            uniqueId = obj.lastTransactionId;
+        end
         
     end
     
     methods (Static)
-        function uid = uniqueId()
-            %TODO - return a unique number
-            uid = 100;
-        end
+
     end
 end

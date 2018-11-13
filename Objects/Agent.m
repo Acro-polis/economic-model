@@ -8,11 +8,11 @@ classdef Agent < handle
     properties (SetAccess = private)
         id          uint32          % The agent id for this agent
         birthdate   uint32          % The birthdate for this agent = time dt
+        polis       Polis           % Store a reference to God
     end
     
     properties (GetAccess = private, SetAccess = private)
         wallet      CryptoWallet    % This agents wallet
-        polis       Polis           % Store a reference to God
     end
     
     properties (Constant)
@@ -107,6 +107,10 @@ classdef Agent < handle
             connections = find(AM(obj.id,:) ~= 0);
         end
         
+        %
+        % Transaction methods
+        %
+        
         function transacted = submitPurchase(obj, AM, amount, targetAgent, timeStep)
             % Submit a purachase between this agent (obj.id) and the 
             % targetAgent. The transaction may require intermediary agents
@@ -131,35 +135,31 @@ classdef Agent < handle
                 transacted = false;
                 return;
             end
-            
+
             % Okay, we are good to go.
             [~, numberAgents] = size(path);
             if numberAgents == 2
-                % Directly connected, commit the transaction TODO - turn
-                % into commin instead of submit ... doing double work
-                transacted = obj.submitPurchaseWithDirectConnection(AM, amount, targetAgent, timeStep);
+                targetAgent = obj.polis.agents(path(1,2));
+                mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, obj.id, targetAgent.id);
+                obj.wallet.commitPurchaseWithDirectConnection(amount, targetAgent, mutualAgentIds, timeStep);
             else
                 % Create an array of Agents from the paths array
                 agents = Agent.empty;
                 for i = 2:numberAgents
-                    agents = [agents , obj.polis.agents(path(i))];
+                    agents = [agents , obj.polis.agents(path(1,i))];
                 end
                 transacted = obj.wallet.commitPurchaseWithIndirectConnection(AM, amount, agents, timeStep);
             end
         end
         
         %
-        % Wallet: Wrappers
+        % Wallet: Wrappers 
         %        
 
-        function transacted = submitPurchaseWithDirectConnection(obj, AM, amount, thatAgent, timeStep)
-            % submit a purchase transaction between two directly connected
-            % agents
-            assert(obj.areWeConnected(AM, thatAgent.id),"Error: Agents are not connected");
-            
-            transacted = obj.wallet.submitPurchaseWithDirectConnection(AM, amount, thatAgent, timeStep);
-        end
-        
+        %
+        % Methods supporting transactions
+        %
+                
         function depositUBI(obj, amount, timeStep)
             % Deposit UBI
             obj.wallet.depositUBI(amount, timeStep);
@@ -170,23 +170,6 @@ classdef Agent < handle
             obj.wallet.applyDemurrage(percentage, timeStep);
         end
         
-        function balance = currentBalanceAllCurrencies(obj)
-            % Return current balance all currencies
-            balance = obj.wallet.currentBalanceAllCurrencies;
-        end
-        
-        function balance = availableBalanceForTransactionWithAgent(obj, thatAgentId, mutualAgentIds)
-            % Return the available balance for a proposed transaction with
-            % thatAgent
-            balance = obj.wallet.availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
-        end
-
-        function [agentIds, balances] = individualBalancesForTransactionWithAgent(obj, thatAgentId, mutualAgentIds)
-            % Return the currency agents and their individual balances that
-            % thatAgent will accept for a transaction
-            [agentIds, balances] = obj.wallet.individualBalancesForTransactionWithAgent(thatAgentId, mutualAgentIds);
-        end        
-                    
         function addTransaction(obj, transaction)
             % Submit a transaction to be added to the agents wallet. Note
             % this should never be called except by code written within the
@@ -208,6 +191,31 @@ classdef Agent < handle
             obj.wallet.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, buyTransactionType, sellTransactionType, timeStep);
         end
 
+        %        
+        % Methods supporting balance calculations
+        %
+
+        function balance = currentBalanceAllCurrencies(obj)
+            % Return current balance all currencies
+            balance = obj.wallet.currentBalanceAllCurrencies;
+        end
+        
+        function balance = availableBalanceForTransactionWithAgent(obj, thatAgentId, mutualAgentIds)
+            % Return the available balance for a proposed transaction with
+            % thatAgent
+            balance = obj.wallet.availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
+        end
+
+        function [agentIds, balances] = individualBalancesForTransactionWithAgent(obj, thatAgentId, mutualAgentIds)
+            % Return the currency agents and their individual balances that
+            % thatAgent will accept for a transaction
+            [agentIds, balances] = obj.wallet.individualBalancesForTransactionWithAgent(thatAgentId, mutualAgentIds);
+        end        
+                    
+        %        
+        % Methods supporting data logging
+        %
+        
         function dumpLedger(obj)
             % Write the contents of the wallet's ledger to the console
             obj.wallet.dump;
@@ -231,7 +239,7 @@ classdef Agent < handle
             connections = find(AM(agentId,:) ~= 0);
         end
                 
-        function mutualConnections = findMutualConnectionsWithAgent(AM, thisAgent, thatAgentId)
+        function mutualConnections = findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId)
             % Return common connections this agent shares with another 
             % (that agent). The mutualConnections array contains the index 
             % numbers of other agents in the Agency Matrix and excludes 
@@ -241,7 +249,7 @@ classdef Agent < handle
             % Algorithm: Sum two rows of the Adjancey Matrix and any element
             % that is equal to 2 is a mutual connection.
             %
-            mutualConnections = find((AM(thisAgent,:) + AM(thatAgentId,:)) == 2);
+            mutualConnections = find((AM(thisAgentId,:) + AM(thatAgentId,:)) == 2);
         end
 
         function uncommonConnections = findAgentsUncommonConnections(AM, thisAgentId, thatAgentId)
@@ -289,7 +297,7 @@ classdef Agent < handle
     end
 
     methods (Access = private)
-
+        
         function pathIsGood = checkIfPathIsValid(obj, AM, path, amount)
             % Determine if this path carries enough balance to support the
             % transaction amount
@@ -300,7 +308,7 @@ classdef Agent < handle
                 thisAgentId = path(segment - 1);
                 thatAgentId = path(segment);
                 fprintf("Checking segment %d to %d\n",thisAgentId, thatAgentId);
-                mutualAgentIds = obj.findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId);
+                mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId);
                 availableBalance = obj.polis.agents(thisAgentId).availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
                 fprintf("Available Balance = %.2f, Amount = %.2f\n",availableBalance, amount);
                 if availableBalance <= amount

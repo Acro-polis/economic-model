@@ -22,7 +22,7 @@ fprintf("\nTesting with Connected Graph of 4 Agents\n\n");
 polis.depositUBI(100, time);
 
 % A1 buys from A2
-agent1.submitPurchaseWithDirectConnection(AM, 50, agent2, time);
+agent1.submitPurchase(AM, 50, agent2, time);
 
 mutualConnections = Agent.findMutualConnectionsWithAgent(AM, agent1.id, agent2.id);
 availableBalance1 = agent1.availableBalanceForTransactionWithAgent(agent2.id, mutualConnections);
