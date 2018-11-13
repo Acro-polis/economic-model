@@ -62,12 +62,16 @@ sourceAgentId = 5;
 targetAgentId = 2;
 expectedPaths = 10;
 runPathTest(polis, sourceAgentId, targetAgentId, testNumber, expectedPaths);
+
 fprintf("\nTests Completed Successfully\n");
+
+%+++++++++++++++++++++++++++++++++++++++++
 
 %
 % Test Function
 %
 function runPathTest(polis, sourceAgentId, targetAgentId, testNumber, expectedPaths)
+    fprintf("\n------------------------------------------\n");
     fprintf("\nTest %d - Testing connections between agents %d and %d\n", testNumber, sourceAgentId, targetAgentId);
     paths = polis.agents(sourceAgentId).findAllNetworkPathsToAgent(polis.AM, targetAgentId);
     polis.agents(sourceAgentId).logPaths(paths);
