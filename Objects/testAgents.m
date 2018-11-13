@@ -15,67 +15,86 @@ time = 1;
 polis = Polis(AM);
 polis.createAgents(time);
 
-fprintf("\nTesting Agents Methods\n\n");
+fprintf("\nTesting Agents Methods\n");
 
+%-----------------------------------------
+
+testNumber = 1;
 sourceAgentId = polis.agents(1).id;
 targetAgentId = polis.agents(2).id;
+expectedConnections = 0;
+fprintf("\n------------------------------------------\n");
+fprintf("Test Suite = %d, with agents %d and %d\n", testNumber, sourceAgentId, targetAgentId);
 
-fprintf("Testing suite with agents %d and %d", sourceAgentId, targetAgentId);
+testMutualConnectionsWithAgent(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections);
 
-fprintf("\nTest 1: Agent.findMutualConnectionsWithAgent\n\n");
+expectedConnections = 1;
+testFindAgentsUncommonConnections(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections);
 
-fprintf("Seeking common connections between agents %d and %d\n", sourceAgentId, targetAgentId);
-commonConnections = Agent.findMutualConnectionsWithAgent(AM, sourceAgentId, targetAgentId);
-logIntegerArray("Common Connections",commonConnections);
-[~, connections] = size(commonConnections);
-assert(connections == 0,"Error - wrong number of connections");
-fprintf("\nExpected Answer    = [ ]\n\n");
+expectedConnections = 2;
+testFindMyUncommonConnectionsFromAgent(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections);
 
-fprintf("\nTest 2: Agent.findAgentsUncommonConnections\n\n");
-fprintf("Seeking uncommon connections between agents %d and %d\n", sourceAgentId, targetAgentId);
-uncommonConnections = Agent.findAgentsUncommonConnections(AM, sourceAgentId, targetAgentId);
-logIntegerArray("Uncommon Connections",uncommonConnections);
-[~, connections] = size(uncommonConnections);
-assert(connections == 1,"Error - wrong number of uncommon connections");
-fprintf("\nExpected Answer      = [ 4 ]\n\n");
+%-----------------------------------------
 
-fprintf("\nTest 3: Agent.findMyUncommonConnectionsFromAgent\n\n");
-fprintf("Seeking uncommon connections between agents %d and %d\n", sourceAgentId, targetAgentId);
-uncommonConnections = Agent.findMyUncommonConnectionsFromAgent(AM, sourceAgentId, targetAgentId);
-logIntegerArray("Uncommon Connections",uncommonConnections);
-[~, connections] = size(uncommonConnections);
-assert(connections == 2,"Error - wrong number of uncommon connections");
-fprintf("\nExpected Answer      = [ 3  6 ]\n\n");
-
+testNumber = 2;
 sourceAgentId = polis.agents(4).id;
 targetAgentId = polis.agents(7).id;
+expectedConnections = 0;
+fprintf("\n------------------------------------------\n");
+fprintf("\nTest Suite = %d, with agents %d and %d\n", testNumber, sourceAgentId, targetAgentId);
 
-fprintf("Testing suite with agents %d and %d", sourceAgentId, targetAgentId);
+testMutualConnectionsWithAgent(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections);
 
-fprintf("\nTest 1: Agent.findMutualConnectionsWithAgent\n\n");
+expectedConnections = 1;
+testFindAgentsUncommonConnections(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections);
 
-fprintf("Seeking common connections between agents %d and %d\n", sourceAgentId, targetAgentId);
-commonConnections = Agent.findMutualConnectionsWithAgent(AM, sourceAgentId, targetAgentId);
-logIntegerArray("Common Connections",commonConnections);
-[~, connections] = size(commonConnections);
-assert(connections == 0,"Error - wrong number of connections");
-fprintf("\nExpected Answer    = [ ]\n\n");
+expectedConnections = 2;
+testFindMyUncommonConnectionsFromAgent(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections);
 
-fprintf("\nTest 2: Agent.findAgentsUncommonConnections\n\n");
-fprintf("Seeking uncommon connections between agents %d and %d\n", sourceAgentId, targetAgentId);
-uncommonConnections = Agent.findAgentsUncommonConnections(AM, sourceAgentId, targetAgentId);
-logIntegerArray("Uncommon Connections",uncommonConnections);
-[~, connections] = size(uncommonConnections);
-assert(connections == 1,"Error - wrong number of uncommon connections");
-fprintf("\nExpected Answer      = [ 6 ]\n\n");
+%-----------------------------------------
 
-fprintf("\nTest 3: Agent.findMyUncommonConnectionsFromAgent\n\n");
-fprintf("Seeking uncommon connections between agents %d and %d\n", sourceAgentId, targetAgentId);
-uncommonConnections = Agent.findMyUncommonConnectionsFromAgent(AM, sourceAgentId, targetAgentId);
-logIntegerArray("Uncommon Connections",uncommonConnections);
-[~, connections] = size(uncommonConnections);
-assert(connections == 2,"Error - wrong number of uncommon connections");
-fprintf("\nExpected Answer      = [ 2  3 ]\n\n");
+testNumber = 3;
+sourceAgentId = polis.agents(8).id;
+targetAgentId = polis.agents(6).id;
+expectedConnections = 0;
+fprintf("\n------------------------------------------\n");
+fprintf("\nTest Suite = %d, with agents %d and %d\n", testNumber, sourceAgentId, targetAgentId);
+
+testMutualConnectionsWithAgent(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections);
+
+expectedConnections = 2;
+testFindAgentsUncommonConnections(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections);
+
+expectedConnections = 2;
+testFindMyUncommonConnectionsFromAgent(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections);
 
 fprintf("\nTests Completed Successfully\n");
 
+%+++++++++++++++++++++++++++++++++++++++++
+
+function testMutualConnectionsWithAgent(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections)
+    fprintf("\nTest %da: Agent.findMutualConnectionsWithAgent\n\n", testNumber);
+    fprintf("Seeking common connections between agents %d and %d\n", sourceAgentId, targetAgentId);
+    commonConnections = Agent.findMutualConnectionsWithAgent(polis.AM, sourceAgentId, targetAgentId);
+    logIntegerArray("Common Connections",commonConnections);
+    [~, connections] = size(commonConnections);
+    assert(connections == expectedConnections,"Error: expected %d connections, found %d connections", expectedConnections, connections);
+end
+
+function testFindAgentsUncommonConnections(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections)
+    fprintf("\nTest %db: Agent.findAgentsUncommonConnections\n\n", testNumber);
+    fprintf("Seeking uncommon connections agent %d has from %d\n", targetAgentId, sourceAgentId);
+    uncommonConnections = Agent.findAgentsUncommonConnections(polis.AM, sourceAgentId, targetAgentId);
+    logIntegerArray("Uncommon Connections",uncommonConnections);
+    [~, connections] = size(uncommonConnections);
+    assert(connections == expectedConnections,"Error: expected %d uncommon connections, found %d uncommon connections", expectedConnections, connections);
+end
+
+function testFindMyUncommonConnectionsFromAgent(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections)
+    fprintf("\nTest %dc: Agent.findMyUncommonConnectionsFromAgent\n\n", testNumber);
+    fprintf("Seeking uncommon connections agent %d has from %d\n", sourceAgentId, targetAgentId);
+    uncommonConnections = Agent.findMyUncommonConnectionsFromAgent(polis.AM, sourceAgentId, targetAgentId);
+    logIntegerArray("Uncommon Connections",uncommonConnections);
+    [~, connections] = size(uncommonConnections);
+    assert(connections == expectedConnections,"Error: expected %d uncommon connections, found %d uncommon connections", expectedConnections, connections);
+end

@@ -13,7 +13,7 @@ time = 1;
 polis = Polis(AM);
 polis.createAgents(time);
 
-fprintf("\n Testing Agent.findAllNetworkPathsToAgent()\n\n");
+fprintf("\nTesting Agent.findAllNetworkPathsToAgent()\n\n");
 
 testNumber = 1;
 sourceAgentId = 10;
