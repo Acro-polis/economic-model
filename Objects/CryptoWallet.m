@@ -76,7 +76,7 @@ Buying - adding currency
                 for leg = 1:(numberAgents - 2)
                     thisAgent = agentsInPath(leg);
                     thatAgent = agentsInPath(leg + 1);
-                    mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, that.agent.id, targetAgemt.id);
+                    mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, thisAgent.id, thatAgent.id);
                     fprintf("Middle Leg: id %d = %d, id %d = %d\n", leg, thisAgent.id, leg + 1, thatAgent.id);
                     thisAgent.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY_TRANSITIVE, TransactionType.SELL_TRANSITIVE, transactionId, timeStep);            
                 end

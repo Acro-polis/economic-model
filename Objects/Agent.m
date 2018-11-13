@@ -181,14 +181,14 @@ classdef Agent < handle
         end
 
         
-        function commitPurchaseSegment(obj, amount, thatAgent, mutualAgentIds, buyTransactionType, sellTransactionType, timeStep)
+        function commitPurchaseSegment(obj, amount, thatAgent, mutualAgentIds, buyTransactionType, sellTransactionType, tramsactionId, timeStep)
             % Submit a transaction to be added to the agents wallet. Note
             % this should never be called except by code written within the
             % wallet. Someday I'll figure out how to close this hole, or
             % not. It's due to the design appraoch to write into two
             % different agents ledgers at the same time. One simplification
             % creates a different hurdle. TODO!
-            obj.wallet.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, buyTransactionType, sellTransactionType, timeStep);
+            obj.wallet.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, buyTransactionType, sellTransactionType, tramsactionId, timeStep);
         end
 
         %        

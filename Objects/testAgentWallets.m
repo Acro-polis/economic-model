@@ -118,34 +118,27 @@ fprintf('Agent2 Current Balnace = %.2f\n', a2bal);
 fprintf('Agent3 Current Balnace = %.2f\n', a3bal);
 fprintf('Agent4 Current Balnace = %.2f\n', a4bal);
 
-time = 4;
+time = time + 1;
 fprintf("\nTest Agent Wallets: time = %d\n",time);
 
 
 % -----------------------
 
-% fprintf("\nTest 10 - Submit a purchase\n");
-% 
-% timestep = birthday + 1;
-% transacted = agent8.submitPurchase(AM, 10.0, agent1, timestep);
-% agent8.dumpLedger();
-% polis.agents(6).dumpLedger();
-% polis.agents(1).dumpLedger();
-% 
-% timestep = timestep + 1;
-% targetAgent = polis.agents(2);
-% agent8.submitPurchase(AM, 8.0, targetAgent, timestep);
-% agent8.dumpLedger()
-% polis.agents(6).dumpLedger();
-% polis.agents(1).dumpLedger();
-% targetAgent.dumpLedger();
-% 
-% timestep = timestep + 1;
-% polis.applyDemurrageWithPercentage(0.5, timestep);
-% agent8.dumpLedger();
-% 
-% targetAgent = polis.agents(6);
-% agent8.submitPurchase(AM, 5.0, targetAgent, timestep);
-% % result = agent8.submitPurchase(AM, paths, 10.0, targetAgentId, timestep);
-% agent8.dumpLedger()
-% targetAgent.dumpLedger();
+fprintf("\nTest 10 - Submit a purchase\n");
+ 
+time = time + 1;
+agent8 = polis.agents(8);
+transacted = agent8.submitPurchase(AM, 10.0, agent1, time);
+agent8.dumpLedger();
+polis.agents(6).dumpLedger();
+polis.agents(1).dumpLedger();
+
+time = time + 1;
+agent10 = polis.agents(10);
+agent9 = polis.agents(9);
+transacted = agent10.submitPurchase(AM, 10.0, agent1, time);
+agent10.dumpLedger();
+polis.agents(9).dumpLedger();
+polis.agents(8).dumpLedger();
+polis.agents(6).dumpLedger();
+polis.agents(1).dumpLedger();
