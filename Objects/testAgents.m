@@ -1,9 +1,13 @@
 %=====================================================
 %
-% Test suite for agent methods
+% Test suite that tests methods:
 %
-% TODO - add missing methods, not skip methods tested
-% in testAgentWallets and testTrustedTransactions
+% Agent.findMutualConnectionsWithAgent()
+% Agent.findAgentsUncommonConnections()
+% Agent.findMyUncommonConnectionsFromAgent()
+%
+% TODO: Add other methods not covered by testAgentWallets
+% and testTrustedTransaction
 %
 % Author: Jess
 % Created: 10.31.2018
