@@ -51,7 +51,7 @@ classdef Agent < handle
             % complicated paths will fail in a buy / sell situation too)
             if obj.areWeConnected(AM, targetAgentId)
                 allPaths = {[obj.id targetAgentId]};
-                fprintf("\nAgents are directly connected\n");
+                %fprintf("\nAgents are directly connected\n");
                 return;
             end
             
@@ -317,13 +317,13 @@ classdef Agent < handle
             % or we run out of uncommon connections (and ensureing we do
             % not traverse the object agent (obj.id))
             
-            logIntegerArray("Starting Path", currentPath)
-            fprintf("Agents: This = %d, That = %d, Target = %d, Search Level = %d\n\n", thisAgentId, thatAgentId, targetAgentId, searchLevel);
+            %logIntegerArray("Starting Path", currentPath)
+            %fprintf("Agents: This = %d, That = %d, Target = %d, Search Level = %d\n\n", thisAgentId, thatAgentId, targetAgentId, searchLevel);
             
             if thatAgentId == targetAgentId
                 % Found it, we are done!
                 paths = [paths ; {currentPath}];
-                fprintf("!!!! Done: Found Target Agent = %d !!!!\n\n",targetAgentId);
+                %fprintf("!!!! Done: Found Target Agent = %d !!!!\n\n",targetAgentId);
                 return;
             end
             
@@ -332,7 +332,7 @@ classdef Agent < handle
             % return (see below). Same if we run out of search levels
             if searchLevel > Agent.maximumSearchLevels
                 % No luck, go home empty handed
-                fprintf("**** Abandon Ship - Max Level Reached ****\n\n");
+                %fprintf("**** Abandon Ship - Max Level Reached ****\n\n");
                 return;
             else
                 searchLevel = searchLevel + 1;
@@ -342,16 +342,16 @@ classdef Agent < handle
             uncommonConnections = obj.removeMeIfIAmPresent(obj.findAgentsUncommonConnections(AM, thisAgentId, thatAgentId));
             [~, indices] = size(uncommonConnections);
             if indices > 0 
-                logIntegerArray("---- Uncommon Connections", uncommonConnections)
+                %logIntegerArray("---- Uncommon Connections", uncommonConnections)
                 for index = 1:indices
                     nextAgent = uncommonConnections(index);
-                    fprintf("---- Searching Uncommon Connection = %d\n",nextAgent);
+                    %fprintf("---- Searching Uncommon Connection = %d\n",nextAgent);
                     nextPathSegment = [currentPath , nextAgent];
                     paths = obj.findNextNetworkConnection(AM, searchLevel, nextPathSegment, thatAgentId, nextAgent, targetAgentId, paths);
                 end
             else
                 % No luck, go home empty handed
-                fprintf("**** Abandon Ship - No More Uncommon Connections ****\n\n");
+                %fprintf("**** Abandon Ship - No More Uncommon Connections ****\n\n");
                 return;
             end
         end
