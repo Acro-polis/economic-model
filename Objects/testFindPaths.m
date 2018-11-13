@@ -12,7 +12,6 @@ AM = importNetworkModelFromCSV(numberOfAgents, "test_network_10_agents.csv");
 time = 1;
 polis = Polis(AM);
 polis.createAgents(time);
-polis.depositUBI(100.0, time);
 
 fprintf("\nTest 1 - Connections between agents 10 and 9\n");
 sourceAgentId = 10;

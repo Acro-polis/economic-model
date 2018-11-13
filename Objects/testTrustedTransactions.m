@@ -1,14 +1,14 @@
 %=====================================================
 %
-% Test function testTrustedTransactions
-%
+% TODO - Incorporate this into overall test play
 %
 % Author: Jess
 % Created: 10.31.2018
 %=====================================================
 
+numberOfAgents = 10; % We need to know this; cannot derive it from the connections import file (yet) 
+AM = importNetworkModelFromCSV(numberOfAgents, "test_network_10_agents.csv");
 time = 1;
-AM = connectedGraph(4);
 polis = Polis(AM);
 polis.createAgents(time);
 
@@ -19,10 +19,7 @@ agent4 = polis.agents(4);
 
 fprintf("\nTesting with Connected Graph of 4 Agents\n\n");
 
-agent1.depositUBI(100.0, time);
-agent2.depositUBI(100.0, time);
-agent3.depositUBI(100.0, time);
-agent4.depositUBI(100.0, time);
+polis.depositUBI(100, time);
 
 % A1 buys from A2
 agent1.submitPurchaseWithDirectConnection(AM, 50, agent2, time);
@@ -37,7 +34,7 @@ balances2 = agent2.individualBalancesForTransactionWithAgent(agent1.id, mutualCo
 
 fprintf("Available balance of agent 1 to transact with agent 2 = %.2f\n",availableBalance1);
 agent1.dumpLedger;
+
 fprintf("\nAvailable balance of agent 2 to transact with agent 1 = %.2f\n",availableBalance2);
 agent2.dumpLedger;
-
 
