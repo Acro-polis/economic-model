@@ -6,8 +6,9 @@ classdef Polis < handle
 %================================================================
 
     properties (SetAccess = private)
-        AM          % The system adjacency matrix
-        agents      % Array of all agents
+        AM                  % The system adjacency matrix
+        agents              % Array of all agents
+        maximumSearchLevels % Maximum search steps allowed for finding valid paths
     end
 
     properties (SetAccess = private, GetAccess = private)
@@ -21,9 +22,11 @@ classdef Polis < handle
     
     methods (Access = public)
         
-        function obj = Polis(AM)
-            % Zeus assigns the adjacency matrix and instantiates the agents
+        function obj = Polis(AM, maximumSearchLevels)
+            % Assign the adjacency matrix maximum search levels
             obj.AM = AM;
+            obj.maximumSearchLevels = maximumSearchLevels;
+            % Reset the sequence
             obj.lastTransactionId = 0;
         end
     

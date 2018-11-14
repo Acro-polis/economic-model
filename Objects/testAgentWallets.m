@@ -11,7 +11,7 @@
 numberOfAgents = 10; % We need to know this; cannot derive it from the connections import file (yet) 
 AM = importNetworkModelFromCSV(numberOfAgents, "test_network_10_agents.csv");
 time = 1;
-polis = Polis(AM);
+polis = Polis(AM, 6);
 polis.createAgents(time);
 
 fprintf("\nTest Agent Wallets: time = %d\n\n",time);
@@ -148,7 +148,7 @@ fprintf("\n----------- Playing ------------\n");
 
 polis.delete
 time = 1;
-polis = Polis(AM);
+polis = Polis(AM, 6);
 polis.createAgents(time);
 polis.depositUBI(500.0, time);
 agent1 = polis.agents(1);

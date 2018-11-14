@@ -8,17 +8,13 @@ classdef Agent < handle
     properties (SetAccess = private)
         id          uint32          % The agent id for this agent
         birthdate   uint32          % The birthdate for this agent = time dt
-        polis       Polis           % Store a reference to God
+        polis       Polis           % Store a reference to the gods
     end
     
     properties (GetAccess = private, SetAccess = private)
         wallet      CryptoWallet    % This agents wallet
     end
-    
-    properties (Constant)
-        maximumSearchLevels = 6;
-    end
-    
+        
     methods (Access = public)
 
         function obj = Agent(id, polis, timeStep)
@@ -45,16 +41,6 @@ classdef Agent < handle
             
             % Use cells since we expect paths to be of unequal length
             allPaths = {};
-            
- % This was a bad assumption - optimized too early
-            % Check for a direct connection. If it exists, that's all we
-            % need (because if the direct connection fails then all more 
-            % complicated paths will fail in a buy / sell situation too)
-%            if obj.areWeConnected(AM, targetAgentId)
-%                allPaths = {[obj.id targetAgentId]};
-%                %fprintf("\nAgents are directly connected\n");
-%                return;
-%            end
             
             % Start with my connections (obj.id) and recursively discover 
             % each neighbors uncommon connections thereby building the 
@@ -343,7 +329,7 @@ classdef Agent < handle
             % If we run out of uncommon connections before we find the
             % target then we are out of luck, they are not connected and we
             % return (see below). Same if we run out of search levels
-            if searchLevel > Agent.maximumSearchLevels
+            if searchLevel > obj.polis.maximumSearchLevels
                 % No luck, go home empty handed
                 %fprintf("**** Abandon Ship - Max Level Reached ****\n\n");
                 return;
