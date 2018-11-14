@@ -63,6 +63,25 @@ targetAgentId = 2;
 expectedPaths = 10;
 runPathTest(polis, sourceAgentId, targetAgentId, testNumber, expectedPaths);
 
+testNumber = 8;
+sourceAgentId = 1;
+targetAgentId = 6;
+expectedPaths = 5;
+runPathTest(polis, sourceAgentId, targetAgentId, testNumber, expectedPaths);
+fprintf("\nTests Completed Successfully\n");
+
+testNumber = 9;
+sourceAgentId = 1;
+targetAgentId = 3;
+expectedPaths = 5;
+runPathTest(polis, sourceAgentId, targetAgentId, testNumber, expectedPaths);
+fprintf("\nTests Completed Successfully\n");
+
+testNumber = 10;
+sourceAgentId = 1;
+targetAgentId = 2;
+expectedPaths = 5;
+runPathTest(polis, sourceAgentId, targetAgentId, testNumber, expectedPaths);
 fprintf("\nTests Completed Successfully\n");
 
 %+++++++++++++++++++++++++++++++++++++++++

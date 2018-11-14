@@ -46,14 +46,15 @@ classdef Agent < handle
             % Use cells since we expect paths to be of unequal length
             allPaths = {};
             
+ % This was a bad assumption - optimized too early
             % Check for a direct connection. If it exists, that's all we
             % need (because if the direct connection fails then all more 
             % complicated paths will fail in a buy / sell situation too)
-            if obj.areWeConnected(AM, targetAgentId)
-                allPaths = {[obj.id targetAgentId]};
-                %fprintf("\nAgents are directly connected\n");
-                return;
-            end
+%            if obj.areWeConnected(AM, targetAgentId)
+%                allPaths = {[obj.id targetAgentId]};
+%                %fprintf("\nAgents are directly connected\n");
+%                return;
+%            end
             
             % Start with my connections (obj.id) and recursively discover 
             % each neighbors uncommon connections thereby building the 
@@ -72,13 +73,17 @@ classdef Agent < handle
         end
                
         function selectedPath = findAValidPathForTheTransactionAmount(obj, AM, paths, amount)
-            % Return the first path that supports the transaction
+            % Return the first path that supports the transaction. Paths
+            % should be ordered from the shortest to the longest.
             selectedPath = [];
-            [~, indices] = size(paths);
+            [indices, ~] = size(paths);
             for index = 1:indices
-                path = cell2mat(paths(1, index));
+                path = cell2mat(paths(index, 1));
+                fprintf("\nPath %d of %d\n", index, indices);
+                logIntegerArray("Analyzing Path",path);
                 if obj.checkIfPathIsValid(AM, path, amount) 
                     selectedPath = path;
+                    return;
                 end
             end
         end

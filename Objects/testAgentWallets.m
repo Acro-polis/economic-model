@@ -142,3 +142,38 @@ polis.agents(9).dumpLedger();
 polis.agents(8).dumpLedger();
 polis.agents(6).dumpLedger();
 polis.agents(1).dumpLedger();
+
+
+fprintf("\n----------- Playing ------------\n");
+
+polis.delete
+time = 1;
+polis = Polis(AM);
+polis.createAgents(time);
+polis.depositUBI(500.0, time);
+agent1 = polis.agents(1);
+agent2 = polis.agents(2);
+agent3 = polis.agents(3);
+agent4 = polis.agents(4);
+agent6 = polis.agents(6);
+
+time = time + 1;
+transacted = agent1.submitPurchase(AM, 400.00, agent6, time);
+assert(transacted == true,"Transaction Failed");
+
+time = time + 1;
+transacted = agent3.submitPurchase(AM, 250.00, agent1, time);
+assert(transacted == true,"Transaction Failed");
+
+time = time + 1;
+transacted = agent1.submitPurchase(AM, 249.00, agent2, time);
+assert(transacted == true,"Transaction Failed");
+
+agent1.dumpLedger;
+agent3.dumpLedger;
+agent4.dumpLedger;
+agent2.dumpLedger;
+
+
+
+
