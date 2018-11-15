@@ -47,28 +47,10 @@ assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction 
 result = agent2.submitPurchase(AM, 200, agent4, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
-agent1.dumpLedger();
-fprintf('\n');
-agent2.dumpLedger();
-fprintf('\n');
-agent3.dumpLedger();
-fprintf('\n');
-agent4.dumpLedger();
-
-a1bal = agent1.currentBalanceAllCurrencies;
-a2bal = agent2.currentBalanceAllCurrencies;
-a3bal = agent3.currentBalanceAllCurrencies;
-a4bal = agent4.currentBalanceAllCurrencies;
-
-fprintf('\nAgent1 Current Balnace = %.2f\n', a1bal);
-fprintf('Agent2 Current Balnace = %.2f\n', a2bal);
-fprintf('Agent3 Current Balnace = %.2f\n', a3bal);
-fprintf('Agent4 Current Balnace = %.2f\n', a4bal);
-
-assert(a1bal == 425,'Error in Agent 1 balance, %d != 425', a1bal);
-assert(a2bal == 400,'Error in Agent 2 balance, %d != 400', a2bal);
-assert(a3bal == 475,'Error in Agent 3 balance, %d != 675', a3bal);
-assert(a4bal == 700,'Error in Agent 4 balance, %d != 700', a4bal);
+agents = [agent1, agent2, agent3, agent4];
+expectedBalances = [425.0, 400.0, 475.0, 700.0];
+dumpLedgers(agents);
+checkBalances(agents, expectedBalances);
 
 %---------------------------------------------
 
@@ -78,32 +60,11 @@ fprintf("\nTest Agent Wallets: time = %d\n",time);
 % Apply Demurrage
 polis.applyDemurrage(time);
 
-agent1.dumpLedger();
-fprintf('\n');
-agent2.dumpLedger();
-fprintf('\n');
-agent3.dumpLedger();
-fprintf('\n');
-agent4.dumpLedger();
-
-a1bal = agent1.currentBalanceAllCurrencies;
-a2bal = agent2.currentBalanceAllCurrencies;
-a3bal = agent3.currentBalanceAllCurrencies;
-a4bal = agent4.currentBalanceAllCurrencies;
 agent5 = polis.agents(5);
-a5bal = agent5.currentBalanceAllCurrencies;
-
-fprintf('\nAgent1 Current Balnace = %.2f\n', a1bal);
-fprintf('Agent2 Current Balnace = %.2f\n', a2bal);
-fprintf('Agent3 Current Balnace = %.2f\n', a3bal);
-fprintf('Agent4 Current Balnace = %.2f\n', a4bal);
-fprintf('Agent5 Current Balnace = %.2f\n', a5bal);
-
-assert(a1bal == 403.75,'Error in Agent 1 balance, %d != 403.75', a1bal);
-assert(a2bal == 380.00,'Error in Agent 2 balance, %d != 380.00', a2bal);
-assert(a3bal == 451.25,'Error in Agent 3 balance, %d != 451.25', a3bal);
-assert(a4bal == 665.00,'Error in Agent 4 balance, %d != 665.00', a4bal);
-assert(a5bal == 475.00,'Error in Agent 5 balance, %d != 475.00', a5bal);
+agents = [agent1, agent2, agent3, agent4, agent5];
+expectedBalances = [403.75, 380.0, 451.25, 665.0, 475.0];
+dumpLedgers(agents);
+checkBalances(agents, expectedBalances);
 
 %---------------------------------------------
 
@@ -114,33 +75,10 @@ fprintf("\nTest Agent Wallets: time = %d\n",time);
 result = agent2.submitPurchase(AM, 250.0, agent5, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
-agent1.dumpLedger();
-fprintf('\n');
-agent2.dumpLedger();
-fprintf('\n');
-agent3.dumpLedger();
-fprintf('\n');
-agent4.dumpLedger();
-fprintf('\n');
-agent5.dumpLedger();
-
-a1bal = agent1.currentBalanceAllCurrencies;
-a2bal = agent2.currentBalanceAllCurrencies;
-a3bal = agent3.currentBalanceAllCurrencies;
-a4bal = agent4.currentBalanceAllCurrencies;
-a5bal = agent5.currentBalanceAllCurrencies;
-
-fprintf('\nAgent1 Current Balnace = %.2f\n', a1bal);
-fprintf('Agent2 Current Balnace = %.2f\n', a2bal);
-fprintf('Agent3 Current Balnace = %.2f\n', a3bal);
-fprintf('Agent4 Current Balnace = %.2f\n', a4bal);
-fprintf('Agent5 Current Balnace = %.2f\n', a5bal);
-
-assert(a1bal == 403.75,'Error in Agent 1 balance, %d != 403.75', a1bal);
-assert(a2bal == 130.00,'Error in Agent 2 balance, %d != 1300.00', a2bal);
-assert(a3bal == 451.25,'Error in Agent 3 balance, %d != 451.25', a3bal);
-assert(a4bal == 665.00,'Error in Agent 4 balance, %d != 665.00', a4bal);
-assert(a5bal == 725.00,'Error in Agent 5 balance, %d != 775.00', a5bal);
+agents = [agent1, agent2, agent3, agent4, agent5];
+expectedBalances = [403.75, 130.0, 451.25, 665.0, 725.0];
+dumpLedgers(agents);
+checkBalances(agents, expectedBalances);
 
 %---------------------------------------------
 
@@ -156,49 +94,25 @@ agent8.dumpLedger();
 agent6.dumpLedger();
 agent1.dumpLedger();
 
-a1bal = agent1.currentBalanceAllCurrencies;
-a2bal = agent2.currentBalanceAllCurrencies;
-a3bal = agent3.currentBalanceAllCurrencies;
-a4bal = agent4.currentBalanceAllCurrencies;
-a5bal = agent5.currentBalanceAllCurrencies;
-a6bal = agent6.currentBalanceAllCurrencies;
-a8bal = agent8.currentBalanceAllCurrencies;
-
-fprintf('\nAgent1 Current Balnace = %.2f\n', a1bal);
-fprintf('Agent2 Current Balnace = %.2f\n', a2bal);
-fprintf('Agent3 Current Balnace = %.2f\n', a3bal);
-fprintf('Agent4 Current Balnace = %.2f\n', a4bal);
-fprintf('Agent5 Current Balnace = %.2f\n', a5bal);
-fprintf('Agent6 Current Balnace = %.2f\n', a6bal);
-fprintf('Agent8 Current Balnace = %.2f\n', a8bal);
-
-assert(a1bal == 503.75,'Error in Agent 1 balance, %d != 503.75', a1bal);
-assert(a2bal == 130.00,'Error in Agent 2 balance, %d != 130.00', a2bal);
-assert(a3bal == 451.25,'Error in Agent 3 balance, %d != 451.25', a3bal);
-assert(a4bal == 665.00,'Error in Agent 4 balance, %d != 665.00', a4bal);
-assert(a5bal == 725.00,'Error in Agent 5 balance, %d != 775.00', a5bal);
-assert(a6bal == 475.00,'Error in Agent 6 balance, %d != 465.00', a6bal);
-assert(a8bal == 375.00,'Error in Agent 8 balance, %d != 375.00', a8bal);
-
+agents = [agent1, agent2, agent3, agent4, agent5, agent6, agent8];
+expectedBalances = [503.75, 130.0, 451.25, 665.0, 725.0, 475.0, 375.0];
+dumpLedgers(agents);
+checkBalances(agents, expectedBalances);
 
 %---------------------------------------------
-
-% TODO - finish test plan for these final two tests
 
 time = time + 1;
 fprintf("\nTest Agent Wallets: time = %d\n",time);
 
 agent10 = polis.agents(10);
 agent9 = polis.agents(9);
-result = agent10.submitPurchase(AM, 12.0, agent1, time);
+result = agent10.submitPurchase(AM, 125.0, agent1, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
-agent10.dumpLedger();
-polis.agents(9).dumpLedger();
-polis.agents(8).dumpLedger();
-polis.agents(6).dumpLedger();
-polis.agents(1).dumpLedger();
-
+agents = [agent10, agent9, agent8, agent6, agent1];
+expectedBalances = [350.0, 475.0, 375.0, 475.0, 628.75];
+dumpLedgers(agents);
+checkBalances(agents, expectedBalances);
 
 fprintf("\n\n----- Wallet Test Suite 2 ----\n\n");
 
@@ -225,7 +139,26 @@ time = time + 1;
 result = agent1.submitPurchase(AM, 249.00, agent2, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
-agent1.dumpLedger;
-agent3.dumpLedger;
-agent4.dumpLedger;
-agent2.dumpLedger;
+agents = [agent1, agent2, agent3, agent4, agent6];
+expectedBalances = [101.0, 749.0, 250.0, 500.0, 900.0];
+dumpLedgers(agents);
+checkBalances(agents, expectedBalances);
+
+function checkBalances(agents, expectedBalances)
+    fprintf("\nChecking Balances\n");
+    [~, cols] = size(agents);
+    for i = 1:cols
+        agent = agents(i);
+        balance = agent.currentBalanceAllCurrencies;
+        fprintf("Agent %d's current balance = %.2f\n", agent.id, balance);
+        assert(balance == expectedBalances(i),"Error with Agent %d: Balance = %.2f, Expected Balance = %.2f", agent.id, balance, expectedBalances(i));
+    end
+end
+
+function dumpLedgers(agents)
+    fprintf("\n");
+    [~, cols] = size(agents);
+    for i = 1:cols
+        agents(i).dumpLedger;
+    end
+end
