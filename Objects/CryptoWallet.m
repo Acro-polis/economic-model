@@ -63,6 +63,7 @@ Buying - subtracting currency
             
             transacted = true;
  
+            [~, numberAgents] = size(agentsInPath);
             transactionId = obj.agent.polis.uniqueId();
             
             % Record the first leg
