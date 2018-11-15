@@ -1,6 +1,8 @@
 classdef Agent < handle
 %================================================================
-% Class Agent: Represents an agent in the system
+% Class Agent: 
+%
+% Represents an Agent in the system
 %
 % Created by Jess 09.13.18
 %================================================================

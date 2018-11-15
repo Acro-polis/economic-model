@@ -2,13 +2,15 @@ classdef Polis < handle
 %================================================================
 % Class Polis
 %
+% Welcome to Mount Olympus
+%
 % Created by Jess 10.26.18
 %================================================================
 
     properties (SetAccess = private)
         AM                  % The system adjacency matrix
         agents              % Array of all agents
-        maximumSearchLevels % Maximum search steps allowed for finding valid paths
+        maximumSearchLevels % Maximum search steps allowed for finding valid paths, 6 is a good number
     end
 
     properties (SetAccess = private, GetAccess = private)
@@ -71,6 +73,6 @@ classdef Polis < handle
     end
     
     methods (Static)
-
     end
+    
 end

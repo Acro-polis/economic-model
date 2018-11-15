@@ -2,6 +2,9 @@ classdef CryptoWallet < handle
 %================================================================
 % Class CryptoWallet
 %
+% This is a wallet. Each Agent has one. It's designed to be a 
+% private attribute of each Agent
+%
 % Created by Jess 10.15.18
 %================================================================    
 %{ 
@@ -59,10 +62,7 @@ Buying - subtracting currency
             % is the selling agent.
             
             transacted = true;
-            
-            [~, numberAgents] = size(agentsInPath);
-            assert(numberAgents > 1,"Error: use submitPurchaseWithDirectConnection instead");
-
+ 
             transactionId = obj.agent.polis.uniqueId();
             
             % Record the first leg
