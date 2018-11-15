@@ -18,12 +18,12 @@ Demurrage - Subtracting Demurrage
     - sourceAgentId is Polis
     - destinationAgentId is the recipient agent
     - quantity is negative
-Selling - subtracting currency
-    - currencyAgentId correspnds to the currency type 
+Selling - adding currency
+    - currencyAgentId corresponds to the currency type 
     - sourceAgentId corresponds to the buying agent
     - destinationAgentId is the recipient agent
     - quantity is positive
-Buying - adding currency
+Buying - subtracting currency
     - currencyAgentId correspnds to the currency type 
     - sourceAgentId coressponds to the selling agent
     - destinationAgentId is the recipient agent
@@ -120,10 +120,10 @@ Buying - adding currency
                     if remainingAmount > balance
                         % Record Buy/Sell using balance and continue
                         % Buy
-                        tAB = Transaction(buyTransactionType, -balance, currencyAgentId, transactionId, obj.agent.id, thatAgent.id, "BUY", timeStep);
+                        tAB = Transaction(buyTransactionType, -balance, currencyAgentId, transactionId, thatAgent.id, obj.agent.id, "BUY", timeStep);
                         obj.addTransaction(tAB);
                         % Sell
-                        tBA = Transaction(sellTransactionType, balance, currencyAgentId, transactionId, thatAgent.id, obj.agent.id, "SELL", timeStep);
+                        tBA = Transaction(sellTransactionType, balance, currencyAgentId, transactionId, obj.agent.id, thatAgent.id, "SELL", timeStep);
                         thatAgent.addTransaction(tBA);
                         remainingAmount = remainingAmount - balance;
                     else
@@ -131,10 +131,10 @@ Buying - adding currency
                         % break, the purchase amount has been
                         % satisfied.
                         % Buy
-                        tAB = Transaction(buyTransactionType, -remainingAmount, currencyAgentId, transactionId, obj.agent.id, thatAgent.id, "BUY", timeStep);
+                        tAB = Transaction(buyTransactionType, -remainingAmount, currencyAgentId, transactionId, thatAgent.id, obj.agent.id, "BUY", timeStep);
                         obj.addTransaction(tAB);
                         % Sell
-                        tBA = Transaction(sellTransactionType, remainingAmount, currencyAgentId, transactionId, thatAgent.id, obj.agent.id, "SELL", timeStep);
+                        tBA = Transaction(sellTransactionType, remainingAmount, currencyAgentId, transactionId, obj.agent.id, thatAgent.id, "SELL", timeStep);
                         thatAgent.addTransaction(tBA);
                         break;
                     end
