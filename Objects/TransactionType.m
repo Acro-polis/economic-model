@@ -6,12 +6,19 @@ classdef TransactionType
 %================================================================
 
     properties (Constant)
-        UBI                 = 6001
-        DEMURRAGE           = 6002
-        BUY                 = 6003
-        SELL                = 6004
-        BUY_TRANSITIVE      = 7001
-        SELL_TRANSITIVE     = 7002
+        
+        % Purchase transaction codes
+        UBI                  = 6001
+        DEMURRAGE            = 6002
+        BUY                  = 6003
+        SELL                 = 6004
+        BUY_TRANSITIVE       = 7001
+        SELL_TRANSITIVE      = 7002
+        
+        % Transaction status codes
+        TRANSACTION_SUCCEEDED   = 5000;
+        FAILED_NO_PATH_FOUND    = 5001;
+        FAILED_NO_LIQUIDITY     = 5001;
     end
     
 end

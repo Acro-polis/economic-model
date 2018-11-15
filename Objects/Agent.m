@@ -60,7 +60,7 @@ classdef Agent < handle
                                    
         end
                
-        function selectedPath = findAValidPathForTheTransactionAmount(obj, AM, paths, amount)
+        function selectedPath = findALiquidPathForTheTransactionAmount(obj, AM, paths, amount)
             % Return the first path that supports the transaction. Paths
             % should be ordered from the shortest to the longest.
             selectedPath = [];
@@ -104,28 +104,28 @@ classdef Agent < handle
         % Transaction methods
         %
         
-        function transacted = submitPurchase(obj, AM, amount, targetAgent, timeStep)
+        function result = submitPurchase(obj, AM, amount, targetAgent, timeStep)
             % Submit a purachase between this agent (obj.id) and the 
             % targetAgent. The transaction may require intermediary agents
             % to complete the transaction. Validate the transaction and if
             % it passes complete the transaction.
 
-            transacted = true;
+            result = TransactionType.TRANSACTION_SUCCEEDED;
             
             % Find all possible paths
             paths = obj.findAllNetworkPathsToAgent(AM, targetAgent.id);
             obj.logPaths(paths);
             if isempty(paths)
-                transacted = false;
+                result = TransactionType.FAILED_NO_PATH_FOUND;
                 return;
             end
             
             % Find a path that satisfies the transaction criteria (e.g. all
             % agents have enough balance)
-            path = obj.findAValidPathForTheTransactionAmount(AM, paths, amount);
+            path = obj.findALiquidPathForTheTransactionAmount(AM, paths, amount);
             logIntegerArray("Ths selected path is",path);
             if isempty(path) 
-                transacted = false;
+                result = TransactionType.FAILED_NO_LIQUIDITY;
                 return;
             end
 
@@ -141,7 +141,7 @@ classdef Agent < handle
                 for i = 2:numberAgents
                     agents = [agents , obj.polis.agents(path(1,i))];
                 end
-                transacted = obj.wallet.commitPurchaseWithIndirectConnection(AM, amount, agents, timeStep);
+                obj.wallet.commitPurchaseWithIndirectConnection(AM, amount, agents, timeStep);
             end
         end
         

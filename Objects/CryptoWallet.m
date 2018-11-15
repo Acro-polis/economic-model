@@ -54,15 +54,13 @@ Buying - subtracting currency
         %
         % Transactional Functions
         %
-        function transacted = commitPurchaseWithIndirectConnection(obj, AM, amount, agentsInPath, timeStep)
+        function commitPurchaseWithIndirectConnection(obj, AM, amount, agentsInPath, timeStep)
             % Commit a transaction that spans more than two connected
             % agents. Note the agent array represents the path but is
             % missing the buyer (this agent) from its list. So the total 
             % number of agents is really numberAgents + 1. The last agent
             % is the selling agent.
             
-            transacted = true;
- 
             [~, numberAgents] = size(agentsInPath);
             transactionId = obj.agent.polis.uniqueId();
             
