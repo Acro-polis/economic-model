@@ -13,7 +13,7 @@ fprintf(fileId,'\nCommerce Model Input Parameters\n\n');
 
 fprintf(fileId,'1)  Number of Time Steps (dt): %.0f\n',300.0);
 fprintf(fileId,'2)  Number of Agents: %d\n',25.0);
-fprintf(fileId,'3)  Network Filenae: %s\n',"use blank for connected network");
+fprintf(fileId,'3)  Network Filename: %s\n',"use blank for connected network");
 fprintf(fileId,'4)  Initial Wallet Size (drachma / agent): %.1f\n',0.0);
 fprintf(fileId,'5)  UBI Rate (drachma / dt): %.1f\n',100.0);
 fprintf(fileId,'6)  Percent Demurrage (/dt): %.2f\n',0.05);

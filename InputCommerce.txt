@@ -3,11 +3,11 @@ Commerce Model Input Parameters
 
 1)  Number of Time Steps (dt): 300
 2)  Number of Agents: 25
-3)  Network Filenae: use blank for connected network
+3)  Network Filename:test_network_10_agents
 4)  Initial Wallet Size (drachma / agent): 0.0
 5)  UBI Rate (drachma / dt): 100.0
 6)  Percent Demurrage (/dt): 0.05
-7)  Percentage of Agents Buying: 1.0
-8)  Percentage of Agents Selling: 1.0
+7)  Percentage of Agents Buying: 0.75
+8)  Percentage of Agents Selling: 0.75
 9)  Price of Goods (drachma / unit): 75.0
 10) Initial Inventory (# units / agent): 600.0
