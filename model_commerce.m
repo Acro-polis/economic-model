@@ -6,8 +6,11 @@
 % Created: 2018.08.30
 %===================================================
 
-version_number = "1.1.1"; % Tagged version in githum
+version_number = "1.2.0"; % Tagged version in github
 	
+inputTypeDouble = 0;
+inputTypeString = 1;
+
 % Setup
 fprintf("\n===========================================================\n");
 fprintf("Modeling Start\n")
@@ -22,13 +25,23 @@ for i = 1:3
 end
 
 % Initializations
-T =  parseInputString(fgetl(fileId));   % Max Time (Input 1)
-dt = 1;                                 % Time Step 
-numSteps = round(T / dt);               % Number of time steps (integer)
+T =  parseInputString(fgetl(fileId), inputTypeDouble);                  % Max Time (Input 1)
+dt = 1;                                                                 % Time Step 
+numSteps = round(T / dt);                                               % Number of time steps (integer)
 assert(numSteps >= 1,'Assert: Number of time steps must be >= 1!');
 
-N =  round(parseInputString(fgetl(fileId)));    % Number of Agents (nodes) (Input 2)
-AM = connectedGraph(N);                         % The WOT network
+N =  round(parseInputString(fgetl(fileId), inputTypeDouble));           % Number of Agents (nodes) (Input 2)
+
+networkFilename = parseInputString(fgetl(fileId), inputTypeString);     % Network FileName (Input 3)
+fprintf("Network Filename = %s\n", networkFilename);
+
+AM = [];
+if networkFilename == ""
+    AM = connectedGraph(N);                                                
+else
+    AM = importNetworkModelFromCSV(N, "test_network_10_agents.csv");
+end
+
 assert(N >= 2,'Assert: Number of agemts must be >= 2!');
 
 fprintf("This simulation has %d agents and a duration of %d time steps\n\n", N, numSteps);
@@ -37,20 +50,20 @@ fprintf("This simulation has %d agents and a duration of %d time steps\n\n", N, 
 drachma = 1;
 
 % Wallet
-seedWalletSize = parseInputString(fgetl(fileId)); % Wallet Size (Input 3)
+seedWalletSize = parseInputString(fgetl(fileId), inputTypeDouble); % Wallet Size (Input 4)
 Wallet = newATMatrix(N,numSteps,seedWalletSize);
 
 fprintf("Starting wallet size per agent = %.2f drachma\n", seedWalletSize);
 
 % Rate of UBI
-amountUBI = parseInputString(fgetl(fileId)); % UBI amount (Input 4)
+amountUBI = parseInputString(fgetl(fileId), inputTypeDouble); % UBI amount (Input 5)
 assert(amountUBI > 0,'Assert: UBI must be > 0!');
 b = 1.0;
 amountUBI = amountUBI*drachma / b*dt; 
 UBI = newATMatrix(N,numSteps,0.0);
 
 % Percentage of Demurrage
-percentDemurrage = parseInputString(fgetl(fileId)); % Percentage Demurrage (Input 5)
+percentDemurrage = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Demurrage (Input 6)
 assert(percentDemurrage >= 0 && percentDemurrage <= 1.0,'Assert: Percentage Demurrage Out Of Range!');
 d = 1;
 percentDemurrage = percentDemurrage*drachma / d*dt;
@@ -61,7 +74,7 @@ fprintf("UBI = %.2f drachmas / agent / dt, Demurrage = %.2f percent / agent / dt
 % Buyers 1 = Buyer, 0 = No Buyer
 Buyers = zeros(N,1);
 unitsBought = newATMatrix(N,numSteps,0.0);
-percentBuyers = parseInputString(fgetl(fileId)); % Percentage Buyers (Input 6)
+percentBuyers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Buyers (Input 7)
 assert(percentBuyers > 0 && percentBuyers <= 1.0,'Assert: Percentage Buyers Out Of Range!')
 numberOfBuyers = round(percentBuyers*N);
 
@@ -70,20 +83,20 @@ fprintf("Num buyers   = %d <= %d agents\n", numberOfBuyers, N);
 % Sellers 1 = Seller, 0 = No Seller
 Sellers = zeros(N,1);
 unitsSold = newATMatrix(N,numSteps,0.0);
-percentSellers = parseInputString(fgetl(fileId)); % Percentage Sellers (Input 7)
+percentSellers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Sellers (Input 8)
 assert(percentSellers > 0 && percentSellers <= 1.0,'Assert: Percentage Sellers Out Of Range!')
 numberOfSellers = round(percentSellers*N);
 
 fprintf("Num sellers  = %d <= %d agents\n", numberOfSellers, N);
 
 % Cost of goods
-price = parseInputString(fgetl(fileId)); % Price Goods (Input 8);
+price = parseInputString(fgetl(fileId), inputTypeDouble); % Price Goods (Input 9);
 price = price*drachma;
 
 fprintf("Price of goods = %.2f drachmas\n", price);
 
 % Seller Inventory
-inventoryInitialUnits = parseInputString(fgetl(fileId)); % Inital Inventory (Input 9)
+inventoryInitialUnits = parseInputString(fgetl(fileId), inputTypeDouble); % Inital Inventory (Input 10)
 inventoryInitialValue = inventoryInitialUnits*price;
 sellerInventoryUnits = newATMatrix(N,numSteps,0.0);
 
