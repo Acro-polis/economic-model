@@ -31,24 +31,25 @@ numSteps = round(T / dt);                                               % Number
 assert(numSteps >= 1,'Assert: Number of time steps must be >= 1!');
 
 N =  round(parseInputString(fgetl(fileId), inputTypeDouble));           % Number of Agents (nodes) (Input 2)
+assert(N >= 2,'Assert: Number of agemts must be >= 2!');
 
 networkFilename = parseInputString(fgetl(fileId), inputTypeString);     % Network FileName (Input 3)
-fprintf("Network Filename = %s\n", networkFilename);
 
 AM = [];
 if networkFilename == ""
+    fprintf("\nUsing a connected network\n");
     AM = connectedGraph(N);                                                
 else
-    AM = importNetworkModelFromCSV(N, "test_network_10_agents.csv");
+    fprintf("\nNetwork Filename = %s\n", networkFilename);
+    AM = importNetworkModelFromCSV(N, networkFilename);
 end
 
+% Create the polis
 maxSearchLevels = 6;
 polis = Polis(AM, maxSearchLevels); 
-polis.createAgents(0);
+polis.createAgents(1);
 
-assert(N >= 2,'Assert: Number of agemts must be >= 2!');
-
-fprintf("This simulation has %d agents and a duration of %d time steps\n\n", N, numSteps);
+fprintf("\nThis simulation has %d agents and a duration of %d time steps\n\n", N, numSteps);
 
 % Unit of currency
 drachma = 1;
