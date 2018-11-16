@@ -42,6 +42,10 @@ else
     AM = importNetworkModelFromCSV(N, "test_network_10_agents.csv");
 end
 
+maxSearchLevels = 6;
+polis = Polis(AM, maxSearchLevels); 
+polis.createAgents(0);
+
 assert(N >= 2,'Assert: Number of agemts must be >= 2!');
 
 fprintf("This simulation has %d agents and a duration of %d time steps\n\n", N, numSteps);
