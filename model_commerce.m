@@ -162,9 +162,9 @@ for time = 1:numSteps
        sellerInventoryUnits(:,time) = sellerInventoryUnits(:,time - 1);
        
        % Subtract the demurrage from each wallet and accumulate total demurrange 
-        if time == 200
-            percentDemurrage = percentDemurrage / 2.0;
-        end
+%         if time == 200
+%             percentDemurrage = percentDemurrage / 2.0;
+%         end
         
        incrementalDemurrage = Wallet(:,time) * percentDemurrage;
        Wallet(:,time) = Wallet(:,time) - incrementalDemurrage;
