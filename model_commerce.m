@@ -111,16 +111,17 @@ fclose(fileId);
 
 % Randomely select sellers
 % TODO - Make preferrential selection?
-selectedNodes = randsample(N,numberOfSellers);
 if (numberOfSellers == N) 
     Sellers = ones(N,1);
     sellerInventoryUnits(:,1) = inventoryInitialUnits;
 else   
+    selectedNodes = randsample(N,numberOfSellers);
     for i = 1:numberOfSellers
         sellerInventoryUnits(selectedNodes(i,1)) = inventoryInitialUnits;
         Sellers(selectedNodes(i,1)) = 1;
     end
 end
+polis.setupSellers(numberOfSellers, inventoryInitialUnits, numSteps);
 
 % Randomely select buyers
 % TODO - Make preferrential selection?
@@ -132,6 +133,7 @@ else
         Buyers(selectedNodes(i,1)) = 1;
     end
 end
+polis.setupBuyers(numberOfBuyers, numSteps);
 
 % Report roles
 [numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents] = parseRoles(Buyers, Sellers, N);

@@ -1,7 +1,7 @@
 
 Commerce Model Input Parameters
 
-1)  Number of Time Steps (dt): 300
+1)  Number of Time Steps (dt): 3
 2)  Number of Agents: 10
 3)  Network Filename:test_network_10_agents.csv
 4)  Initial Wallet Size (drachma / agent): 0.0

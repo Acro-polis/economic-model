@@ -22,6 +22,16 @@ classdef Polis < handle
         PercentDemurage = 0.05
     end
     
+    properties (Dependent)
+        numberOfAgents
+    end
+    
+    methods 
+        function numAgents = get.numberOfAgents(obj)
+            [numAgents, ~] = size(obj.AM);
+        end
+    end
+    
     methods (Access = public)
         
         function obj = Polis(AM, maximumSearchLevels)
@@ -68,6 +78,22 @@ classdef Polis < handle
             % the time comes, this will suffice for quite a while.
             obj.lastTransactionId = obj.lastTransactionId + 1;
             uniqueId = obj.lastTransactionId;
+        end
+        
+        function setupSellers(obj, numberOfSellers, initialInventory, totalTimeSteps)
+            % Setup the agents that will be sellers
+            selectedAgents = randsample(obj.numberOfAgents, numberOfSellers);
+            for i = 1:numberOfSellers
+                obj.agents(selectedAgents(i,1)).setupAsSeller(initialInventory, totalTimeSteps);
+            end
+        end
+        
+        function setupBuyers(obj, numberOfBuyers, totalTimeSteps)
+            % Setup the agents that will be buyers
+            selectedAgents = randsample(obj.numberOfAgents, numberOfBuyers);
+            for i = 1:numberOfBuyers
+                obj.agents(selectedAgents(i,1)).setupAsBuyer(totalTimeSteps);
+            end
         end
         
     end

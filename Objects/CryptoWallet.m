@@ -219,8 +219,15 @@ Buying - subtracting currency
         end
         
         function currentBalance = get.currentBalanceAllCurrencies(obj)
-            % Total balance, irrespective of agent dependencies
+            % Total balance, all currencies (irrespective of agent 
+            % dependencies)
             currentBalance = sum([obj.transactions.amount]);
+        end
+        
+        function currentBalance = currentBalanceAllCurrenciesAtTime(obj, timeStep)
+            % Total balance at time timeStep, all currencies (irrespective
+            % of agent dependencies)
+            currentBalance = sum([obj.transactions.amount]); %TODO add .and clause
         end
         
         %

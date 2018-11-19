@@ -7,16 +7,34 @@ classdef Agent < handle
 % Created by Jess 09.13.18
 %================================================================
 
+    properties (SetAccess = public, GetAccess = public)
+        
+    end
+    
     properties (SetAccess = private)
         id          uint32          % The agent id for this agent
         birthdate   uint32          % The birthdate for this agent = time dt
         polis       Polis           % Store a reference to the gods
+        numberItemsSold   
+        initialInventory   uint32
+        isSeller    
+        isBuyer     
     end
     
     properties (GetAccess = private, SetAccess = private)
         wallet      CryptoWallet    % This agents wallet
     end
-        
+    
+    properties (Dependent)
+        availabeInventory  
+    end
+
+    methods
+        function inventory = get.availabeInventory(obj)
+            inventory = obj.initialInventory - sum(obj.numberItemsSold(1,:));
+        end
+    end
+    
     methods (Access = public)
 
         function obj = Agent(id, polis, timeStep)
@@ -26,10 +44,30 @@ classdef Agent < handle
             assert(id ~= Polis.PolisId,'Error: Agent Id equals reserved PolisId!');
             obj.id = id;
             obj.birthdate = timeStep;
-            obj.wallet = CryptoWallet(obj);
             obj.polis = polis;
+            obj.wallet = CryptoWallet(obj);
+            obj.isSeller = false;
+            obj.isBuyer = false;
         end
                
+        %
+        % Seller / Buyer related
+        %
+        function setupAsSeller(obj, initialInventory, totalTimeSteps)
+            obj.isSeller = true;
+            obj.initialInventory = initialInventory;
+            obj.numberItemsSold = zeros(1,totalTimeSteps);
+        end
+        
+        function recordSale(obj, numItems, timeStep)
+            assert(obj.availabeInventory >= numItems,"Error: unexpectedly out of inventory");
+            obj.numberItemsSoldmsSold(1,timeStep) = obj.numberItemsSold(1,timeStep) + numItems;
+        end
+                        
+        function setupAsBuyer(obj, totalTimeSteps)
+            obj.isBuyer = true;
+        end
+
         %
         % Network exploration methods
         %
@@ -205,6 +243,11 @@ classdef Agent < handle
             [agentIds, balances] = obj.wallet.individualBalancesForTransactionWithAgent(thatAgentId, mutualAgentIds);
         end        
                     
+        function currentBalance = currentBalanceAllCurrenciesAtTime(obj, timeStep)
+            % Return the balance at time timeStep, all currencies
+            currentBalance = obj.wallet.currentBalanceAllCurrenciesAtTime(timeStep);
+        end
+
         %        
         % Methods supporting data logging
         %
