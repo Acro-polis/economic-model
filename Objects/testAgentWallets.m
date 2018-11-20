@@ -114,6 +114,9 @@ expectedBalances = [350.0, 475.0, 375.0, 475.0, 628.75];
 dumpLedgers(agents);
 checkBalances(agents, expectedBalances);
 
+expectedBalances = [500.0, 425.0, 403.75, 403.75, 503.75, 628.75];
+checkBalancesInTime(agent1, time, expectedBalances);
+
 fprintf("\n\n----- Wallet Test Suite 2 ----\n\n");
 
 polis.delete
@@ -152,6 +155,15 @@ function checkBalances(agents, expectedBalances)
         balance = agent.currentBalanceAllCurrencies;
         fprintf("Agent %d's current balance = %.2f\n", agent.id, balance);
         assert(balance == expectedBalances(i),"Error with Agent %d: Balance = %.2f, Expected Balance = %.2f", agent.id, balance, expectedBalances(i));
+    end
+end
+
+function checkBalancesInTime(agent, time, expectedBalances)
+    fprintf("\nChecking Balances In Time\n");
+    for i = 1:time
+        balance = agent.currentBalanceAllCurrenciesAtTime(i);
+        fprintf("Agent %d's balance at time %d = %.2f\n", agent.id, i, balance);
+        assert(balance == expectedBalances(i),"Error with Agent %d: Balance at time %d = %.2f, Expected Balance = %.2f", agent.id, i, balance, expectedBalances(i));
     end
 end
 
