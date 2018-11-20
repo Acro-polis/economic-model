@@ -224,13 +224,30 @@ Buying - subtracting currency
             currentBalance = sum([obj.transactions.amount]);
         end
                         
-        function balance = currentBalanceAllCurrenciesAtTime(obj, timeStep)
-            % Balance at time timeStep, all currencies (irrespective
-            % of agent dependencies)
+        function balance = balanceAllTransactionsAtTimestep(obj, timeStep)
+            % Balance at time timeStep, all transactions
 
             function result = withinTimePeriod(obj)
                 % obj is a Transaction
                 if obj.dateCreated <= timeStep
+                    result = true;
+                else
+                    result = false;
+                end
+            end            
+            
+            functionHandle = @withinTimePeriod;
+            matchingTransactions = findobj(obj.transactions,'-function', functionHandle);
+            
+            balance = sum([matchingTransactions.amount]);
+        end
+        
+        function balance = balanceForTransactionTypeAtTimestep(obj, transactionType, timeStep)
+            % Balance at time timeStep for the transactionType
+
+            function result = withinTimePeriod(obj)
+                % obj is a Transaction
+                if obj.dateCreated <= timeStep && obj.type == transactionType
                     result = true;
                 else
                     result = false;

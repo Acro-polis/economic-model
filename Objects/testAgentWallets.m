@@ -117,6 +117,12 @@ checkBalances(agents, expectedBalances);
 expectedBalances = [500.0, 425.0, 403.75, 403.75, 503.75, 628.75];
 checkBalancesInTime(agent1, time, expectedBalances);
 
+expectedBalances = [500., 500., 500., 500., 500., 500.];
+checkBalancesInTimeForTransactionType(agent1, time, TransactionType.UBI, expectedBalances);
+
+expectedBalances = [0., 0., -21.25, -21.25, -21.25, -21.25];
+checkBalancesInTimeForTransactionType(agent1, time, TransactionType.DEMURRAGE, expectedBalances);
+
 fprintf("\n\n----- Wallet Test Suite 2 ----\n\n");
 
 polis.delete
@@ -161,9 +167,18 @@ end
 function checkBalancesInTime(agent, time, expectedBalances)
     fprintf("\nChecking Balances In Time\n");
     for i = 1:time
-        balance = agent.currentBalanceAllCurrenciesAtTime(i);
+        balance = agent.balanceAllTransactionsAtTimestep(i);
         fprintf("Agent %d's balance at time %d = %.2f\n", agent.id, i, balance);
         assert(balance == expectedBalances(i),"Error with Agent %d: Balance at time %d = %.2f, Expected Balance = %.2f", agent.id, i, balance, expectedBalances(i));
+    end
+end
+
+function checkBalancesInTimeForTransactionType(agent, time, transactionType, expectedBalances)
+    fprintf("\nChecking Balances In Time For TransctionType = %d\n", transactionType);
+    for i = 1:time
+        balance = agent.balanceForTransactionTypeAtTimestep(transactionType, i);
+        fprintf("Agent %d's balance at time %d for transaction type %d = %.2f\n", agent.id, i, transactionType, balance);
+        assert(balance == expectedBalances(i),"Error with Agent %d: Balance at time %d and transaction type %d = %.2f, Expected Balance = %.2f", agent.id, i, transactionType, balance, expectedBalances(i));
     end
 end
 

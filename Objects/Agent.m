@@ -243,11 +243,16 @@ classdef Agent < handle
             [agentIds, balances] = obj.wallet.individualBalancesForTransactionWithAgent(thatAgentId, mutualAgentIds);
         end        
                     
-        function currentBalance = currentBalanceAllCurrenciesAtTime(obj, timeStep)
+        function balance = balanceAllTransactionsAtTimestep(obj, timeStep)
             % Return the balance at time timeStep, all currencies
-            currentBalance = obj.wallet.currentBalanceAllCurrenciesAtTime(timeStep);
+            balance = obj.wallet.balanceAllTransactionsAtTimestep(timeStep);
         end
 
+        function balance = balanceForTransactionTypeAtTimestep(obj, transactionType, timeStep)
+            % Return the balance at time timeStep for the transactionType
+            balance = obj.wallet.balanceForTransactionTypeAtTimestep(transactionType, timeStep);
+        end
+        
         %        
         % Methods supporting data logging
         %
