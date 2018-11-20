@@ -110,37 +110,19 @@ fprintf("Initial inventory = %.2f units / selling agent and value = %.2f\n", inv
 fclose(fileId);
 
 % Randomely select sellers
-% TODO - Make preferrential selection?
-if (numberOfSellers == N) 
-    Sellers = ones(N,1);
-    sellerInventoryUnits(:,1) = inventoryInitialUnits;
-else   
-    selectedNodes = randsample(N,numberOfSellers);
-    for i = 1:numberOfSellers
-        sellerInventoryUnits(selectedNodes(i,1)) = inventoryInitialUnits;
-        Sellers(selectedNodes(i,1)) = 1;
-    end
-end
 polis.setupSellers(numberOfSellers, inventoryInitialUnits, numSteps);
 
 % Randomely select buyers
-% TODO - Make preferrential selection?
-if (numberOfBuyers == N) 
-    Buyers = ones(N,1);
-else
-    selectedNodes = randsample(N,numberOfBuyers);
-    for i = 1:numberOfBuyers
-        Buyers(selectedNodes(i,1)) = 1;
-    end
-end
 polis.setupBuyers(numberOfBuyers, numSteps);
 
 % Report roles
-[numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents] = parseRoles(Buyers, Sellers, N);
+[numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents] = polis.parseAgentCommerceRoleTypes();
 fprintf("\nNum Buyers+Sellers = %d\n",numBuySellAgents);
 fprintf("Num Buyers Only    = %d\n",numBuyAgents);
 fprintf("Num Sellers Only   = %d\n",numSellAgents);
 fprintf("Non-Participants   = %d\n",numNonparticipatingAgents);
+
+stop;
 
 % Report Initial Statistics
 sumWallets = sum(Wallet(:,1));
@@ -502,28 +484,4 @@ xlabel('Time');
 ylabel('Inventory');
 title('Inventory by Agent');
 
-
-%
-% Supporting Functions
-%
-
-function [bs, b, s, np] = parseRoles(Buyers, Sellers, N)
-
-    bs = 0;
-    b = 0;
-    s = 0;
-    np = 0;
-    
-    for i = 1:N
-        if Buyers(i) == 1 && Sellers(i) == 1
-            bs = bs + 1;
-        elseif Buyers(i) == 1 
-            b = b + 1;
-        elseif Sellers(i) == 1
-            s = s + 1;
-        else
-            np = np + 1;
-        end    
-    end
-end
 

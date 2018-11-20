@@ -12,26 +12,48 @@ classdef Agent < handle
     end
     
     properties (SetAccess = private)
-        id          uint32          % The agent id for this agent
-        birthdate   uint32          % The birthdate for this agent = time dt
-        polis       Polis           % Store a reference to the gods
-        numberItemsSold   
-        initialInventory   uint32
-        isSeller    
-        isBuyer     
+        id                  uint32          % The agent id for this agent
+        birthdate           uint32          % The birthdate for this agent = time dt
+        polis               Polis           % Store a reference to the gods
+        numberItemsSold     uint32
+        initialInventory    uint32
     end
     
     properties (GetAccess = private, SetAccess = private)
         wallet      CryptoWallet    % This agents wallet
+        isBuyer     uint32
+        isSeller    uint32
+    end
+    
+    properties (Constant)
+        % Agent Commerce Types
+        TYPE_BUYER_SELLER            = 3000;
+        TYPE_BUYER_ONLY              = 3001;
+        TYPE_SELLER_ONLY             = 3002;
+        TYPE_NONPARTICIPANT          = 3003;
     end
     
     properties (Dependent)
         availabeInventory  
+        agentCommerceRoleType
     end
 
     methods
+        
         function inventory = get.availabeInventory(obj)
             inventory = obj.initialInventory - sum(obj.numberItemsSold(1,:));
+        end
+        
+        function type = get.agentCommerceRoleType(obj)
+            if obj.isBuyer && obj.isSeller 
+                type = Agent.TYPE_BUYER_SELLER;
+            elseif obj.isBuyer 
+                type = Agent.TYPE_BUYER_ONLY;
+            elseif obj.isSeller 
+                type = Agent.TYPE_SELLER_ONLY;
+            else
+                type = Agent.TYPE_NONPARTICIPANT;
+            end
         end
     end
     

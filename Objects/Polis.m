@@ -81,7 +81,8 @@ classdef Polis < handle
         end
         
         function setupSellers(obj, numberOfSellers, initialInventory, totalTimeSteps)
-            % Setup the agents that will be sellers
+            % Randomly select the agents that will be sellers
+            % TODO - Make preferrential selection?
             selectedAgents = randsample(obj.numberOfAgents, numberOfSellers);
             for i = 1:numberOfSellers
                 obj.agents(selectedAgents(i,1)).setupAsSeller(initialInventory, totalTimeSteps);
@@ -89,12 +90,33 @@ classdef Polis < handle
         end
         
         function setupBuyers(obj, numberOfBuyers, totalTimeSteps)
-            % Setup the agents that will be buyers
+            % Randomly select the agents that will be buyers
+            % TODO - Make preferrential selection?
             selectedAgents = randsample(obj.numberOfAgents, numberOfBuyers);
             for i = 1:numberOfBuyers
                 obj.agents(selectedAgents(i,1)).setupAsBuyer(totalTimeSteps);
             end
         end
+        
+        function [buyerseller, buyer, seller, nonparticipant] = parseAgentCommerceRoleTypes(obj)
+
+            buyerseller = 0;
+            buyer = 0;
+            seller = 0;
+            nonparticipant = 0;
+
+            for i = 1:obj.numberOfAgents
+                if obj.agents(i).agentCommerceRoleType == Agent.TYPE_BUYER_SELLER
+                    buyerseller = buyerseller + 1;
+                elseif obj.agents(i).agentCommerceRoleType ==  Agent.TYPE_BUYER_ONLY
+                    buyer = buyer + 1;
+                elseif obj.agents(i).agentCommerceRoleType == Agent.TYPE_SELLER_ONLY
+                    seller = seller + 1;
+                else
+                    nonparticipant = nonparticipant + 1;
+                end    
+            end
+        end        
         
     end
     
