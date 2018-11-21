@@ -234,11 +234,10 @@ Buying - subtracting currency
                 else
                     result = false;
                 end
-            end            
-            
+            end                        
             functionHandle = @withinTimePeriod;
-            matchingTransactions = findobj(obj.transactions,'-function', functionHandle);
             
+            matchingTransactions = findobj(obj.transactions,'-function', functionHandle);
             balance = sum([matchingTransactions.amount]);
         end
         
@@ -253,10 +252,9 @@ Buying - subtracting currency
                     result = false;
                 end
             end            
-            
             functionHandle = @withinTimePeriod;
-            matchingTransactions = findobj(obj.transactions,'-function', functionHandle);
             
+            matchingTransactions = findobj(obj.transactions,'-function', functionHandle);            
             balance = sum([matchingTransactions.amount]);
         end
         

@@ -47,7 +47,7 @@ end
 % Create the polis
 maxSearchLevels = 6;
 polis = Polis(AM, maxSearchLevels); 
-polis.createAgents(1);
+polis.createAgents(1, numSteps);
 
 fprintf("\nThis simulation has %d agents and a duration of %d time steps\n\n", N, numSteps);
 
@@ -110,10 +110,10 @@ fprintf("Initial inventory = %.2f units / selling agent and value = %.2f\n", inv
 fclose(fileId);
 
 % Randomely select sellers
-polis.setupSellers(numberOfSellers, inventoryInitialUnits, numSteps);
+polis.setupSellers(numberOfSellers, inventoryInitialUnits);
 
 % Randomely select buyers
-polis.setupBuyers(numberOfBuyers, numSteps);
+polis.setupBuyers(numberOfBuyers);
 
 % Report roles
 [numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents] = polis.parseAgentCommerceRoleTypes();
@@ -122,13 +122,11 @@ fprintf("Num Buyers Only    = %d\n",numBuyAgents);
 fprintf("Num Sellers Only   = %d\n",numSellAgents);
 fprintf("Non-Participants   = %d\n",numNonparticipatingAgents);
 
-stop;
-
 % Report Initial Statistics
-sumWallets = sum(Wallet(:,1));
-sumSellerInventoryUnits = sum(sellerInventoryUnits(:,1));
-sumSellerInventoryValue = sum(sellerInventoryUnits(:,1))*price;
-fprintf("\nInitial Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = %.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
+sumWallets = polis.totalMoneySupplyAtTimestep(1);
+sumSellerInventoryUnits = polis.totalInventoryAtTimestep(1);
+sumSellerInventoryValue = sumSellerInventoryUnits*price;
+fprintf("\nInitial Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = $%.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
 
 %--------------------------------------------------------------------------
 % Simulation finish states
@@ -140,33 +138,15 @@ SuspendCode = OutOfTime;
 % Start simulation
 for time = 1:numSteps
    
-   if time == 1
-       fprintf("----- Start of time step = %d, money supply = %.2f -----\n\n", time, sum(Wallet(:,time)));
-   elseif time > 1 
-       
-       fprintf("----- Start of time step = %d, money supply = %.2f -----\n\n", time, sum(Wallet(:,time - 1)));
-       
-       % Prepare For Next Step
-       Wallet(:,time) = Wallet(:,time - 1);
-       sellerInventoryUnits(:,time) = sellerInventoryUnits(:,time - 1);
-       
-       % Subtract the demurrage from each wallet and accumulate total demurrange 
-%         if time == 200
-%             percentDemurrage = percentDemurrage / 2.0;
-%         end
-        
-       incrementalDemurrage = Wallet(:,time) * percentDemurrage;
-       Wallet(:,time) = Wallet(:,time) - incrementalDemurrage;
-       Demurrage(:,time) = Demurrage(:,time) + incrementalDemurrage;
+   fprintf("\n----- Start of time step = %d, money supply = %.2f -----\n\n", time, polis.totalMoneySupplyAtTimestep(time));
 
-       % Wallet cannot be reduced below zero due to demurrage
-       Wallet(Wallet < 0) = 0;
-       
-       % Add UBI to each wallet and accumulate total UBI
-       Wallet(:,time) = Wallet(:,time) + amountUBI;
-       UBI(:,time) = UBI(:,time) + amountUBI;
-       
+   if time > 1
+       % Apply demurrage
+       polis.applyDemurrageWithPercentage(percentDemurrage, time);
    end
+   
+   % Deposit UBI
+   polis.depositUBI(amountUBI, time);
    
    % Randomly order buyers before each time step
    numBuyerIndex = 1:N;
@@ -174,86 +154,70 @@ for time = 1:numSteps
    
    for buyer = 1:numel(randBuyerIndex)
        
+       agentBuyerId = randBuyerIndex(buyer);
+       agentBuying = polis.agents(agentBuyerId);
+       
        % Skip non-buying agents
-       if Buyers(buyer,1) ~= 1
-           fprintf("+ B(%d) is not a buyer\n",buyer);
+       if agentBuying.isBuyer == false
+           fprintf("\n+ B(%d) is not a buyer\n",agentBuyerId);
            continue;
        end
        
        % Skip agents out of money
-       if Wallet(buyer,time) < price
-           fprintf("- B(%d) is a buyer out of money\n",buyer);
+       if agentBuying.balanceAllTransactionsAtTimestep(time) < price
+           fprintf("\n- B(%d) is a buyer out of money\n",agentBuyerId);
            continue;
        end
        
-       % Find connections
-       connections = find(AM(buyer,:) ~= 0);
-       
-       % Find connections that are sellers (prohibits buying from yourself)
-       availableSellers = [];
-       for connection = 1:size(connections,2)
-           i = connections(1,connection);
-           if Sellers(i) == 1
-               % Collect the sellers that have inventory
-               if sellerInventoryUnits(i,time) > 0
-                   availableSellers = [availableSellers ; i];
-               end
-           end
-       end
-       
-       % If sellers available, pick one randomly
-       numberOfAvailableSellers = size(availableSellers,1);
-       
-       %fprintf("For Buyer %d, # Sellers = %d\n", buyer, numberOfAvailableSellers);
-       
+       % Find sellers that are not the buying agent
+       sellingAgents = polis.identifySellers(agentBuying);
+       numberOfAvailableSellers = size(sellingAgents,1);
+             
        if  numberOfAvailableSellers > 0
            
-           % Sale!
+           % Pick a seller randomly
            j = randsample(numberOfAvailableSellers,1);
-           sellerIndex = availableSellers(j);
-           numUnits = 1;
+           agentSelling = sellingAgents(j);
            
-           %fprintf("Buyer %d exchanging with Seller %d\n", buyer, sellerIndex);
+           fprintf("\nProposed purchase of agent %d from agent %d\n", agentBuying.id, agentSelling.id);
+           % Submit the purchase
+           numUnits = 1;           
+           result = agentBuying.submitPurchase(polis.AM, numUnits*price, agentSelling, time);
            
-           % Seller
-           
-           % Decrement Inventory
-           sellerInventoryUnits(sellerIndex,time) = sellerInventoryUnits(sellerIndex,time) - numUnits;
-           
-           % Record units sold (can have more than one sale per dt)
-           unitsSold(sellerIndex,time) = unitsSold(sellerIndex,time) + numUnits;
-           
-           % Increment Wallet
-           Wallet(sellerIndex,time) = Wallet(sellerIndex,time) + numUnits*price;
-           
-           % Buyer
-           
-           % Record units bought (just one purchase per dt)
-           unitsBought(buyer,time) = numUnits;
-           
-           % Decrement Wallet
-           Wallet(buyer,time) = Wallet(buyer,time) - numUnits*price;
-           
+           if result == TransactionType.TRANSACTION_SUCCEEDED
+               fprintf("\nSale Successful!\n");
+               agentSelling.recordSale(numUnits, time);
+               agentBuying.recordPurchase(numUnits, time);
+           else
+               if result == TransactionType.FAILED_NO_LIQUIDITY
+                   fprintf("\nSale Failed, no liquidity\n");
+               elseif result == TransactionType.FAILED_NO_PATH_FOUND
+                   fprintf("\nSale Failed, no path found\n");
+               else
+                   fprintf("\nUnrecognized result. Check it out!\n");
+               end
+           end
+                      
        else
            % No sale :-(
-           fprintf("No sellers available\n");
+           fprintf("\nNo sellers available\n");
        end
    end
    
    % Report Incremental Statistics
    
-   sumWallets = sum(Wallet(:,time));
-   cumDemurrage = sum(sum(Demurrage(:,1:time)));
-   cumUBI = sum(sum(UBI(:,1:time)));
+   sumWallets = polis.totalMoneySupplyAtTimestep(time);
+   cumDemurrage = polis.totalDemurrageAtTimestep(time);
+   cumUBI = polis.totalUBIAtTimestep(time);
    
-   sumSellerInventoryUnits = sum(sellerInventoryUnits(:,time));
+   sumSellerInventoryUnits = polis.totalInventoryAtTimestep(time);
    sumSellerInventoryValue = sumSellerInventoryUnits*price;
-   sumBought = sum(sum(unitsBought(:,1:time)));
-   sumSold = sum(sum(unitsSold(:,1:time)));
+   sumBought = polis.totalPurchasesAtTimestep(time);
+   sumSold = polis.totalSalesAtTimestep(time);
    
    fprintf("\n----- End of time step   = %d -----\n\n",time);
-   fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. UBI-Demurrage = TMS = %.2f)\n", sumWallets, cumDemurrage, cumUBI, (cumUBI - cumDemurrage));
-   fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = %.2f, Total Inventory Exchanged %2.f (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, sumBought, (sumBought - sumSold));
+   fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. TMS - (UBI + Demurrage) = %.2f)\n", sumWallets, cumDemurrage, cumUBI, (sumWallets - (cumUBI + cumDemurrage)));
+   fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = $%.2f, Total Inventory Exchanged = %2.f (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, sumBought, (sumBought - sumSold));
 
    if sumSellerInventoryUnits <= 0
        SuspendCode = OutOfInventory;
@@ -270,11 +234,11 @@ end
 
 % Completion status
 if SuspendCode == OutOfTime
-    fprintf("Simulation ended normally at time = %d\n",time);
+    fprintf("\nSimulation ended normally at time = %d\n",time);
 elseif SuspendCode == OutOfInventory
-    fprintf("Simulation Halted: Out of inventory at time = %d\n",time);
+    fprintf("\nSimulation Halted: Out of inventory at time = %d\n",time);
 elseif SuspendCode == OutOfMoney
-    fprintf("Simulation Halted: Out of money at time = %d\n",time);
+    fprintf("\nSimulation Halted: Out of money at time = %d\n",time);
 end
         
 % Plot some results
@@ -296,6 +260,8 @@ xlabel('Agent');
 ylabel('Drachmas');
 title('Remaining Money');
 legend('Wallet Size');
+
+stop;
 
 % 2. Bought / Sold Distribution
 yHeights = sort([max(sum(unitsBought,2)) max(sum(unitsSold,2)) max(sellerInventoryUnits(:,time))],'descend');

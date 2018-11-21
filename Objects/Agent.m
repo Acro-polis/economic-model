@@ -15,14 +15,15 @@ classdef Agent < handle
         id                  uint32          % The agent id for this agent
         birthdate           uint32          % The birthdate for this agent = time dt
         polis               Polis           % Store a reference to the gods
-        numberItemsSold     uint32
-        initialInventory    uint32
+        numberItemsSold                     % Array of items sold each time step
+        numberItemsPurchased                % Array of items purchased each time step
+        initialInventory    uint32          % Initial inventory
+        isBuyer             uint32          % Is a buyer, true or false
+        isSeller            uint32          % Is a seller, true or false
     end
     
     properties (GetAccess = private, SetAccess = private)
         wallet      CryptoWallet    % This agents wallet
-        isBuyer     uint32
-        isSeller    uint32
     end
     
     properties (Constant)
@@ -34,7 +35,7 @@ classdef Agent < handle
     end
     
     properties (Dependent)
-        availabeInventory  
+        availabeInventory
         agentCommerceRoleType
     end
 
@@ -59,37 +60,63 @@ classdef Agent < handle
     
     methods (Access = public)
 
-        function obj = Agent(id, polis, timeStep)
+        function obj = Agent(id, polis, birthdate, totalTimeSteps)
             % AgentId must corresponds to a row id in an associated 
             % Adjacency Matrix. Agents should only be created by the Polis
             % object which maintains the list of all agents in the system.
             assert(id ~= Polis.PolisId,'Error: Agent Id equals reserved PolisId!');
             obj.id = id;
-            obj.birthdate = timeStep;
+            obj.birthdate = birthdate;
             obj.polis = polis;
             obj.wallet = CryptoWallet(obj);
-            obj.isSeller = false;
             obj.isBuyer = false;
+            obj.isSeller = false;
+            obj.numberItemsSold = zeros(1,totalTimeSteps);
+            obj.numberItemsPurchased = zeros(1,totalTimeSteps);
+            obj.initialInventory = 0;
         end
                
         %
         % Seller / Buyer related
         %
-        function setupAsSeller(obj, initialInventory, totalTimeSteps)
+        
+        function setupAsSeller(obj, initialInventory)
+            % Setup agent as a seller
             obj.isSeller = true;
             obj.initialInventory = initialInventory;
-            obj.numberItemsSold = zeros(1,totalTimeSteps);
         end
         
         function recordSale(obj, numItems, timeStep)
+            % Record a sale
             assert(obj.availabeInventory >= numItems,"Error: unexpectedly out of inventory");
-            obj.numberItemsSoldmsSold(1,timeStep) = obj.numberItemsSold(1,timeStep) + numItems;
+            obj.numberItemsSold(1,timeStep) = obj.numberItemsSold(1,timeStep) + numItems;
         end
-                        
-        function setupAsBuyer(obj, totalTimeSteps)
+        
+        function recordPurchase(obj, numItems, timeStep)
+            % Record a purchase
+            obj.numberItemsPurchased(1,timeStep) = obj.numberItemsPurchased(1,timeStep) + numItems;
+        end
+        
+        function setupAsBuyer(obj)
+            % Setup agent as a buyer
             obj.isBuyer = true;
         end
 
+        function inventory = availabeInventoryAtTimestep(obj, timeStep)
+            % Return the available inventory at time timeStep
+            inventory = obj.initialInventory - sum(obj.numberItemsSold(1,1:timeStep));
+        end
+
+        function sales = totalSalesAtTimestep(obj, timeStep)
+            % Return the total purchases at time timeStep
+            sales = sum(obj.numberItemsSold(1,1:timeStep));
+        end
+        
+        function purchases = totalPurchasesAtTimestep(obj, timeStep)
+            % Return the total purchases at time timeStep
+            purchases = sum(obj.numberItemsPurchased(1,1:timeStep));
+        end
+        
         %
         % Network exploration methods
         %
