@@ -264,9 +264,9 @@ Buying - subtracting currency
         
         function dump(obj)
             % Log this agents complete ledger
-            fprintf('\nLedger for Agent Id = %d\n',obj.agent.id);
-            fprintf('id\t tranId\t time\t type amount\t cur\t src\t dest\t note\t\n');
             [rows, ~] = size(obj.transactions);
+            fprintf('\nLedger for Agent Id = %d, # records = %d\n',obj.agent.id, rows);
+            fprintf('id\t tranId\t time\t type amount\t cur\t src\t dest\t note\t\n');
             for i = 1:rows
                 obj.transactions(i).dump();
             end
