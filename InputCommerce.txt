@@ -10,4 +10,4 @@ Commerce Model Input Parameters
 7)  Percentage of Agents Buying: 0.75
 8)  Percentage of Agents Selling: 0.75
 9)  Price of Goods (drachma / unit): 75.0
-10) Initial Inventory (# units / agent): 600.0
+10) Initial Inventory (# units / agent): 300.0

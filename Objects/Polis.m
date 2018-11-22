@@ -188,6 +188,58 @@ classdef Polis < handle
             end
         end                        
         
+        function [wallets, ubi, demurrage, ids, agentTypes] = transactionTimeHistories(obj, totalTimeSteps)
+            % Tabulate the wallet, ubi, demurrage time histories for each agent
+            wallets = zeros(obj.numberOfAgents, totalTimeSteps);
+            ubi = zeros(obj.numberOfAgents, totalTimeSteps);
+            demurrage = zeros(obj.numberOfAgents, totalTimeSteps);
+            ids = zeros(obj.numberOfAgents,1);
+            agentTypes = zeros(obj.numberOfAgents,1);
+            
+            for i = 1:obj.numberOfAgents
+                agent = obj.agents(i);
+                ids(i,1) = agent.id;
+                agentTypes(i,1) = agent.agentCommerceRoleType;
+                for j = 1:totalTimeSteps
+                    wallets(i,j) = agent.balanceAllTransactionsAtTimestep(j);
+                    ubi(i,j) = agent.balanceForTransactionTypeAtTimestep(TransactionType.UBI, j);
+                    demurrage(i,j) = agent.balanceForTransactionTypeAtTimestep(TransactionType.DEMURRAGE, j);
+                end
+            end
+            
+            % Sort results by agent type
+            [agentTypes, indices] = sort(agentTypes);
+            wallets = wallets(indices,:);
+            ubi = ubi(indices,:);
+            demurrage = demurrage(indices,:);
+            ids = ids(indices);
+            
+        end
+        
+        function [numBS, numB, numS, numNP] = countAgentCommerceTypes(obj, agentTypes)
+            % Return the numerical distribution of the agent types
+            
+            numBS = 0;
+            numB = 0;
+            numS = 0;
+            numNP = 0;
+            
+            [rows, ~] = size(agentTypes);
+            assert(rows == obj.numberOfAgents,"Error due to your incompetence!");
+            
+            for i = 1:obj.numberOfAgents
+                if agentTypes(i) == Agent.TYPE_BUYER_SELLER
+                    numBS = numBS + 1;
+                elseif agentTypes(i) == Agent.TYPE_BUYER_ONLY
+                    numB = numB + 1;
+                elseif agentTypes(i) == Agent.TYPE_SELLER_ONLY
+                    numS = numS + 1;
+                elseif agentTypes(i) == Agent.TYPE_NONPARTICIPANT
+                    numNP = numNP + 1;
+                end
+            end            
+        end
+        
     end
     
     methods (Static)
