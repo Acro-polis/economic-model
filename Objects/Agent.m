@@ -165,7 +165,7 @@ classdef Agent < handle
             for index = 1:indices
                 path = cell2mat(paths(index, 1));
                 fprintf("\nPath %d of %d\n", index, indices);
-                logIntegerArray("Analyzing Path",path);
+ %Log               logIntegerArray("Analyzing Path",path);
                 if obj.checkIfPathIsValid(AM, path, amount) 
                     selectedPath = path;
                     return;
@@ -217,7 +217,7 @@ classdef Agent < handle
             
             % Find all possible paths
             paths = obj.findAllNetworkPathsToAgent(AM, targetAgent.id);
-            obj.logPaths(paths);
+%Log            obj.logPaths(paths);
             if isempty(paths)
                 result = TransactionType.FAILED_NO_PATH_FOUND;
                 return;
@@ -226,7 +226,7 @@ classdef Agent < handle
             % Find a path that satisfies the transaction criteria (e.g. all
             % agents have enough balance)
             path = obj.findALiquidPathForTheTransactionAmount(AM, paths, amount);
-            logIntegerArray("Ths selected path is",path);
+%Log            logIntegerArray("Ths selected path is",path);
             if isempty(path) 
                 result = TransactionType.FAILED_NO_LIQUIDITY;
                 return;
