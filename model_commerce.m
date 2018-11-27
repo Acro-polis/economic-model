@@ -45,28 +45,28 @@ else
 end
 
 % Create the polis
-maxSearchLevels = 2;
+maxSearchLevels =  round(parseInputString(fgetl(fileId), inputTypeDouble)); % Search Levels (Input 4)
 polis = Polis(AM, maxSearchLevels); 
 polis.createAgents(1, numSteps);
 
-fprintf("\nThis simulation has %d agents and a duration of %d time steps\n\n", N, numSteps);
+fprintf("\nThis simulation has %d agents, a duration of %d time steps and maximum search path levels of %d\n\n", N, numSteps, maxSearchLevels);
 
 % Unit of currency
 drachma = 1;
 
 % Wallet
-seedWalletSize = parseInputString(fgetl(fileId), inputTypeDouble); % Wallet Size (Input 4)
+seedWalletSize = parseInputString(fgetl(fileId), inputTypeDouble); % Wallet Size (Input 5)
 
 fprintf("Starting wallet size per agent = %.2f drachma\n", seedWalletSize);
 
 % Rate of UBI
-amountUBI = parseInputString(fgetl(fileId), inputTypeDouble); % UBI amount (Input 5)
+amountUBI = parseInputString(fgetl(fileId), inputTypeDouble); % UBI amount (Input 6)
 assert(amountUBI > 0,'Assert: UBI must be > 0!');
 b = 1.0;
 amountUBI = amountUBI*drachma / b*dt; 
 
 % Percentage of Demurrage
-percentDemurrage = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Demurrage (Input 6)
+percentDemurrage = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Demurrage (Input 7)
 assert(percentDemurrage >= 0 && percentDemurrage <= 1.0,'Assert: Percentage Demurrage Out Of Range!');
 d = 1;
 percentDemurrage = percentDemurrage*drachma / d*dt;
@@ -74,27 +74,27 @@ percentDemurrage = percentDemurrage*drachma / d*dt;
 fprintf("UBI = %.2f drachmas / agent / dt, Demurrage = %.2f percent / agent / dt\n", amountUBI, percentDemurrage*100);
 
 % Buyers
-percentBuyers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Buyers (Input 7)
+percentBuyers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Buyers (Input 8)
 assert(percentBuyers > 0 && percentBuyers <= 1.0,'Assert: Percentage Buyers Out Of Range!')
 numberOfBuyers = round(percentBuyers*N);
 
 fprintf("Num buyers   = %d <= %d agents\n", numberOfBuyers, N);
 
 % Sellers
-percentSellers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Sellers (Input 8)
+percentSellers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Sellers (Input 9)
 assert(percentSellers > 0 && percentSellers <= 1.0,'Assert: Percentage Sellers Out Of Range!')
 numberOfSellers = round(percentSellers*N);
 
 fprintf("Num sellers  = %d <= %d agents\n", numberOfSellers, N);
 
 % Cost of goods
-price = parseInputString(fgetl(fileId), inputTypeDouble); % Price Goods (Input 9);
+price = parseInputString(fgetl(fileId), inputTypeDouble); % Price Goods (Input 10);
 price = price*drachma;
 
 fprintf("Price of goods = %.2f drachmas\n", price);
 
 % Seller Inventory
-inventoryInitialUnits = parseInputString(fgetl(fileId), inputTypeDouble); % Inital Inventory (Input 10)
+inventoryInitialUnits = parseInputString(fgetl(fileId), inputTypeDouble); % Inital Inventory (Input 11)
 inventoryInitialValue = inventoryInitialUnits*price;
 
 fprintf("Initial inventory = %.2f units / selling agent and value = %.2f\n", inventoryInitialUnits, inventoryInitialValue);
@@ -122,10 +122,13 @@ fprintf("\nInitial Money Supply = %.2f drachma, Inventory Supply = %.2f, Invento
 
 %--------------------------------------------------------------------------
 % Simulation finish states
-OutOfTime = 0;
-OutOfInventory = 1;
-OutOfMoney = 2;
-SuspendCode = OutOfTime;
+OutOfTime       = 0;
+OutOfInventory  = 1;
+OutOfMoney      = 2;
+SuspendCode     = OutOfTime;
+FailNoMoney     = zeros(N, numSteps);
+FailNoLiquidity = zeros(N, numSteps);
+FailNoPath      = zeros(N, numSteps);
 
 % Start simulation
 for time = 1:numSteps
@@ -157,6 +160,7 @@ for time = 1:numSteps
        
        % Skip agents out of money
        if agentBuying.balanceAllTransactionsAtTimestep(time) < price
+           FailNoMoney(agentBuyerId, time) = FailNoMoney(agentBuyerId, time) + 1;
            fprintf("\n- B(%d) is a buyer out of money\n",agentBuyerId);
            continue;
        end
@@ -182,11 +186,14 @@ for time = 1:numSteps
                agentBuying.recordPurchase(numUnits, time);
            else
                if result == TransactionType.FAILED_NO_LIQUIDITY
+                   FailNoLiquidity(agentBuyerId, time) = FailNoLiquidity(agentBuyerId, time) + 1;
                    fprintf("\nSale Failed, no liquidity\n");
                elseif result == TransactionType.FAILED_NO_PATH_FOUND
+                   FailNoPath(agentBuyerId, time) = FailNoPath(agentBuyerId, time) + 1;
                    fprintf("\nSale Failed, no path found\n");
                else
                    fprintf("\nUnrecognized result. Check it out!\n");
+                   assert(true,"Should not be here, investigate");
                end
            end
                       
@@ -241,6 +248,7 @@ colors = Colors();
 % Plot the 4 panal summary plot
 plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, time);
 
+% Plot cumulative money supply, UBI and Demurrage
 plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, time, colors);
 
 % Plot wallets by agent id
@@ -249,6 +257,8 @@ plotWalletByAgentId(polis, Wallet, ids, time);
 % Plot purchased & sold items by agent id
 plotPuchsasedItemsByAgent(polis, Purchased, ids, time);
 plotSoldItemsByAgent(polis, Sold, ids, time);
+
+% Plot transaction failures by agent
 
 % Now sort the data by agentType for the remaining output
 [Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = sortByAgentType(Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes);
