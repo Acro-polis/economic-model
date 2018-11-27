@@ -134,8 +134,10 @@ FailNoInventory = zeros(N, numSteps);
 
 % Start simulation
 for time = 1:numSteps
-   
-   fprintf("\n----- Start of time step = %d, money supply = %.2f -----\n\n", time, polis.totalMoneySupplyAtTimestep(time));
+
+% Skip estimating the money supply each step, it's time consuming    
+%   fprintf("\n----- Start of time step = %d, money supply = %.2f -----\n\n", time, polis.totalMoneySupplyAtTimestep(time));
+   fprintf("\n----- Start of time step = %d -----\n\n", time);
 
    if time > 1
        % Apply demurrage

@@ -36,20 +36,21 @@ for i = 1:3
     fgetl(fileId);
 end
 
-% line 1
 line = fgetl(fileId);
 inputValue = parseInputString(line,0);
 fprintf('%.2f\n',inputValue);
 
-% line 2
 line = fgetl(fileId);
 inputValue = parseInputString(line,0);
 fprintf('%.2f\n',inputValue);
 
-% line 3
 line = fgetl(fileId);
 inputValue = parseInputString(line,1);
 fprintf('%s\n',inputValue);
+
+line = fgetl(fileId);
+inputValue = parseInputString(line,0);
+fprintf('%.2f\n',inputValue);
 
 line = fgetl(fileId);
 inputValue = parseInputString(line,0);
