@@ -201,13 +201,19 @@ classdef Agent < handle
         % Transaction methods
         %
         
-        function result = submitPurchase(obj, AM, amount, targetAgent, timeStep)
+        function result = submitPurchase(obj, AM, numberItems, amount, targetAgent, timeStep)
             % Submit a purachase between this agent (obj.id) and the 
             % targetAgent. The transaction may require intermediary agents
             % to complete the transaction. Validate the transaction and if
             % it passes complete the transaction.
 
             result = TransactionType.FAILED_UNKNOWN;
+            
+            % Insure seller has enough inventory
+            if targetAgent.availabeInventory < numberItems
+                result = TransactionType.FAILED_NO_INVENTORY;
+                return;
+            end
             
             % Find all possible paths
             paths = obj.findAllNetworkPathsToAgent(AM, targetAgent.id);

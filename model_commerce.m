@@ -130,6 +130,7 @@ SuspendCode     = OutOfTime;
 FailNoMoney     = zeros(N, numSteps);
 FailNoLiquidity = zeros(N, numSteps);
 FailNoPath      = zeros(N, numSteps);
+FailNoInventory = zeros(N, numSteps);
 
 % Start simulation
 for time = 1:numSteps
@@ -179,7 +180,7 @@ for time = 1:numSteps
            fprintf("\nProposed purchase of agent %d from agent %d\n", agentBuying.id, agentSelling.id);
            % Submit the purchase
            numUnits = 1;           
-           result = agentBuying.submitPurchase(polis.AM, numUnits*price, agentSelling, time);
+           result = agentBuying.submitPurchase(polis.AM, numUnits, numUnits*price, agentSelling, time);
            
            if result == TransactionType.TRANSACTION_SUCCEEDED
                fprintf("\nSale Successful!\n");
@@ -192,6 +193,9 @@ for time = 1:numSteps
                elseif result == TransactionType.FAILED_NO_PATH_FOUND
                    FailNoPath(agentBuyerId, time) = FailNoPath(agentBuyerId, time) + 1;
                    fprintf("\nSale Failed, no path found\n");
+               elseif result == TransactionType.FAILED_NO_INVENTORY
+                   FailNoInventory(agentBuyerId, time) = FailNoInventory(agentBuyerId, time) + 1;
+                   fprintf("\nSale Failed, no inventory\n");
                else
                    fprintf("\nUnrecognized result. Check it out!\n");
                    assert(true,"Should not be here, investigate");
@@ -210,13 +214,13 @@ for time = 1:numSteps
        reportIncrementalStatistics(polis, price, time);
    end
    
-   if sumSellerInventoryUnits <= 0
+   if polis.totalInventoryAtTimestep(time) <= 0
        SuspendCode = OutOfInventory;
        reportIncrementalStatistics(polis, price, time);
        break;
    end
    
-   % Break if out of money any time other than time = 1
+   % TODO - Break if out of money any time other than time = 1
 %    if sumWallets <= 0 && time ~= 1
 %        SuspendCode = OutOfMoney;
 %        reportIncrementalStatistics(polis, price, time);
@@ -240,7 +244,7 @@ end
 [Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = polis.transactionTimeHistories(time);
 
 % Transaction Failure Analysis
-reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPath, Purchased, time);
+reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, time);
 
 %
 % ======  Plot some results  ======
@@ -279,15 +283,16 @@ plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colo
 %
 % ======  Helping Functions  ======
 %
-function reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPaths, Purchased, endTime)
+function reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPaths, FailNoInventory, Purchased, endTime)
     numBuyers = polis.countBuyers;
     sumNoMoney = sum(sum(FailNoMoney(:,1:endTime)));
     sumNoLiquidity = sum(sum(FailNoLiquidity(:,1:endTime)));
     sumNoPaths = sum(sum(FailNoPaths(:,1:endTime)));
+    sumNoInventory = sum(sum(FailNoInventory(:,1:endTime)));
     sumPurchased = sum(sum(Purchased(:,1:endTime)));
-    fprintf("\nItems Purchased = %.2f, Failed No Money = %.2f, Failed No Liquidity = %.2f, Failed No Paths = %.2f\n", sumPurchased, sumNoMoney, sumNoLiquidity, sumNoPaths);
+    fprintf("\nItems Purchased = %.2f, Failed No Money = %.2f, Failed No Liquidity = %.2f, Failed No Paths = %.2f, Failed No Inventory = %.2f\n", sumPurchased, sumNoMoney, sumNoLiquidity, sumNoPaths, sumNoInventory);
     expectedPurchased = numBuyers*endTime;
-    checkSum = sumPurchased + sumNoMoney + sumNoLiquidity + sumNoPaths;
+    checkSum = sumPurchased + sumNoMoney + sumNoLiquidity + sumNoPaths + sumNoInventory;
     assert(expectedPurchased == checkSum,"Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n", expectedPurchased, checkSum);
 end
 
