@@ -46,6 +46,7 @@ end
 
 % Create the polis
 maxSearchLevels =  round(parseInputString(fgetl(fileId), inputTypeDouble)); % Search Levels (Input 4)
+assert(maxSearchLevels >= 0,"Error: Max. Search Levels < 0");
 polis = Polis(AM, maxSearchLevels); 
 polis.createAgents(1, numSteps);
 
@@ -234,16 +235,19 @@ elseif SuspendCode == OutOfMoney
 end
 
 %
+% Tabluate results for ouput
+%
+[Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = polis.transactionTimeHistories(time);
+
+% Transaction Failure Analysis
+reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPath, Purchased, time);
+
+%
 % ======  Plot some results  ======
 %
 close all
 yScale = 1.5;
 colors = Colors();
-
-%
-% Tabluate results for ouput
-%
-[Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = polis.transactionTimeHistories(time);
 
 % Plot the 4 panal summary plot
 plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, time);
@@ -259,6 +263,8 @@ plotPuchsasedItemsByAgent(polis, Purchased, ids, time);
 plotSoldItemsByAgent(polis, Sold, ids, time);
 
 % Plot transaction failures by agent
+%TODO - make a 4 panel in time with Purchased
+sP = Purchased;
 
 % Now sort the data by agentType for the remaining output
 [Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = sortByAgentType(Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes);
@@ -273,6 +279,17 @@ plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colo
 %
 % ======  Helping Functions  ======
 %
+function reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPaths, Purchased, endTime)
+    numBuyers = polis.countBuyers;
+    sumNoMoney = sum(sum(FailNoMoney(:,1:endTime)));
+    sumNoLiquidity = sum(sum(FailNoLiquidity(:,1:endTime)));
+    sumNoPaths = sum(sum(FailNoPaths(:,1:endTime)));
+    sumPurchased = sum(sum(Purchased(:,1:endTime)));
+    fprintf("\nItems Purchased = %.2f, Failed No Money = %.2f, Failed No Liquidity = %.2f, Failed No Paths = %.2f\n", sumPurchased, sumNoMoney, sumNoLiquidity, sumNoPaths);
+    expectedPurchased = numBuyers*endTime;
+    checkSum = sumPurchased + sumNoMoney + sumNoLiquidity + sumNoPaths;
+    assert(expectedPurchased == checkSum,"Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n", expectedPurchased, checkSum);
+end
 
 function reportIncrementalStatistics(polis, price, time)
 

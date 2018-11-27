@@ -211,7 +211,27 @@ classdef Polis < handle
                 end
             end            
         end
-                
+
+        function count = countBuyers(obj)
+            % Count the number of buyer agents
+            count = 0;
+            for i = 1:obj.numberOfAgents
+                if obj.agents(i).isBuyer
+                    count = count + 1;
+                end
+            end
+        end
+
+        function count = countSellers(obj)
+            % Count the number of seller agents
+            count = 0;
+            for i = 1:obj.numberOfAgents
+                if obj.agents(i).isSeller
+                    count = count + 1;
+                end
+            end
+        end
+
         function [numBS, numB, numS, numNP] = countAgentCommerceTypes(obj, agentTypes)
             % Return the numerical distribution of the agent types
             

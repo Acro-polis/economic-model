@@ -207,7 +207,7 @@ classdef Agent < handle
             % to complete the transaction. Validate the transaction and if
             % it passes complete the transaction.
 
-            result = TransactionType.TRANSACTION_SUCCEEDED;
+            result = TransactionType.FAILED_UNKNOWN;
             
             % Find all possible paths
             paths = obj.findAllNetworkPathsToAgent(AM, targetAgent.id);
@@ -240,6 +240,7 @@ classdef Agent < handle
                 end
                 obj.wallet.commitPurchaseWithIndirectConnection(AM, amount, agents, timeStep);
             end
+            result = TransactionType.TRANSACTION_SUCCEEDED;
         end
         
         %

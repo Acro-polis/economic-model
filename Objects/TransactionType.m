@@ -19,6 +19,7 @@ classdef TransactionType
         TRANSACTION_SUCCEEDED   = 5000;
         FAILED_NO_PATH_FOUND    = 5001;
         FAILED_NO_LIQUIDITY     = 5002;
+        FAILED_UNKNOWN          = 5003;
         
     end
     
