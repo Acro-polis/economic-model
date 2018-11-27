@@ -1,7 +1,7 @@
 
 Commerce Model Input Parameters
 
-1)  Number of Time Steps (dt): 300
+1)  Number of Time Steps (dt): 20
 2)  Number of Agents: 10
 3)  Network Filename:test_network_10_agents.csv
 4)  Initial Wallet Size (drachma / agent): 0.0
@@ -11,3 +11,9 @@ Commerce Model Input Parameters
 8)  Percentage of Agents Selling: 0.75
 9)  Price of Goods (drachma / unit): 75.0
 10) Initial Inventory (# units / agent): 300.0
+
+
+
+Filenames
+
+test_network_10_agents.csv

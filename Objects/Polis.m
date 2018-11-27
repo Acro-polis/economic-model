@@ -188,11 +188,13 @@ classdef Polis < handle
             end
         end                        
         
-        function [wallets, ubi, demurrage, ids, agentTypes] = transactionTimeHistories(obj, totalTimeSteps)
+        function [wallets, ubi, demurrage, purchased, sold, ids, agentTypes] = transactionTimeHistories(obj, totalTimeSteps)
             % Tabulate the wallet, ubi, demurrage time histories for each agent
             wallets = zeros(obj.numberOfAgents, totalTimeSteps);
             ubi = zeros(obj.numberOfAgents, totalTimeSteps);
             demurrage = zeros(obj.numberOfAgents, totalTimeSteps);
+            purchased = zeros(obj.numberOfAgents, totalTimeSteps);
+            sold = zeros(obj.numberOfAgents, totalTimeSteps);
             ids = zeros(obj.numberOfAgents,1);
             agentTypes = zeros(obj.numberOfAgents,1);
             
@@ -201,21 +203,15 @@ classdef Polis < handle
                 ids(i,1) = agent.id;
                 agentTypes(i,1) = agent.agentCommerceRoleType;
                 for j = 1:totalTimeSteps
-                    wallets(i,j) = agent.balanceAllTransactionsAtTimestep(j);
-                    ubi(i,j) = agent.balanceForTransactionTypeAtTimestep(TransactionType.UBI, j);
-                    demurrage(i,j) = agent.balanceForTransactionTypeAtTimestep(TransactionType.DEMURRAGE, j);
+                    wallets(i,j) = agent.balanceAllTransactionsAtTimestep(j);                                   % Cumulative
+                    ubi(i,j) = agent.balanceForTransactionTypeAtTimestep(TransactionType.UBI, j);               % Cumulative
+                    demurrage(i,j) = agent.balanceForTransactionTypeAtTimestep(TransactionType.DEMURRAGE, j);   % Cumulative
+                    purchased(i,j) = agent.purchasesAtTimestep(j);                                              % Incremental
+                    sold(i,j) = agent.salesAtTimestep(j);                                                       % Incremental
                 end
-            end
-            
-            % Sort results by agent type
-            [agentTypes, indices] = sort(agentTypes);
-            wallets = wallets(indices,:);
-            ubi = ubi(indices,:);
-            demurrage = demurrage(indices,:);
-            ids = ids(indices);
-            
+            end            
         end
-        
+                
         function [numBS, numB, numS, numNP] = countAgentCommerceTypes(obj, agentTypes)
             % Return the numerical distribution of the agent types
             

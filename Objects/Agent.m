@@ -108,13 +108,23 @@ classdef Agent < handle
         end
 
         function sales = totalSalesAtTimestep(obj, timeStep)
-            % Return the total purchases at time timeStep
+            % Return the total purchases through time timeStep
             sales = sum(obj.numberItemsSold(1,1:timeStep));
         end
         
         function purchases = totalPurchasesAtTimestep(obj, timeStep)
-            % Return the total purchases at time timeStep
+            % Return the total purchases through time timeStep
             purchases = sum(obj.numberItemsPurchased(1,1:timeStep));
+        end
+        
+        function sales = salesAtTimestep(obj, timeStep)
+            % Return the total purchases at time timeStep
+            sales = obj.numberItemsSold(1,timeStep);
+        end
+        
+        function purchases = purchasesAtTimestep(obj, timeStep)
+            % Return the total purchases at time timeStep
+            purchases = obj.numberItemsPurchased(1,timeStep);
         end
         
         %

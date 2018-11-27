@@ -45,7 +45,7 @@ else
 end
 
 % Create the polis
-maxSearchLevels = 6;
+maxSearchLevels = 2;
 polis = Polis(AM, maxSearchLevels); 
 polis.createAgents(1, numSteps);
 
@@ -73,18 +73,14 @@ percentDemurrage = percentDemurrage*drachma / d*dt;
 
 fprintf("UBI = %.2f drachmas / agent / dt, Demurrage = %.2f percent / agent / dt\n", amountUBI, percentDemurrage*100);
 
-% Buyers 1 = Buyer, 0 = No Buyer
-Buyers = zeros(N,1);
-unitsBought = newATMatrix(N,numSteps,0.0);
+% Buyers
 percentBuyers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Buyers (Input 7)
 assert(percentBuyers > 0 && percentBuyers <= 1.0,'Assert: Percentage Buyers Out Of Range!')
 numberOfBuyers = round(percentBuyers*N);
 
 fprintf("Num buyers   = %d <= %d agents\n", numberOfBuyers, N);
 
-% Sellers 1 = Seller, 0 = No Seller
-Sellers = zeros(N,1);
-unitsSold = newATMatrix(N,numSteps,0.0);
+% Sellers
 percentSellers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Sellers (Input 8)
 assert(percentSellers > 0 && percentSellers <= 1.0,'Assert: Percentage Sellers Out Of Range!')
 numberOfSellers = round(percentSellers*N);
@@ -229,202 +225,44 @@ elseif SuspendCode == OutOfInventory
 elseif SuspendCode == OutOfMoney
     fprintf("\nSimulation Halted: Out of money at time = %d\n",time);
 end
-        
-% Get results for plotting
-[Wallet, UBI, Demurrage, ids, agentTypes] = polis.transactionTimeHistories(numSteps);
 
-% Plot some results
+%
+% ======  Plot some results  ======
+%
 close all
 yScale = 1.5;
+colors = Colors();
 
-% 1. Final Wallet Size
-maxYHeight = max(Wallet(:,time))*yScale;
-if (maxYHeight <= 0) 
-    maxYHeight = 1; 
-end
+%
+% Tabluate results for ouput
+%
+[Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = polis.transactionTimeHistories(time);
 
-ax1 = subplot(4,1,1);
-x = 1:N;
-plot(ax1, x, Wallet(:,time),'-o');
-xlim([1 N]);
-ylim([0 maxYHeight]);
-xlabel('Agent');
-ylabel('Drachmas');
-title('Remaining Money');
-legend('Wallet Size');
+% Plot the 4 panal summary plot
+plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, time);
 
+plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, time, colors);
 
-% 2. Bought / Sold Distribution
-% yHeights = sort([max(sum(unitsBought,2)) max(sum(unitsSold,2)) max(sellerInventoryUnits(:,time))],'descend');
-% maxYHeight = yHeights(1)*yScale;
-% if (maxYHeight <= 0) 
-%     maxYHeight = 1; 
-% end
-% 
-% ax2 = subplot(4,1,2);
-% x = 1:N;
-% plot(ax2, x, sum(unitsBought,2), '--o', x, sum(unitsSold,2), '-o', x, sellerInventoryUnits(:,time), 'c--*');
-% xlim([1 N]);
-% ylim([0 maxYHeight]);
-% xlabel('Agent');
-% ylabel('Units');
-% title('Units Bought & Sold');
-% legend('Bought','Sold','Ending Inventory');
-% 
-% % 3. Buyers & Sellers Plot
-% ax3 = subplot(4,1,3);
-% x = 1:N;
-% plot(ax3, x, Buyers, 'x', x, Sellers, 'o');
-% xlim([1 N]);
-% ylim([0.9 1.1]);
-% xlabel('Agent');
-% ylabel('Type');
-% title('Buyers & Sellers');
-% legend('Buyers','Sellers');
+% Plot wallets by agent id
+plotWalletByAgentId(polis, Wallet, ids, time);
 
-% 4. Money Supply
-totalUBI = UBI(:,time);
-totalDemurrage = Demurrage(:,time);
-initialWallet = Wallet(:,1);
-net = initialWallet + totalUBI - totalDemurrage;
-yHeights = sort([max(net) max(initialWallet) max(totalUBI) max(totalDemurrage)],'descend');
-maxYHeight = yHeights(1)*yScale;
-if (maxYHeight <= 0) 
-    maxYHeight = 1; 
-end
-minyLim = 0;
-if min(net) < 0
-    minyLim = min(net)*yScale;
-end
+% Plot purchased & sold items by agent id
+plotPuchsasedItemsByAgent(polis, Purchased, ids, time);
+plotSoldItemsByAgent(polis, Sold, ids, time);
 
-ax4 = subplot(4,1,4);
-x = 1:N;
-plot(ax4, x, net, 'c-*', x, initialWallet, '--o', x, totalUBI, 'g-x', x, -totalDemurrage, '-ro');
-xlim([1 N]);
-ylim([minyLim maxYHeight]);
-xlabel('Agent');
-ylabel('Drachma');
-title('Money Supply');
-legend('Net', 'Seed','UBI', 'Dumurrage');
-
-% Split data by B+S, B, S and NP
-
+% Now sort the data by agentType for the remaining output
+[Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = sortByAgentType(Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes);
 [numBS, numB, numS, numNP] = polis.countAgentCommerceTypes(agentTypes);
 
-% Custom colors
-gold   = [255.0/255.0, 171.0/255.0,  23.0/255.0];
-orange = [232.0/255.0,  85.0/255.0,  12.0/255.0];
-red    = [255.0/255.0,   0.0/255.0,   0.0/255.0];
-violet = [215.0/255.0,  12.0/255.0, 232.0/255.0];
-blue   = [ 86.0/255.0,  13.0/255.0, 255.0/255,0];
-green  = [  4.0/255.0, 255.0/255.0,   0.0/255,0];
+% Plot wallets grouped by agent type
+plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, time, colors);
 
-% Plot Wallet
-figure;
-x = 1:time;
-p1 = plot(x, Wallet(1:numBS, 1:numSteps),'b-diamond');
-%set(p1,'color',blue); %TODO - Matlab bug?
-ps = p1(1);
-psnames = {'Buy-Sell'};
-hold on;
-if numB > 0
-    a1 = numBS + 1;
-    a2 = numBS + numB;
-    p2 = plot(x, Wallet(a1:a2, 1:time),'g-+');
-    %p2 = plot(x, Wallet(a1:a2, 1:time),'Color',green,'LineStyle','-','Marker','+','LineWidth',0.5);
-    ps = [ps ; p2(1)];
-    psnames = [psnames , {'Buy'}];
-end
-if numS > 0
-    a1 = numBS + numB + 1;
-    a2 = numBS + numB + numS;
-    p3 = plot(x, Wallet(a1:a2,1:time),'Color',violet,'LineStyle','-','Marker','*','LineWidth',0.5); 
-    ps = [ps ; p3(1)];
-    psnames = [psnames , {'Sell'}];
-end
-if numNP > 0
-    a1 = numBS + numB + numS + 1;
-    a2 = numBS + numB + numS + numNP;
-    p4 = plot(x, Wallet(a1:a2, 1:time),'Color',red,'LineStyle','-','Marker','x','LineWidth',0.5);
-    ps = [ps ; p4(1)];
-    psnames = [psnames , {'NP'}];
-end
-%plot(x,(sum(Wallet(:,1:time)) ./ N),'k--+');
-hold off;
-legend(ps,psnames);
-xlabel('Time');
-ylabel('Drachma');
-title('Agent Wallets');
+% Plot cumlative UBI & Demurrage grouped by agent type
+plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colors);
 
-
-% Plot incremental UBI & Demurrage
-figure;
-x = 1:time;
-hold on;
-p1 = plot(x, buysellD(:,1:time),'b-diamond');
-%set(p1,'color',blue); %TODO - Matlab bug?
-ps = p1(1);
-psnames = {'D Buy-Sell'};
-if ~isempty(sellD)
-    p2 = plot(x, sellD(:,1:time),'color',violet,'linestyle','--','marker','*','linewidth',0.5);
-    ps = [ps ; p2(1)];
-    psnames = [psnames , {'D Sell'}];
-end
-if ~isempty(buyD)
-    p3 = plot(x, buyD(:,1:time),'color',green,'linestyle','-','marker','+','linewidth',0.5);
-    ps = [ps ; p3(1)];
-    psnames = [psnames , {'D Buy'}];
-end
-if ~isempty(npD)
-    p4 = plot(x, npD(:,1:time),'color',red,'linestyle','-','marker','x','linewidth',0.5);
-    ps = [ps ; p4(1)];
-    psnames = [psnames , {'D NP'}];
-end
-p5 = plot(x, UBI(:,1:time),'color',gold,'linestyle','-','marker','o','linewidth',0.5);
-ps = [ps ; p5(1)];
-psnames = [psnames , {'UBI'}];
-hold off;
-legend(ps,psnames);
-xlabel('Time');
-ylabel('Drachma');
-title('Incremental Demurrage By Agent & Type + UBI');
-
-% Cumulative Money Suppy, Demurrage & UBI
-
-% Calculate the cumulative Demurrage & UBI as a function of time (we have been
-% storing incremental values)
-cumDemurrage = cumsum(Demurrage,2);
-cumUBI = cumsum(UBI,2);
-
-figure;
-hold on;
-x = 1:time;
-p1 = plot(x, sum(Wallet(:,1:time)),'k-diamond');
-p2 = plot(x, sum(cumDemurrage(:,1:time)),'b-o');
-p3 = plot(x, sum(cumUBI(:,1:time)),'c-x');
-set(p3,'color',gold);
-hold off;
-legend([p1, p2, p3],{'Money Supply','Demurrage','UBI'});
-xlabel('Time');
-ylabel('Drachma');
-title('Cumulative Money Supply, Demurrage & UBI');
-
-% Plot Inventory, Buying and Selling over time
-cumBought = cumsum(unitsBought,2);
-cumSold = cumsum(unitsSold,2);
-
-figure;
-hold on;
-x = 1:time;
-p1 = plot(x, sellerInventoryUnits(:,1:time),'b-o');
-p2 = plot(x, cumSold(:,1:time),'r-+');
-p3 = plot(x, cumBought(:,1:time),'g-x');
-hold off;
-legend([p1(1), p2(1), p3(1)],{'Inventory','Cum. Sold','Cum. Bought'});
-xlabel('Time');
-ylabel('Inventory');
-title('Inventory by Agent');
-
+%
+% ======  Helping Functions  ======
+%
 
 function reportIncrementalStatistics(polis, price, time)
 
@@ -441,4 +279,293 @@ function reportIncrementalStatistics(polis, price, time)
        fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. TMS - (UBI + Demurrage) = %.2f)\n", sumWallets, cumDemurrage, cumUBI, (sumWallets - (cumUBI + cumDemurrage)));
        fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = $%.2f, Total Inventory Exchanged = %2.f (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, sumBought, (sumBought - sumSold));
        
+end
+
+function [wallets, ubi, demurrage, purchased, sold, ids, agentTypes] = sortByAgentType(wallets, ubi, demurrage, purchased, sold, ids, agentTypes)
+            % Sort these matrices by the agentTypes
+            [agentTypes, indices] = sort(agentTypes);
+            wallets = wallets(indices,:);
+            ubi = ubi(indices,:);
+            demurrage = demurrage(indices,:);
+            purchased = purchased(indices,:);
+            sold = sold(indices,:);
+            ids = ids(indices);
+end
+
+%
+% ====== Plotting Functions ======
+%
+function plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, endTime)
+    %
+    % The summary plot has 4 sections
+    %
+    numAgents = polis.numberOfAgents;
+
+    % Section 1: Final Wallet Size By Agent At time = endTime
+    maxYHeight = max(Wallet(:,endTime))*yScale;
+    if (maxYHeight <= 0) 
+        maxYHeight = 1; 
+    end
+
+    ax1 = subplot(4,1,1);
+    x = 1:numAgents;
+    plot(ax1, x, Wallet(:,endTime),'-o');
+    xlim([1 numAgents]);
+    ylim([0 maxYHeight]);
+    xlabel('Agent');
+    ylabel('Drachmas');
+    title('Remaining Money');
+    legend('Wallet Size');
+
+    % Section 2: Items Bought & Sold Distribution
+    yHeights = sort([max(sum(Purchased,2)) max(sum(Sold,2))],'descend');
+    maxYHeight = yHeights(1)*yScale;
+    if (maxYHeight <= 0) 
+        maxYHeight = 1; 
+    end
+
+    ax2 = subplot(4,1,2);
+    x = 1:numAgents;
+    plot(ax2, x, sum(Purchased,2), '--o', x, sum(Sold,2), '-o');
+    xlim([1 numAgents]);
+    ylim([0 maxYHeight]);
+    xlabel('Agent');
+    ylabel('Units');
+    title('Units Bought & Sold');
+    legend('Bought','Sold');
+
+    % Section 3: Distribution Buyers & Sellers
+    Buyers = zeros(1,numAgents);
+    Sellers = zeros(1,numAgents);
+    for i = 1:numAgents
+        agent = polis.agents(i);
+        if agent.isBuyer
+            Buyers(1,i) = 1;
+        end
+        if agent.isSeller
+            Sellers(1,i) = 1;
+        end
+    end
+    ax3 = subplot(4,1,3);
+    x = 1:numAgents;
+    plot(ax3, x, Buyers, 'x', x, Sellers, 'o');
+    xlim([1 numAgents]);
+    ylim([0.9 1.1]);
+    xlabel('Agent');
+    ylabel('Type');
+    title('Buyers & Sellers');
+    legend('Buyers','Sellers');
+
+    % Section 4: Money Supply
+    totalUBI = UBI(:,endTime);
+    totalDemurrage = Demurrage(:,endTime);
+    initialWallet = Wallet(:,1);
+    net = initialWallet + totalUBI - totalDemurrage;
+    yHeights = sort([max(net) max(initialWallet) max(totalUBI) max(totalDemurrage)],'descend');
+    maxYHeight = yHeights(1)*yScale;
+    if (maxYHeight <= 0) 
+        maxYHeight = 1; 
+    end
+    minyLim = 0;
+    if min(net) < 0
+        minyLim = min(net)*yScale;
+    end
+
+    ax4 = subplot(4,1,4);
+    x = 1:numAgents;
+    plot(ax4, x, net, 'c-*', x, initialWallet, '--o', x, totalUBI, 'g-x', x, -totalDemurrage, '-ro');
+    xlim([1 numAgents]);
+    ylim([minyLim maxYHeight]);
+    xlabel('Agent');
+    ylabel('Drachma');
+    title('Money Supply');
+    legend('Net', 'Seed','UBI', 'Dumurrage');
+end
+
+function plotWalletByAgentId(polis, Wallet, ids, endTime)
+    %
+    % Wallet by Agent
+    %
+    numberOfAgents = polis.numberOfAgents;
+    
+    figure;
+    hold on;
+    x = 1:endTime;
+    p = plot(x, Wallet(:, 1:endTime),'-x');
+    hold off;
+    ps = [];
+    psnames = {};
+    for i = 1:numberOfAgents
+        ps = [ps ; p(i)];
+        name = sprintf("%d",ids(i));
+        psnames = [psnames ; {name}];
+    end
+    legend(ps, psnames);
+    xlabel('Time');
+    ylabel('Drachma');
+    title('Wallet By Agent Id');
+end
+
+function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors)
+    % 
+    % Plot Wallet By Agent Type
+    %
+    
+    figure;
+    x = 1:endTime;
+    p1 = plot(x, Wallet(1:numBS, 1:endTime),'b-diamond');
+    %set(p1,'color',blue); %TODO - Matlab bug?
+    ps = p1(1);
+    psnames = {'Buy-Sell'};
+    hold on;
+    if numB > 0
+        a1 = numBS + 1;
+        a2 = numBS + numB;
+        p2 = plot(x, Wallet(a1:a2, 1:endTime),'g-+');
+        %p2 = plot(x, Wallet(a1:a2, 1:time),'Color',green,'LineStyle','-','Marker','+','LineWidth',0.5);
+        ps = [ps ; p2(1)];
+        psnames = [psnames , {'Buy'}];
+    end
+    if numS > 0
+        a1 = numBS + numB + 1;
+        a2 = numBS + numB + numS;
+        p3 = plot(x, Wallet(a1:a2,1:endTime),'Color',colors.violet,'LineStyle','-','Marker','*','LineWidth',0.5); 
+        ps = [ps ; p3(1)];
+        psnames = [psnames , {'Sell'}];
+    end
+    if numNP > 0
+        a1 = numBS + numB + numS + 1;
+        a2 = numBS + numB + numS + numNP;
+        p4 = plot(x, Wallet(a1:a2, 1:endTime),'Color',colors.red,'LineStyle','-','Marker','x','LineWidth',0.5);
+        ps = [ps ; p4(1)];
+        psnames = [psnames , {'NP'}];
+    end
+    %
+    % Add the average wallet size
+    %
+    %plot(x,(sum(Wallet(:,1:endTime)) ./ N),'k--+');
+    hold off;
+    legend(ps,psnames);
+    xlabel('Time');
+    ylabel('Drachma');
+    title('Wallet by Agent Type');
+end
+
+function plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, endTime, colors)
+    % 
+    % Plot Cumulative Money Supply, Demurrage & UBI
+    %
+    
+    % Calculate the cumulative Demurrage & UBI as a function of time 
+    % (we have incremental values)
+    cumDemurrage = cumsum(-Demurrage,2);
+    cumUBI = cumsum(UBI,2);
+
+    figure;
+    hold on;
+    x = 1:endTime;
+    p1 = plot(x, sum(Wallet(:,1:endTime)),'k-diamond');
+    p2 = plot(x, sum(cumDemurrage(:,1:endTime)),'b-o');
+    p3 = plot(x, sum(cumUBI(:,1:endTime)),'c-x');
+    set(p3,'color',colors.gold);
+    hold off;
+    legend([p3, p2, p1],{'UBI','Demurrage','Money Supply'});
+    xlabel('Time');
+    ylabel('Drachma');
+    title('Cumulative UBI, Demurrage & Money Supply');
+end
+
+function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, endTime, colors)
+    % 
+    % Plot incremental UBI & Demurrage
+    %
+    figure;
+    x = 1:endTime;
+    hold on;
+    p1 = plot(x, -Demurrage(1:numBS,1:endTime),'b-diamond');
+    %set(p1,'color',blue); %TODO - Matlab bug?
+    ps = p1(1);
+    psnames = {'Dem. Buy-Sell'};
+    if numB > 0
+        a1 = numBS + 1;
+        a2 = numBS + numB;
+        p2 = plot(x, -Demurrage(a1:a2, 1:endTime),'g-+');
+        %p2 = plot(x, Demurrage(a1:a2, 1:endTime),'Color',colors.green,'LineStyle','-','Marker','+','LineWidth',0.5);
+        ps = [ps ; p2(1)];
+        psnames = [psnames , {'Dem. Buy'}];
+    end
+    if numS > 0
+        a1 = numBS + numB + 1;
+        a2 = numBS + numB + numS;
+        p3 = plot(x, -Demurrage(a1:a2,1:endTime),'Color',colors.violet,'LineStyle','-','Marker','*','LineWidth',0.5); 
+        ps = [ps ; p3(1)];
+        psnames = [psnames , {'Dem. Sell'}];
+    end
+    if numNP > 0
+        a1 = numBS + numB + numS + 1;
+        a2 = numBS + numB + numS + numNP;
+        p4 = plot(x, -Demurrage(a1:a2, 1:endTime),'Color',colors.red,'LineStyle','-','Marker','x','LineWidth',0.5);
+        ps = [ps ; p4(1)];
+        psnames = [psnames , {'Dem. NP'}];
+    end
+    p5 = plot(x, UBI(:,1:endTime),'color',colors.gold,'linestyle','-','marker','o','linewidth',0.5);
+    ps = [ps ; p5(1)];
+    psnames = [psnames , {'UBI'}];
+    hold off;
+    legend(ps,psnames);
+    xlabel('Time');
+    ylabel('Drachma');
+    title('Cumulative Demurrage By Agent Type + UBI');
+end
+
+function plotPuchsasedItemsByAgent(polis, Purchased, ids, endTime)
+    %
+    % Plot Buying and Selling over time
+    %
+    numberOfAgents = polis.numberOfAgents;
+    
+    cumPurchased = cumsum(Purchased,2);
+
+    figure;
+    hold on;
+    x = 1:endTime;
+    p = plot(x, cumPurchased(:,1:endTime),'-x');
+    hold off;
+    ps = [];
+    psnames = {};
+    for i = 1:numberOfAgents
+        ps = [ps ; p(i)];
+        name = sprintf("%d",ids(i));
+        psnames = [psnames ; {name}];
+    end
+    legend(ps, psnames);
+    xlabel('Time');
+    ylabel('Number of Items');
+    title('Cumulative Purchased Items By Agent');
+end
+
+function plotSoldItemsByAgent(polis, Sold, ids, endTime)
+    %
+    % Plot Buying and Selling over time
+    %
+    numberOfAgents = polis.numberOfAgents;
+    
+    cumSold = cumsum(Sold,2);
+
+    figure;
+    hold on;
+    x = 1:endTime;
+    p = plot(x, cumSold(:,1:endTime),'-+');
+    hold off;
+    ps = [];
+    psnames = {};
+    for i = 1:numberOfAgents
+        ps = [ps ; p(i)];
+        name = sprintf("%d",ids(i));
+        psnames = [psnames ; {name}];
+    end
+    legend(ps, psnames);
+    xlabel('Time');
+    ylabel('Number of Items');
+    title('Cumulative Sold Items By Agent');
 end
