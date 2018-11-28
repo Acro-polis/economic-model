@@ -95,7 +95,7 @@ polis.setupBuyers(numberOfBuyers);
 [numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents] = polis.parseAgentCommerceRoleTypes();
 
 % Log Inputs
-reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, percentDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
+reportSimulationInputs(networkFilename, N, numSteps, maxSearchLevels, amountUBI, percentDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
 
 % Report Initial Statistics
 sumWallets = polis.totalMoneySupplyAtTimestep(1);
@@ -121,12 +121,10 @@ for time = 1:numSteps
 
    if time > 1
        % Apply demurrage
-       fprintf("\n-- Applying Demurrage --\n");
        polis.applyDemurrageWithPercentage(percentDemurrage, time);
    end
    
    % Deposit UBI
-   fprintf("\n-- Depositing UBI --\n");
    polis.depositUBI(amountUBI, time);
    
    % Randomly order buyers before each time step
@@ -228,7 +226,7 @@ fprintf("\n=============================\n");
 %
 
 % Simulation Inputs
-reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, percentDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
+reportSimulationInputs(networkFilename, N, numSteps, maxSearchLevels, amountUBI, percentDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
 % Simulation Statistics
 reportSimulationStatistics(polis, price, time);
 % Transaction Failure Analysis
@@ -237,7 +235,6 @@ reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailN
 %
 % ======  Plot some results  ======
 %
-fprintf("\n----- Begin Plotting -----\n");
 close all
 yScale = 1.5;
 colors = Colors();
@@ -272,8 +269,8 @@ plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colo
 %
 % ======  Helping Functions  ======
 %
-function reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, percentDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents)
-    fprintf("\n----- Summarized Simulation Inputs For Code Version = %s -----\n", version_number);
+function reportSimulationInputs(networkFilename, N, numSteps, maxSearchLevels, amountUBI, percentDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents)
+    fprintf("\n----- Summarized Simulation Inputs -----\n");
     if networkFilename == ""
         fprintf("\n- Using Connected Network\n\n");
     else

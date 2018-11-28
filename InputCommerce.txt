@@ -1,7 +1,7 @@
 
 Commerce Model Input Parameters
 
-1)  Number of Time Steps (dt): 3
+1)  Number of Time Steps (dt): 200
 2)  Number of Agents: 25
 3)  Network Filename:
 4)  Number of search steps (find path): 0
