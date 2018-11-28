@@ -16,8 +16,9 @@
 numberOfAgents = 10; % We need to know this; cannot derive it from the connections import file (yet) 
 AM = importNetworkModelFromCSV(numberOfAgents, "test_network_10_agents.csv");
 time = 1;
+totalTimeSteps = 20;
 polis = Polis(AM, 6);
-polis.createAgents(time);
+polis.createAgents(time, totalTimeSteps);
 
 fprintf("\nTesting Agents Methods\n");
 

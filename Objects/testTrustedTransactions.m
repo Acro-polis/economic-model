@@ -9,8 +9,12 @@
 numberOfAgents = 10; % We need to know this; cannot derive it from the connections import file (yet) 
 AM = importNetworkModelFromCSV(numberOfAgents, "test_network_10_agents.csv");
 time = 1;
+totalTimeSteps = 10;
 polis = Polis(AM, 6);
-polis.createAgents(time);
+polis.createAgents(time, totalTimeSteps);
+numItems = 1;
+inventoryInitialUnits = 100.0;
+polis.setupSellers(numberOfAgents, inventoryInitialUnits);
 
 agent1 = polis.agents(1);
 agent2 = polis.agents(2);
@@ -22,7 +26,7 @@ fprintf("\nTesting with Connected Graph of 4 Agents\n\n");
 polis.depositUBI(100, time);
 
 % A1 buys from A2
-agent1.submitPurchase(AM, 50, agent2, time);
+agent1.submitPurchase(AM, numItems, 50, agent2, time);
 
 mutualConnections = Agent.findMutualConnectionsWithAgent(AM, agent1.id, agent2.id);
 availableBalance1 = agent1.availableBalanceForTransactionWithAgent(agent2.id, mutualConnections);

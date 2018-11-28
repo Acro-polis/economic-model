@@ -13,10 +13,14 @@ fprintf("\n\n----- Wallet Test Suite 1 ----\n\n");
 numberOfAgents = 10; % We need to know this; cannot derive it from the connections import file (yet) 
 AM = importNetworkModelFromCSV(numberOfAgents, "test_network_10_agents.csv");
 time = 1;
+totalTimeSteps = 20;
 fprintf("\nTest Agent Wallets: time = %d\n\n",time);
 maxSearchLevels = 6;
 polis = Polis(AM, maxSearchLevels); 
-polis.createAgents(time);
+polis.createAgents(time, totalTimeSteps);
+numItems = 1;
+inventoryInitialUnits = 100.0;
+polis.setupSellers(numberOfAgents, inventoryInitialUnits);
 
 % Give everybody 500
 polis.depositUBI(500, time);
@@ -32,19 +36,19 @@ agent3 = polis.agents(3);
 agent4 = polis.agents(4);
 
 % A1 buys from A2
-result = agent1.submitPurchase(AM, 100, agent2, time);
+result = agent1.submitPurchase(AM, numItems, 100, agent2, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 % A1 buys from A3
-result = agent1.submitPurchase(AM, 50, agent3, time);
+result = agent1.submitPurchase(AM, numItems, 50, agent3, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 % A3 buys from A1
-result = agent3.submitPurchase(AM, 75, agent1, time);
+result = agent3.submitPurchase(AM, numItems, 75, agent1, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 % A2 buys from A4
-result = agent2.submitPurchase(AM, 200, agent4, time);
+result = agent2.submitPurchase(AM, numItems, 200, agent4, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 agents = [agent1, agent2, agent3, agent4];
@@ -72,7 +76,7 @@ time = time + 1;
 fprintf("\nTest Agent Wallets: time = %d\n",time);
 
 % A2 buys from A5
-result = agent2.submitPurchase(AM, 250.0, agent5, time);
+result = agent2.submitPurchase(AM, numItems, 250.0, agent5, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 agents = [agent1, agent2, agent3, agent4, agent5];
@@ -87,7 +91,7 @@ fprintf("\nTest Agent Wallets: Time = %d\n",time);
 
 agent8 = polis.agents(8);
 agent6 = polis.agents(6);
-result = agent8.submitPurchase(AM, 100.0, agent1, time);
+result = agent8.submitPurchase(AM, numItems, 100.0, agent1, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 agent8.dumpLedger();
@@ -106,7 +110,7 @@ fprintf("\nTest Agent Wallets: time = %d\n",time);
 
 agent10 = polis.agents(10);
 agent9 = polis.agents(9);
-result = agent10.submitPurchase(AM, 125.0, agent1, time);
+result = agent10.submitPurchase(AM, numItems, 125.0, agent1, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 agents = [agent10, agent9, agent8, agent6, agent1];
@@ -127,9 +131,14 @@ fprintf("\n\n----- Wallet Test Suite 2 ----\n\n");
 
 polis.delete
 time = 1;
+totalTimeSteps = 5;
 polis = Polis(AM, 6);
-polis.createAgents(time);
+polis.createAgents(time, totalTimeSteps);
 polis.depositUBI(500.0, time);
+numItems = 1;
+inventoryInitialUnits = 100.0;
+polis.setupSellers(numberOfAgents, inventoryInitialUnits);
+
 agent1 = polis.agents(1);
 agent2 = polis.agents(2);
 agent3 = polis.agents(3);
@@ -137,15 +146,15 @@ agent4 = polis.agents(4);
 agent6 = polis.agents(6);
 
 time = time + 1;
-result = agent1.submitPurchase(AM, 400.00, agent6, time);
+result = agent1.submitPurchase(AM, numItems, 400.00, agent6, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 time = time + 1;
-result = agent3.submitPurchase(AM, 250.00, agent1, time);
+result = agent3.submitPurchase(AM, numItems, 250.00, agent1, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 time = time + 1;
-result = agent1.submitPurchase(AM, 249.00, agent2, time);
+result = agent1.submitPurchase(AM, numItems, 249.00, agent2, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 agents = [agent1, agent2, agent3, agent4, agent6];
