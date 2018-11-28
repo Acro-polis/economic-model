@@ -517,7 +517,7 @@ end
 
 function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, endTime, colors)
     % 
-    % Plot incremental UBI & Demurrage
+    % Plot Cumulative UBI & Demurrage
     %
     figure;
     x = 1:endTime;
