@@ -190,20 +190,23 @@ Buying - subtracting currency
         % Balance Calculations
         %
         
-        function [agentIds, balances] = individualBalancesForTransactionWithAgent(obj, agentId, mutualAgentIds)
+        function [agentIds, balances] = individualBalancesForTransactionWithAgent(obj, targetAgentId, mutualAgentIds)
             % Return the balance for each individual currency from common
             % agents, the target agent (agentId) and oneself (obj.Id). 
             % Order by agentId, common agents, then onself.
-            agentIds = agentId;
-            balances = obj.balanceForAgentsCurrency(agentId);
             [~, indices] = size(mutualAgentIds);
+            N = indices + 2;
+            agentIds = zeros(N, 1);
+            balances = zeros(N, 1);
+            agentIds(1) = targetAgentId; 
+            balances(1) = obj.balanceForAgentsCurrency(targetAgentId);
             for index = 1:indices
                 mutualAgentId = mutualAgentIds(index);
-                agentIds = [agentIds ; mutualAgentId];
-                balances = [balances ; obj.balanceForAgentsCurrency(mutualAgentId)];
+                agentIds(index + 1) = mutualAgentId;
+                balances(index + 1) = obj.balanceForAgentsCurrency(mutualAgentId);
             end
-            agentIds = [agentIds ; obj.agent.id];
-            balances = [balances ; obj.balanceForAgentsCurrency(obj.agent.id)];
+            agentIds(N) = obj.agent.id;
+            balances(N) = obj.balanceForAgentsCurrency(obj.agent.id);
         end
         
         function balance = availableBalanceForTransactionWithAgent(obj, agentId, mutualAgentIds)
