@@ -20,7 +20,7 @@ fprintf(fileId,'6)  UBI Rate (drachma / dt): %.1f\n',100.0);
 fprintf(fileId,'7)  Percent Demurrage (/dt): %.2f\n',0.05);
 fprintf(fileId,'8)  Percentage of Agents Buying: %.2f\n',0.75);
 fprintf(fileId,'9)  Percentage of Agents Selling: %.2f\n',0.75);
-fprintf(fileId,'10)  Price of Goods (drachma / unit): %.1f\n',75.0);
+fprintf(fileId,'10) Price of Goods (drachma / unit): %.1f\n',75.0);
 fprintf(fileId,'11) Initial Inventory (# units / agent): %.1f\n',300.0);
 
 fclose(fileId);

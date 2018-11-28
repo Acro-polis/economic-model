@@ -323,6 +323,11 @@ classdef Agent < handle
         % Methods supporting data logging
         %
         
+        function total = totalLedgerRecords(obj)
+            % Return the total number of ledger records
+            total = obj.wallet.totalLedgerRecords;
+        end
+        
         function dumpLedger(obj)
             % Write the contents of the wallet's ledger to the console
             obj.wallet.dump;

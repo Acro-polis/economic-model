@@ -256,6 +256,14 @@ classdef Polis < handle
             end            
         end
         
+        function totalLedgerRecordsByAgent = totalLedgerRecordsByAgent(obj)
+            % Return the total number of ledger records for all agents
+            totalLedgerRecordsByAgent = zeros(obj.numberOfAgents,1);
+            for i = 1:obj.numberOfAgents
+                totalLedgerRecordsByAgent(i,1) = obj.agents(i).totalLedgerRecords;
+            end
+        end
+        
     end
     
     methods (Static)

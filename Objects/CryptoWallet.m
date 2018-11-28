@@ -259,8 +259,13 @@ Buying - subtracting currency
         end
         
         %
-        % Output
+        % Output / Logging
         %
+        
+        function total = totalLedgerRecords(obj)
+            % Return the total number of records currently in the ledger
+            [total, ~] = size(obj.transactions);
+        end
         
         function dump(obj)
             % Log this agents complete ledger

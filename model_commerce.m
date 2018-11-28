@@ -269,6 +269,10 @@ plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, time, colors);
 % Plot cumlative UBI & Demurrage grouped by agent type
 plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colors);
 
+% Plot total ledger records by agent
+totalLedgerRecordsByAgent = polis.totalLedgerRecordsByAgent;
+plotLedgerRecordTotals(totalLedgerRecordsByAgent);
+
 %
 % ======  Helping Functions  ======
 %
@@ -604,4 +608,14 @@ function plotSoldItemsByAgent(polis, Sold, ids, endTime)
     xlabel('Time');
     ylabel('Number of Items');
     title('Cumulative Sold Items By Agent');
+end
+
+function plotLedgerRecordTotals(totalLedgerRecordsByAgent)
+    figure;
+    [N, ~] = size(totalLedgerRecordsByAgent);
+    x = 1:N;
+    plot(x, totalLedgerRecordsByAgent, '--x');
+    xlabel('Agent Id');
+    ylabel('Total Records');
+    title('Total Number Of Ledger Records By Agent');
 end
