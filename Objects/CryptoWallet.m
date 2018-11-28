@@ -177,7 +177,7 @@ Buying - subtracting currency
                 amount = -1.0*percentage*obj.balanceForAgentsCurrency(agentIds(index));
                 
                 %
-                % Record the transaction
+                % Record the transaction (remember demurrage is negative)
                 %
                 if amount < 0.0
                     t = Transaction(TransactionType.DEMURRAGE, amount, agentIds(index), obj.agent.polis.uniqueId(), Polis.PolisId, obj.agent.id, "DEMURRAGE", timeStep);
