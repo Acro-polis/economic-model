@@ -319,6 +319,7 @@ function reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPa
     expectedPurchased = numBuyers*endTime;
     checkSum = sumPurchased + sumNoMoney + sumNoLiquidity + sumNoPaths + sumNoInventory;
     assert(expectedPurchased == checkSum,"Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n", expectedPurchased, checkSum);
+    fprintf("* Expected Purchases = Items Purchased + Sum Of Failures = %2.f\n", expectedPurchased);
 end
 
 function [wallets, ubi, demurrage, purchased, sold, ids, agentTypes] = sortByAgentType(wallets, ubi, demurrage, purchased, sold, ids, agentTypes)
