@@ -1,7 +1,7 @@
 
 Commerce Model Input Parameters
 
-1)  Number of Time Steps (dt): 10
+1)  Number of Time Steps (dt): 3
 2)  Number of Agents: 25
 3)  Network Filename:
 4)  Number of search steps (find path): 0
@@ -10,7 +10,7 @@ Commerce Model Input Parameters
 7)  Percent Demurrage (/dt): 0.05
 8)  Percentage of Agents Buying: 0.75
 9)  Percentage of Agents Selling: 0.75
-10)  Price of Goods (drachma / unit): 200.0
+10) Price of Goods (drachma / unit): 75.0
 11) Initial Inventory (# units / agent): 300.0
 
 

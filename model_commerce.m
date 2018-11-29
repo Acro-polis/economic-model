@@ -7,7 +7,7 @@
 %===================================================
 
 version_number = "1.2.0"; % Tagged version in github
-	
+
 inputTypeDouble = 0;
 inputTypeString = 1;
 
@@ -242,6 +242,16 @@ close all
 yScale = 1.5;
 colors = Colors();
 
+% For when we want to save the plots
+savePlots = true;
+setPlotting(savePlots);
+if getPlotting
+    outputFolder = "Output";
+    outputSubFolderName = "Test";
+    outputPath = sprintf("%s/%s", outputFolder, outputSubFolderName);
+    [status, msg, msgID] = mkdir(outputPath);
+end
+
 % Plot the 4 panal summary plot
 plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, time);
 
@@ -271,11 +281,22 @@ plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colo
 
 % Plot total ledger records by agent
 totalLedgerRecordsByAgent = polis.totalLedgerRecordsByAgent;
-plotLedgerRecordTotals(totalLedgerRecordsByAgent);
+filePath = sprintf("%s/%s", outputPath, "test_8.fig");
+plotLedgerRecordTotals(totalLedgerRecordsByAgent, filePath);
 
 %
 % ======  Helping Functions  ======
 %
+function setPlotting(value)
+ global plot;
+ plot = value;
+end
+
+function result = getPlotting
+ global plot;
+ result = plot;
+end
+
 function reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, percentDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents)
     fprintf("\n----- Summarized Simulation Inputs For Code Version %s -----\n", version_number);
     if networkFilename == ""
@@ -497,17 +518,17 @@ function plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, 
     % Plot Cumulative Money Supply, Demurrage & UBI
     %
     
-    % Calculate the cumulative Demurrage & UBI as a function of time 
-    % (we have incremental values)
-    cumDemurrage = cumsum(-Demurrage,2);
-    cumUBI = cumsum(UBI,2);
+    % Sum over all agents
+    demurrageAllAgents = sum(-Demurrage);
+    UBIAllAgents = sum(UBI);
+    walletAllAgents = sum(Wallet);
 
     figure;
     hold on;
     x = 1:endTime;
-    p1 = plot(x, sum(Wallet(:,1:endTime)),'k-diamond');
-    p2 = plot(x, sum(cumDemurrage(:,1:endTime)),'b-o');
-    p3 = plot(x, sum(cumUBI(:,1:endTime)),'c-x');
+    p1 = plot(x, walletAllAgents(1,1:endTime),'k-diamond');
+    p2 = plot(x, demurrageAllAgents(1,1:endTime),'b-o');
+    p3 = plot(x, UBIAllAgents(1,1:endTime),'c-x');
     set(p3,'color',colors.gold);
     hold off;
     legend([p3, p2, p1],{'UBI','Demurrage','Money Supply'});
@@ -611,12 +632,15 @@ function plotSoldItemsByAgent(polis, Sold, ids, endTime)
     title('Cumulative Sold Items By Agent');
 end
 
-function plotLedgerRecordTotals(totalLedgerRecordsByAgent)
+function plotLedgerRecordTotals(totalLedgerRecordsByAgent, filePath)
     figure;
     [N, ~] = size(totalLedgerRecordsByAgent);
     x = 1:N;
-    plot(x, totalLedgerRecordsByAgent, '--x');
+    fig = plot(x, totalLedgerRecordsByAgent, '--x');
     xlabel('Agent Id');
     ylabel('Total Records');
     title('Total Number Of Ledger Records By Agent');
+    if getPlotting
+        saveas(fig, filePath, 'fig');
+    end
 end
