@@ -243,27 +243,32 @@ yScale = 1.5;
 colors = Colors();
 
 % For when we want to save the plots
-savePlots = true;
+savePlots = true;                               % true saves plots, false does not (TODO - make input variable?)
 setPlotting(savePlots);
 if getPlotting
     outputFolder = "Output";
-    outputSubFolderName = "Test";
+    outputSubFolderName = "Economic_Model";     % TODO - make input variable?
     outputPath = sprintf("%s/%s", outputFolder, outputSubFolderName);
     [status, msg, msgID] = mkdir(outputPath);
 end
 
 % Plot the 4 panal summary plot
-plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, time);
+filePath = sprintf("%s/%s", outputPath, "Summary.fig");
+plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, time, filePath);
 
 % Plot cumulative money supply, UBI and Demurrage
-plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, time, colors);
+filePath = sprintf("%s/%s", outputPath, "Cum_MS_UBI_Dem.fig");
+plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, time, colors, filePath);
 
 % Plot wallets by agent id
-plotWalletByAgentId(polis, Wallet, ids, time);
+filePath = sprintf("%s/%s", outputPath, "Wallets_By_Id.fig");
+plotWalletByAgentId(polis, Wallet, ids, time, filePath);
 
 % Plot purchased & sold items by agent id
-plotPuchsasedItemsByAgent(polis, Purchased, ids, time);
-plotSoldItemsByAgent(polis, Sold, ids, time);
+filePath = sprintf("%s/%s", outputPath, "Purchases.fig");
+plotPuchsasedItemsByAgent(polis, Purchased, ids, time, filePath);
+filePath = sprintf("%s/%s", outputPath, "Sales.fig");
+plotSoldItemsByAgent(polis, Sold, ids, time, filePath);
 
 % Plot transaction failures by agent
 %TODO - make a 4 panel in time with Purchased
@@ -274,14 +279,16 @@ sP = Purchased;
 [numBS, numB, numS, numNP] = polis.countAgentCommerceTypes(agentTypes);
 
 % Plot wallets grouped by agent type
-plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, time, colors);
+filePath = sprintf("%s/%s", outputPath, "Wallet_Agent_Type.fig");
+plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, time, colors, filePath);
 
 % Plot cumlative UBI & Demurrage grouped by agent type
-plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colors);
+filePath = sprintf("%s/%s", outputPath, "Cum_UBI_ETC_BY_Agent_Type.fig");
+plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colors, filePath);
 
 % Plot total ledger records by agent
 totalLedgerRecordsByAgent = polis.totalLedgerRecordsByAgent;
-filePath = sprintf("%s/%s", outputPath, "test_8.fig");
+filePath = sprintf("%s/%s", outputPath, "Ledger.fig");
 plotLedgerRecordTotals(totalLedgerRecordsByAgent, filePath);
 
 %
@@ -357,7 +364,7 @@ end
 %
 % ====== Plotting Functions ======
 %
-function plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, endTime)
+function plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, endTime, filePath)
     %
     % The summary plot has 4 sections
     %
@@ -368,7 +375,8 @@ function plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, end
     if (maxYHeight <= 0) 
         maxYHeight = 1; 
     end
-
+    
+    f = figure;
     ax1 = subplot(4,1,1);
     x = 1:numAgents;
     plot(ax1, x, Wallet(:,endTime),'-o');
@@ -442,15 +450,18 @@ function plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, end
     ylabel('Drachma');
     title('Money Supply');
     legend('Net', 'Seed','UBI', 'Dumurrage');
+    if getPlotting
+        saveas(f, filePath, 'fig');
+    end
 end
 
-function plotWalletByAgentId(polis, Wallet, ids, endTime)
+function plotWalletByAgentId(polis, Wallet, ids, endTime, filePath)
     %
     % Wallet by Agent
     %
     numberOfAgents = polis.numberOfAgents;
     
-    figure;
+    f = figure;
     hold on;
     x = 1:endTime;
     p = plot(x, Wallet(:, 1:endTime),'-x');
@@ -466,14 +477,17 @@ function plotWalletByAgentId(polis, Wallet, ids, endTime)
     xlabel('Time');
     ylabel('Drachma');
     title('Wallet By Agent Id');
+    if getPlotting
+        saveas(f, filePath, 'fig');
+    end
 end
 
-function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors)
+function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors, filePath)
     % 
     % Plot Wallet By Agent Type
     %
     
-    figure;
+    f = figure;
     x = 1:endTime;
     p1 = plot(x, Wallet(1:numBS, 1:endTime),'b-diamond');
     %set(p1,'color',blue); %TODO - Matlab bug?
@@ -511,9 +525,12 @@ function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors
     xlabel('Time');
     ylabel('Drachma');
     title('Wallet by Agent Type');
+    if getPlotting
+        saveas(f, filePath, 'fig');
+    end
 end
 
-function plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, endTime, colors)
+function plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, endTime, colors, filePath)
     % 
     % Plot Cumulative Money Supply, Demurrage & UBI
     %
@@ -523,7 +540,7 @@ function plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, 
     UBIAllAgents = sum(UBI);
     walletAllAgents = sum(Wallet);
 
-    figure;
+    f = figure;
     hold on;
     x = 1:endTime;
     p1 = plot(x, walletAllAgents(1,1:endTime),'k-diamond');
@@ -535,13 +552,17 @@ function plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, 
     xlabel('Time');
     ylabel('Drachma');
     title('Cumulative UBI, Demurrage & Money Supply');
+    if getPlotting
+        saveas(f, filePath, 'fig');
+    end
+
 end
 
-function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, endTime, colors)
+function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, endTime, colors, filePath)
     % 
     % Plot Cumulative UBI & Demurrage
     %
-    figure;
+    f = figure;
     x = 1:endTime;
     hold on;
     p1 = plot(x, -Demurrage(1:numBS,1:endTime),'b-diamond');
@@ -578,9 +599,12 @@ function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, e
     xlabel('Time');
     ylabel('Drachma');
     title('Cumulative Demurrage By Agent Type + UBI');
+    if getPlotting
+        saveas(f, filePath, 'fig');
+    end
 end
 
-function plotPuchsasedItemsByAgent(polis, Purchased, ids, endTime)
+function plotPuchsasedItemsByAgent(polis, Purchased, ids, endTime, filePath)
     %
     % Plot Buying and Selling over time
     %
@@ -588,7 +612,7 @@ function plotPuchsasedItemsByAgent(polis, Purchased, ids, endTime)
     
     cumPurchased = cumsum(Purchased,2);
 
-    figure;
+    f = figure;
     hold on;
     x = 1:endTime;
     p = plot(x, cumPurchased(:,1:endTime),'-x');
@@ -604,9 +628,12 @@ function plotPuchsasedItemsByAgent(polis, Purchased, ids, endTime)
     xlabel('Time');
     ylabel('Number of Items');
     title('Cumulative Purchased Items By Agent');
+    if getPlotting
+        saveas(f, filePath, 'fig');
+    end
 end
 
-function plotSoldItemsByAgent(polis, Sold, ids, endTime)
+function plotSoldItemsByAgent(polis, Sold, ids, endTime, filePath)
     %
     % Plot Buying and Selling over time
     %
@@ -614,7 +641,7 @@ function plotSoldItemsByAgent(polis, Sold, ids, endTime)
     
     cumSold = cumsum(Sold,2);
 
-    figure;
+    f = figure;
     hold on;
     x = 1:endTime;
     p = plot(x, cumSold(:,1:endTime),'-+');
@@ -630,17 +657,20 @@ function plotSoldItemsByAgent(polis, Sold, ids, endTime)
     xlabel('Time');
     ylabel('Number of Items');
     title('Cumulative Sold Items By Agent');
+    if getPlotting
+        saveas(f, filePath, 'fig');
+    end
 end
 
 function plotLedgerRecordTotals(totalLedgerRecordsByAgent, filePath)
-    figure;
+    f = figure;
     [N, ~] = size(totalLedgerRecordsByAgent);
     x = 1:N;
-    fig = plot(x, totalLedgerRecordsByAgent, '--x');
+    p = plot(x, totalLedgerRecordsByAgent, '--x');
     xlabel('Agent Id');
     ylabel('Total Records');
     title('Total Number Of Ledger Records By Agent');
     if getPlotting
-        saveas(fig, filePath, 'fig');
+        saveas(f, filePath, 'fig');
     end
 end
