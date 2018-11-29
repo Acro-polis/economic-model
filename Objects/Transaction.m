@@ -2,6 +2,9 @@ classdef Transaction < matlab.mixin.SetGet
 %================================================================
 % Class Transaction
 %
+% Wallets contain Transactions that record sales, purchases, UBI,
+% Demurrage, etc.
+%
 % Created by Jess 20.10.18
 %================================================================
 

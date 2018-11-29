@@ -5,21 +5,38 @@
 % Author: Jess
 % Created: 2018.07.19
 %===================================================
-version_number = 1.0;
+version_number = "1.1.0";
 	
+inputTypeDouble = 0;
+inputTypeString = 1;
+
 % Setup
-fprintf("Start Modeling\n\n")
+fprintf("\n===========================================================\n");
+fprintf("Starting Network Generation\n")
+fprintf("===========================================================\n");
+
+% Open Input File, read header
+fileName = 'InputNetworkGeneration.txt';
+fileId = fopen(fileName, "r");
+for i = 1:3
+    fgetl(fileId);
+end
 addpath lib
 
 % Parameters
 
-N =  2;                   % Number of initial nodes
-T =  9998;                % Max Time 
-alpha = 0.99;             % Proportion of random connections vs preferred connections [0,1]
-                          % 1 = All random (need slightly less than < 1.0
-                          %     for Mean-field plot, so use 0.99.
-                          % 0 = All preferred 
-numNewNodesPerDt = 1;     % Number of new nodes per time
+N =  parseInputString(fgetl(fileId), inputTypeDouble);                  % Number of initial nodes
+T =  parseInputString(fgetl(fileId), inputTypeDouble);                  % Number of generation steps
+numNewNodesPerDt = parseInputString(fgetl(fileId), inputTypeDouble);    % Number of new nodes per genration step
+
+alpha =  parseInputString(fgetl(fileId), inputTypeDouble);  % Proportion of random connections vs preferred connections [0,1]
+                                                            % 1 = All random (need slightly less than < 1.0
+                                                            %     for Mean-field plot, so use 0.99.
+                                                            % 0 = All preferred 
+if alpha == 1.0
+    alpha = 0.99;
+end
+assert(alpha >= 0 && alpha <= 0.99,"Error: Alpha out of bounds");
 
 % Initializations
 dt = 1;                   % Time Step 
@@ -46,7 +63,7 @@ startTime = tic();
 for time = 1:numT
     
    if mod(time,100) == 1
-       fprintf('Time Step = %u\n',time);
+       fprintf('\nTime Step = %u\n',time);
    end
 
     % Store dimensions of nodes at time t and number of nodes TN

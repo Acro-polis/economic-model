@@ -114,6 +114,8 @@ FailNoLiquidity = zeros(N, numSteps);
 FailNoPath      = zeros(N, numSteps);
 FailNoInventory = zeros(N, numSteps);
 
+startTime = tic();
+
 % Start simulation
 for time = 1:numSteps
 
@@ -189,6 +191,7 @@ for time = 1:numSteps
        else
            % No sale :-(
            fprintf("\nNo sellers available\n");
+           assert(true,"Should not be here, investigate!");
        end
    end
       
@@ -208,12 +211,15 @@ end
 
 % Simulation Completion Status
 if SuspendCode == OutOfTime
-    fprintf("\nSimulation Ended Normally At Time = %d\n",time);
+    fprintf("\nSimulation Ended Normally At Time Step = %d\n",time);
 elseif SuspendCode == OutOfInventory
     fprintf("\nSimulation Halted: Out Of Inventory At Time = %d\n",time);
 elseif SuspendCode == OutOfMoney
     fprintf("\nSimulation Halted: Out Of Money At Time = %d\n",time);
 end
+
+elapsedTime1 = toc(startTime);
+fprintf('\n== Simulation Run Time = %.2f Seconds\n',elapsedTime1);
 
 %
 % Tabluate results for ouput
@@ -223,6 +229,9 @@ fprintf("\nTabulating Results For Output\n");
 fprintf("\n=============================\n");
 [Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = polis.transactionTimeHistories(time);
 
+elapsedTime2 = toc(startTime);
+fprintf('\nResults Generation Required = %.2f Seconds\n',elapsedTime2 - elapsedTime1);
+
 %
 % ====== Reporting ======
 %
@@ -230,7 +239,7 @@ fprintf("\n=============================\n");
 % Simulation Inputs
 reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, percentDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
 % Simulation Statistics
-reportSimulationStatistics(polis, price, time);
+reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2);
 % Transaction Failure Analysis
 reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, time);
 
@@ -320,7 +329,7 @@ function reportSimulationInputs(version_number, networkFilename, N, numSteps, ma
     fprintf("- Num Buyers&Sellers = %d, Buyers Only = %d, Sellers Only = %d, Non-Participants = %d\n",numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
 end
 
-function reportSimulationStatistics(polis, price, time)
+function reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2)
 
        sumWallets = polis.totalMoneySupplyAtTimestep(time);
        cumDemurrage = polis.totalDemurrageAtTimestep(time);
@@ -332,6 +341,7 @@ function reportSimulationStatistics(polis, price, time)
        sumSold = polis.totalSalesAtTimestep(time);
 
        fprintf("\n----- Summarized Results, End Of Time Step = %d -----\n\n",time);
+       fprintf("* Simulation Time = %.2f + Results Generation Time = %.2f = %.2f Minutes\n\n", elapsedTime1/60, elapsedTime2/60, (elapsedTime1 + elapsedTime2)/60);
        fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. TMS - (UBI + Demurrage) = %.2f)\n\n", sumWallets, cumDemurrage, cumUBI, (sumWallets - (cumUBI + cumDemurrage)));
        fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = $%.2f, Total Inventory Exchanged = %2.f (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, sumBought, (sumBought - sumSold));
 end
@@ -346,8 +356,11 @@ function reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPa
     fprintf("* Items Purchased = %.2f, Failed No Money = %.2f, Failed No Liquidity = %.2f, Failed No Paths = %.2f, Failed No Inventory = %.2f\n", sumPurchased, sumNoMoney, sumNoLiquidity, sumNoPaths, sumNoInventory);
     expectedPurchased = numBuyers*endTime;
     checkSum = sumPurchased + sumNoMoney + sumNoLiquidity + sumNoPaths + sumNoInventory;
-    assert(expectedPurchased == checkSum,"Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n", expectedPurchased, checkSum);
-    fprintf("* Expected Purchases = Items Purchased + Sum Of Failures = %2.f\n", expectedPurchased);
+    if expectedPurchased == checkSum
+        fprintf("* Expected Purchases = Items Purchased + Sum Of Failures = %2.f\n", expectedPurchased);
+    else
+        fprintf("\n***\n*** Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n***\n", expectedPurchased, checkSum)
+    end
 end
 
 function [wallets, ubi, demurrage, purchased, sold, ids, agentTypes] = sortByAgentType(wallets, ubi, demurrage, purchased, sold, ids, agentTypes)

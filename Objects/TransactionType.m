@@ -2,6 +2,8 @@ classdef TransactionType
 %================================================================
 % Class TransactionType
 %
+% Transactions are distiguished by type
+%
 % Created by Jess 10.16.18
 %================================================================
 

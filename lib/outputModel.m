@@ -13,25 +13,25 @@ FN = size(Am,1);
 
 outputNodes = 0;
 if outputNodes
-    fileNodes   = sprintf('Nodes %s SN=%u FN=%u T=%u a=%.2f V%.1f.csv', title, SN, FN, T, alpha, version_number);
+    fileNodes   = sprintf('Nodes %s SN=%u FN=%u T=%u a=%.2f V%s.csv', title, SN, FN, T, alpha, version_number);
     fIdNodes 	= fopen(fullfile([pwd '/Output'],fileNodes),"w");
     fprintf("Outputting Nodes\n");
     fprintf(fIdNodes,"Id;Label\n");
     for i = 1:FN
-            fprintf(fIdNodes, '%d;\"Node %d\"\n', i, i);
+            fprintf(fIdNodes, '%d,\"Node %d\"\n', i, i);
     end
     fclose(fIdNodes);
 end
 
-fileEdges   = sprintf('Edges %s SN=%u FN=%u T=%u a=%.2f V%.1f.csv', title, SN, FN, T, alpha, version_number);
+fileEdges   = sprintf('Edges %s SN=%u FN=%u T=%u a=%.2f V%s.csv', title, SN, FN, T, alpha, version_number);
 fIdEdges	= fopen(fullfile([pwd '/Output'],fileEdges),"w");
 
 fprintf("Outputing Edges\n");
-fprintf(fIdEdges,"Source;Target;Label;Type\n");
+fprintf(fIdEdges,"Source,Target,Label,Type\n");
 for i = 1:FN
         for j = 1:FN
                 if (i ~= j && Am(i,j) > 0)
-                        fprintf(fIdEdges, '%d;%d;\"Edge %d to %d\";\"Mixed\"\n', i, j, i, j);
+                        fprintf(fIdEdges, '%d,%d,\"Edge %d to %d\",\"Mixed\"\n', i, j, i, j);
                 end
         end
 end
