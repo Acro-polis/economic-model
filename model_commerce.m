@@ -231,7 +231,7 @@ fprintf("\n=============================\n");
 [Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = polis.transactionTimeHistories(time);
 
 elapsedTime2 = toc(startTime);
-fprintf('\nResults Generation Required = %.2f Seconds\n',elapsedTime2 - elapsedTime1);
+fprintf('\n== Results Generation Required = %.2f Seconds\n',elapsedTime2 - elapsedTime1);
 
 %
 % ====== Reporting ======
