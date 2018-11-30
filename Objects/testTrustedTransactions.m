@@ -7,7 +7,7 @@
 %=====================================================
 
 numberOfAgents = 10; % We need to know this; cannot derive it from the connections import file (yet) 
-AM = importNetworkModelFromCSV(numberOfAgents, "test_network_10_agents.csv");
+AM = importNetworkModelFromCSV(numberOfAgents, "Wallet Test Plan 10 Agents.csv");
 time = 1;
 totalTimeSteps = 10;
 polis = Polis(AM, 6);

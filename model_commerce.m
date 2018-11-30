@@ -39,6 +39,7 @@ if networkFilename == ""
     AM = connectedGraph(N);                                                
 else
     AM = importNetworkModelFromCSV(N, networkFilename);
+%    [N, ~] = size(AM);                                                  % Reset N based on AM
 end
 
 % Create the polis
@@ -341,7 +342,9 @@ function reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTim
        sumSold = polis.totalSalesAtTimestep(time);
 
        fprintf("\n----- Summarized Results, End Of Time Step = %d -----\n\n",time);
-       fprintf("* Simulation Time = %.2f + Results Generation Time = %.2f = %.2f Minutes\n\n", elapsedTime1/60, elapsedTime2/60, (elapsedTime1 + elapsedTime2)/60);
+       t1 = elapsedTime1/60;
+       t2 = (elapsedTime2 - elapsedTime1)/60;
+       fprintf("* Simulation Time = %.2f + Results Generation Time = %.2f = %.2f Minutes\n\n", t1, t2, t1 + t2);
        fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. TMS - (UBI + Demurrage) = %.2f)\n\n", sumWallets, cumDemurrage, cumUBI, (sumWallets - (cumUBI + cumDemurrage)));
        fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = $%.2f, Total Inventory Exchanged = %2.f (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, sumBought, (sumBought - sumSold));
 end
@@ -473,11 +476,15 @@ function plotWalletByAgentId(polis, Wallet, ids, endTime, filePath)
     % Wallet by Agent
     %
     numberOfAgents = polis.numberOfAgents;
-    
+    [rows, ~] = size(Wallet);
+    if rows == endTime
+        % Sqaure Matrix, invert it so the plot function does what we want
+        Wallet = Wallet.';
+    end
     f = figure;
     hold on;
     x = 1:endTime;
-    p = plot(x, Wallet(:, 1:endTime),'-x');
+    p = plot(x, Wallet(:, x),'-x');
     hold off;
     ps = [];
     psnames = {};
@@ -502,7 +509,7 @@ function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors
     
     f = figure;
     x = 1:endTime;
-    p1 = plot(x, Wallet(1:numBS, 1:endTime),'b-diamond');
+    p1 = plot(x, Wallet(1:numBS, x),'b-diamond');
     %set(p1,'color',blue); %TODO - Matlab bug?
     ps = p1(1);
     psnames = {'Buy-Sell'};
@@ -510,7 +517,7 @@ function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors
     if numB > 0
         a1 = numBS + 1;
         a2 = numBS + numB;
-        p2 = plot(x, Wallet(a1:a2, 1:endTime),'g-+');
+        p2 = plot(x, Wallet(a1:a2, x),'g-+');
         %p2 = plot(x, Wallet(a1:a2, 1:time),'Color',green,'LineStyle','-','Marker','+','LineWidth',0.5);
         ps = [ps ; p2(1)];
         psnames = [psnames , {'Buy'}];
@@ -518,21 +525,21 @@ function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors
     if numS > 0
         a1 = numBS + numB + 1;
         a2 = numBS + numB + numS;
-        p3 = plot(x, Wallet(a1:a2,1:endTime),'Color',colors.violet,'LineStyle','-','Marker','*','LineWidth',0.5); 
+        p3 = plot(x, Wallet(a1:a2, x),'Color',colors.violet,'LineStyle','-','Marker','*','LineWidth',0.5); 
         ps = [ps ; p3(1)];
         psnames = [psnames , {'Sell'}];
     end
     if numNP > 0
         a1 = numBS + numB + numS + 1;
         a2 = numBS + numB + numS + numNP;
-        p4 = plot(x, Wallet(a1:a2, 1:endTime),'Color',colors.red,'LineStyle','-','Marker','x','LineWidth',0.5);
+        p4 = plot(x, Wallet(a1:a2, x),'Color',colors.red,'LineStyle','-','Marker','x','LineWidth',0.5);
         ps = [ps ; p4(1)];
         psnames = [psnames , {'NP'}];
     end
     %
     % Add the average wallet size
     %
-    %plot(x,(sum(Wallet(:,1:endTime)) ./ N),'k--+');
+    %plot(x,(sum(Wallet(:, x)) ./ N),'k--+');
     hold off;
     legend(ps,psnames);
     xlabel('Time');
@@ -556,9 +563,9 @@ function plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, 
     f = figure;
     hold on;
     x = 1:endTime;
-    p1 = plot(x, walletAllAgents(1,1:endTime),'k-diamond');
-    p2 = plot(x, demurrageAllAgents(1,1:endTime),'b-o');
-    p3 = plot(x, UBIAllAgents(1,1:endTime),'c-x');
+    p1 = plot(x, walletAllAgents(1, x),'k-diamond');
+    p2 = plot(x, demurrageAllAgents(1, x),'b-o');
+    p3 = plot(x, UBIAllAgents(1, x),'c-x');
     set(p3,'color',colors.gold);
     hold off;
     legend([p3, p2, p1],{'UBI','Demurrage','Money Supply'});
@@ -578,33 +585,40 @@ function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, e
     f = figure;
     x = 1:endTime;
     hold on;
-    p1 = plot(x, -Demurrage(1:numBS,1:endTime),'b-diamond');
+    p1 = plot(x, -Demurrage(1:numBS, x),'b-diamond');
     %set(p1,'color',blue); %TODO - Matlab bug?
     ps = p1(1);
     psnames = {'Dem. Buy-Sell'};
     if numB > 0
         a1 = numBS + 1;
         a2 = numBS + numB;
-        p2 = plot(x, -Demurrage(a1:a2, 1:endTime),'g-+');
-        %p2 = plot(x, Demurrage(a1:a2, 1:endTime),'Color',colors.green,'LineStyle','-','Marker','+','LineWidth',0.5);
+        p2 = plot(x, -Demurrage(a1:a2, x),'g-+');
+        %p2 = plot(x, Demurrage(a1:a2, x),'Color',colors.green,'LineStyle','-','Marker','+','LineWidth',0.5);
         ps = [ps ; p2(1)];
         psnames = [psnames , {'Dem. Buy'}];
     end
     if numS > 0
         a1 = numBS + numB + 1;
         a2 = numBS + numB + numS;
-        p3 = plot(x, -Demurrage(a1:a2,1:endTime),'Color',colors.violet,'LineStyle','-','Marker','*','LineWidth',0.5); 
+        p3 = plot(x, -Demurrage(a1:a2, x),'Color',colors.violet,'LineStyle','-','Marker','*','LineWidth',0.5); 
         ps = [ps ; p3(1)];
         psnames = [psnames , {'Dem. Sell'}];
     end
     if numNP > 0
         a1 = numBS + numB + numS + 1;
         a2 = numBS + numB + numS + numNP;
-        p4 = plot(x, -Demurrage(a1:a2, 1:endTime),'Color',colors.red,'LineStyle','-','Marker','x','LineWidth',0.5);
+        p4 = plot(x, -Demurrage(a1:a2, x),'Color',colors.red,'LineStyle','-','Marker','x','LineWidth',0.5);
         ps = [ps ; p4(1)];
         psnames = [psnames , {'Dem. NP'}];
     end
-    p5 = plot(x, UBI(:,1:endTime),'color',colors.gold,'linestyle','-','marker','o','linewidth',0.5);
+    
+    [rows, ~] = size(UBI);
+    if rows == endTime
+        % Sqaure Matrix, invert it so the plot function does what we want
+        UBI = UBI.';
+    end        
+    
+    p5 = plot(x, UBI(:, x),'color',colors.gold,'linestyle','-','marker','o','linewidth',0.5);
     ps = [ps ; p5(1)];
     psnames = [psnames , {'UBI'}];
     hold off;
@@ -625,10 +639,16 @@ function plotPuchsasedItemsByAgent(polis, Purchased, ids, endTime, filePath)
     
     cumPurchased = cumsum(Purchased,2);
 
+    [rows, ~] = size(cumPurchased);
+    if rows == endTime
+        % Sqaure Matrix, invert it so the plot function does what we want
+        cumPurchased = cumPurchased.';
+    end    
+    
     f = figure;
     hold on;
     x = 1:endTime;
-    p = plot(x, cumPurchased(:,1:endTime),'-x');
+    p = plot(x, cumPurchased(:, x),'-x');
     hold off;
     ps = [];
     psnames = {};
@@ -654,10 +674,16 @@ function plotSoldItemsByAgent(polis, Sold, ids, endTime, filePath)
     
     cumSold = cumsum(Sold,2);
 
+    [rows, ~] = size(cumSold);
+    if rows == endTime
+        % Sqaure Matrix, invert it so the plot function does what we want
+        cumSold = cumSold.';
+    end    
+    
     f = figure;
     hold on;
     x = 1:endTime;
-    p = plot(x, cumSold(:,1:endTime),'-+');
+    p = plot(x, cumSold(:, x),'-+');
     hold off;
     ps = [];
     psnames = {};

@@ -1,0 +1,13 @@
+Source,Target,Type,Id
+1,2,Undirected,"0"
+1,3,Undirected,"1"
+1,6,Undirected,"2"
+2,4,Undirected,"3"
+6,7,Undirected,"4"
+6,8,Undirected,"5"
+3,5,Undirected,"6"
+3,4,Undirected,"7"
+4,7,Undirected,"8"
+5,8,Undirected,"9"
+9,8,Undirected,"10"
+10,9,Undirected,"11"

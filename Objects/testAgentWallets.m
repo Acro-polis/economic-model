@@ -11,7 +11,7 @@
 fprintf("\n\n----- Wallet Test Suite 1 ----\n\n");
 
 numberOfAgents = 10; % We need to know this; cannot derive it from the connections import file (yet) 
-AM = importNetworkModelFromCSV(numberOfAgents, "test_network_10_agents.csv");
+AM = importNetworkModelFromCSV(numberOfAgents, "Wallet Test Plan 10 Agents.csv");
 time = 1;
 totalTimeSteps = 20;
 fprintf("\nTest Agent Wallets: time = %d\n\n",time);
