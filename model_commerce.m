@@ -281,8 +281,8 @@ filePath = sprintf("%s/%s", outputPath, "Sales.fig");
 plotSoldItemsByAgent(polis, Sold, ids, time, filePath);
 
 % Plot transaction failures by agent
-%TODO - make a 4 panel in time with Purchased
-sP = Purchased;
+filePath = sprintf("%s/%s", outputPath, "Transaction_Log.fig");
+plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, filePath);
 
 % Now sort the data by agentType for the remaining output
 [Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = sortByAgentType(Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes);
@@ -380,6 +380,88 @@ end
 %
 % ====== Plotting Functions ======
 %
+function plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, filePath)
+
+    sumNoMoney      = sum(FailNoMoney,2);
+    sumNoLiquidity  = sum(FailNoLiquidity,2);
+    sumNoPath      = sum(FailNoPath,2);
+    sumNoInventory  = sum(FailNoInventory,2);
+    sumPurchased    = sum(Purchased,2);
+
+    f = figure;
+    numAgents = polis.numberOfAgents;
+    x = 1:numAgents;
+    
+    ax1 = subplot(5,1,1);
+    maxYHeight = max(sumPurchased)*yScale;
+    if (maxYHeight <= 0) 
+        maxYHeight = 1; 
+    end    
+    plot(ax1, x, sumPurchased.','k-d');
+    xlim([1 numAgents]);
+    ylim([0 maxYHeight]);
+    xlabel('Agent');
+    ylabel('Number');
+    title("Purchases By Agent");
+    legend("Purchases");
+    
+    ax2 = subplot(5,1,2);
+    maxYHeight = max(sumNoPath)*yScale;
+    if (maxYHeight <= 0) 
+        maxYHeight = 1; 
+    end    
+    plot(ax2, x, sumNoPath.','b-*');
+    xlim([1 numAgents]);
+    ylim([0 maxYHeight]);
+    xlabel('Agent');
+    ylabel('Number');
+    title("No Path Failures By Agent");
+    legend("Failures");
+    
+    ax3 = subplot(5,1,3);
+    maxYHeight = max(sumNoLiquidity)*yScale;
+    if (maxYHeight <= 0) 
+        maxYHeight = 1; 
+    end    
+    plot(ax3, x, sumNoLiquidity.','r-s');
+    xlim([1 numAgents]);
+    ylim([0 maxYHeight]);
+    xlabel('Agent');
+    ylabel('Number');
+    title("No Liquidity Failures By Agent");
+    legend("Failures");
+
+    ax4 = subplot(5,1,4);
+    maxYHeight = max(sumNoInventory)*yScale;
+    if (maxYHeight <= 0) 
+        maxYHeight = 1; 
+    end    
+    plot(ax4, x, sumNoInventory.','c-o');
+    xlim([1 numAgents]);
+    ylim([0 maxYHeight]);
+    xlabel('Agent');
+    ylabel('Number');
+    title("No Inventory Failures By Agent");
+    legend("Failures");
+
+    ax5 = subplot(5,1,5);
+    maxYHeight = max(sumNoMoney)*yScale;
+    if (maxYHeight <= 0) 
+        maxYHeight = 1; 
+    end    
+    plot(ax5, x, sumNoMoney.','g-+');
+    xlim([1 numAgents]);
+    ylim([0 maxYHeight]);
+    xlabel('Agent');
+    ylabel('Number');
+    title("No Money Failures By Agent");
+    legend("Failures");
+    
+    if getPlotting
+        saveas(f, filePath, 'fig');
+    end
+end
+
 function plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, endTime, filePath)
     %
     % The summary plot has 4 sections
