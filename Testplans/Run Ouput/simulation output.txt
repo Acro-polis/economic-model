@@ -1,0 +1,28 @@
+----- Summarized Simulation Inputs For Code Version 1.2.0 -----
+
+- Network Input Filename = Wallet Test Plan 10 Agents.csv
+
+- Number Agents = 10, Time Steps (Duration) = 50, Maximum Search Path Level = 0
+
+- UBI = 100.00 drachmas/agent/dt, Demurrage = 5.00 percent/agent/ dt
+
+- Starting wallet size/agent = 0.00 drachma
+
+- Price of goods = 75.00 drachmas
+
+- Num buyers   = 8 <= 10 agents
+
+- Num sellers  = 8 <= 10 agents
+
+- Num Buyers&Sellers = 6, Buyers Only = 2, Sellers Only = 2, Non-Participants = 0
+
+----- Summarized Results, End Of Time Step = 50 -----
+
+* Simulation Time = 0.77 + Results Generation Time = 0.04 = 0.81 Minutes
+
+* Total Money Supply = 18461.10 drachma, Total Demurrage = -31538.90 drachma, Total UBI = 50000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = 0.00)
+
+* Remaining Inventory Supply = 2164.00, Remaining Inventory Value = $162300.00, Total Inventory Exchanged = 236 (check: Purchased - Sold = 0.00)
+
+* Items Purchased = 236.00, Failed No Money = 0.00, Failed No Liquidity = 4.00, Failed No Paths = 160.00, Failed No Inventory = 0.00
+* Expected Purchases = Items Purchased + Sum Of Failures = 400

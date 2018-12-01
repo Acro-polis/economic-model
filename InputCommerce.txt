@@ -1,9 +1,9 @@
 
 Commerce Model Input Parameters
 
-1)  Number of Time Steps (dt): 300
-2)  Number of Agents: 25
-3)  Network Filename:
+1)  Number of Time Steps (dt): 50
+2)  Number of Agents: 10
+3)  Network Filename:Wallet Test Plan 10 Agents.csv
 4)  Number of search steps (find path): 0
 5)  Initial Wallet Size (drachma / agent): 0.0
 6)  UBI Rate (drachma / dt): 100.0
