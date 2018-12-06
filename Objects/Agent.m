@@ -328,6 +328,13 @@ classdef Agent < handle
             total = obj.wallet.totalLedgerRecords;
         end
         
+        function total = totalLedgerRecordsForTransactionTypeSeries(obj, transactionTypeSeries, timeStep)
+            % Return the total number of ledger records that correspond to
+            % the TransactionTypeSeries
+            assert(transactionTypeSeries == TransactionType.BUY_SELL_SERIES || transactionTypeSeries == TransactionType.BUY_SELL_TRANSITIVE_SERIES,"Error: This method is not yet set up for series provided!");
+            total = obj.wallet.totalLedgerRecordsForTransactionTypeSeries(transactionTypeSeries, timeStep);
+        end
+        
         function dumpLedger(obj)
             % Write the contents of the wallet's ledger to the console
             obj.wallet.dump;

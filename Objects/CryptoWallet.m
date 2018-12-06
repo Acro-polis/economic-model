@@ -270,6 +270,24 @@ Buying - subtracting currency
             [total, ~] = size(obj.transactions);
         end
         
+        function total = totalLedgerRecordsForTransactionTypeSeries(obj, transactionTypeSeries, timeStep)
+            % Find all the transactions corresponding to the
+            % TransactionTypeSeries and the total number of their occurrance. 
+            
+            function result = withinTimePeriod(obj)
+                % obj is a Transaction
+                if obj.dateCreated <= timeStep && obj.type > transactionTypeSeries && obj.type < (transactionTypeSeries + 1000)
+                    result = true;
+                else
+                    result = false;
+                end
+            end            
+            functionHandle = @withinTimePeriod;
+
+            matchingTransactions = findobj(obj.transactions,'-function', functionHandle);            
+            [total, ~] = size(matchingTransactions);
+        end
+        
         function dump(obj)
             % Log this agents complete ledger
             [rows, ~] = size(obj.transactions);

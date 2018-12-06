@@ -303,9 +303,9 @@ filePath = sprintf("%s/%s", outputPath, "Cum_UBI_ETC_BY_Agent_Type.fig");
 plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colors, filePath);
 
 % Plot total ledger records by agent
-totalLedgerRecordsByAgent = polis.totalLedgerRecordsByAgent;
+[totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTransitive, totalLedgerRecordsByAgentTransitive] = polis.totalLedgerRecordsByAgent(time);
 filePath = sprintf("%s/%s", outputPath, "Ledger.fig");
-plotLedgerRecordTotals(totalLedgerRecordsByAgent, filePath);
+plotLedgerRecordTotals(totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTransitive, totalLedgerRecordsByAgentTransitive, filePath);
 
 %
 % ======  Helping Functions  ======
@@ -368,6 +368,7 @@ function reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPa
     checkSum = sumPurchased + sumNoMoney + sumNoLiquidity + sumNoPaths + sumNoInventory;
     if expectedPurchased == checkSum
         fprintf("* Expected Purchases = Items Purchased + Sum Of Failures = %2.f\n", expectedPurchased);
+        fprintf("* Selling Efficency = %.2f percent\n\n", (sumPurchased/expectedPurchased)*100.0);
     else
         fprintf("\n***\n*** Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n***\n", expectedPurchased, checkSum)
     end
@@ -796,14 +797,19 @@ function plotSoldItemsByAgent(polis, Sold, ids, endTime, filePath)
     end
 end
 
-function plotLedgerRecordTotals(totalLedgerRecordsByAgent, filePath)
+function plotLedgerRecordTotals(totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTransitive, totalLedgerRecordsByAgentTransitive, filePath)
     f = figure;
     [N, ~] = size(totalLedgerRecordsByAgent);
     x = 1:N;
-    p = plot(x, totalLedgerRecordsByAgent, '--x');
+    hold on;
+    p1 = plot(x, totalLedgerRecordsByAgent, '--x');
+    p2 = plot(x, totalLedgerRecordsByAgentNonTransitive, '-b');
+    p3 = plot(x, totalLedgerRecordsByAgentTransitive, '-r');
+    hold off;
     xlim([1 N]);
+    legend([p1, p2, p3],{'All','Buy/Sell','Transitive'});
     xlabel('Agent Id');
-    ylabel('Total Records');
+    ylabel('Number of Records');
     title('Total Number Of Ledger Records By Agent');
     if getPlotting
         saveas(f, filePath, 'fig');
