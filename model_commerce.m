@@ -6,7 +6,7 @@
 % Created: 2018.08.30
 %===================================================
 
-version_number = "1.2.0"; % Tagged version in github
+version_number = "1.2.1"; % Tagged version in github
 
 inputTypeDouble = 0;
 inputTypeString = 1;
@@ -25,8 +25,7 @@ end
 
 % Initializations
 T =  parseInputString(fgetl(fileId), inputTypeDouble);                  % Max Time (Input 1)
-dt = 1;                                                                 % Time Step 
-numSteps = round(T / dt);                                               % Number of time steps (integer)
+numSteps = round(T);                                                    % Number of time steps (integer)
 assert(numSteps >= 1,'Assert: Number of time steps must be >= 1!');
 
 N =  round(parseInputString(fgetl(fileId), inputTypeDouble));           % Number of Agents (nodes) (Input 2)
@@ -48,23 +47,20 @@ assert(maxSearchLevels >= 0,"Error: Max. Search Levels < 0");
 polis = Polis(AM, maxSearchLevels); 
 polis.createAgents(1, numSteps);
 
-% Unit of currency
-drachma = 1;
-
 % Wallet
 seedWalletSize = parseInputString(fgetl(fileId), inputTypeDouble); % Wallet Size (Input 5)
 
 % Rate of UBI
 amountUBI = parseInputString(fgetl(fileId), inputTypeDouble); % UBI amount (Input 6)
 assert(amountUBI > 0,'Assert: UBI must be > 0!');
-b = 1.0;
-amountUBI = amountUBI*drachma / b*dt; 
+timeStepUBI = parseInputString(fgetl(fileId), inputTypeDouble); % UBI amount (Input 6)
+assert(timeStepUBI >= 1,'Assert: UBI Time Step must be >= 1');
 
 % Percentage of Demurrage
 percentDemurrage = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Demurrage (Input 7)
 assert(percentDemurrage >= 0 && percentDemurrage <= 1.0,'Assert: Percentage Demurrage Out Of Range!');
-d = 1;
-percentDemurrage = percentDemurrage*drachma / d*dt;
+timeStepDemurrage = parseInputString(fgetl(fileId), inputTypeDouble); % UBI amount (Input 6)
+assert(timeStepDemurrage >= 1,'Assert: Demurrage Time Step must be >= 1');
 
 % Buyers
 percentBuyers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Buyers (Input 8)
@@ -78,7 +74,6 @@ numberOfSellers = round(percentSellers*N);
 
 % Cost of goods
 price = parseInputString(fgetl(fileId), inputTypeDouble); % Price Goods (Input 10);
-price = price*drachma;
 
 % Seller Inventory
 inventoryInitialUnits = parseInputString(fgetl(fileId), inputTypeDouble); % Inital Inventory (Input 11)
@@ -96,7 +91,7 @@ polis.setupBuyers(numberOfBuyers);
 [numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents] = polis.parseAgentCommerceRoleTypes();
 
 % Log Inputs
-reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, percentDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
+reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
 
 % Report Initial Statistics
 sumWallets = polis.totalMoneySupplyAtTimestep(1);
@@ -117,20 +112,31 @@ FailNoInventory = zeros(N, numSteps);
 
 startTime = tic();
 
+intervalUBI = 1;
+intervalDemurrage = 1;
+
 % Start simulation
 for time = 1:numSteps
 
    fprintf("\n++++++++ Start of time step = %d ++++++++\n", time);
 
-   if time > 1
-       % Apply demurrage
-       fprintf("\n-- Applying Demurrage --\n");
+   % Apply demurrage
+   if intervalDemurrage < timeStepDemurrage
+       intervalDemurrage = intervalDemurrage + 1;
+   else
+       fprintf("\n-- Applying Demurrage at time = %d --\n", time);
        polis.applyDemurrageWithPercentage(percentDemurrage, time);
+       intervalDemurrage = 1;
    end
    
    % Deposit UBI
-   fprintf("\n-- Depositing UBI --\n");
-   polis.depositUBI(amountUBI, time);
+   if intervalUBI < intervalUBI
+       intervalUBI = intervalUBI + 1;
+   else
+        fprintf("\n-- Depositing UBI at time = %d --\n", time);
+        polis.depositUBI(amountUBI, time);
+        intervalUBI = 1;
+   end
    
    % Randomly order buyers before each time step
    numBuyerIndex = 1:N;
@@ -238,7 +244,7 @@ fprintf('\n== Results Generation Required = %.2f Seconds\n',elapsedTime2 - elaps
 %
 
 % Simulation Inputs
-reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, percentDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
+reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
 % Simulation Statistics
 reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2);
 % Transaction Failure Analysis
@@ -314,7 +320,7 @@ function result = getPlotting
  result = plot;
 end
 
-function reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, percentDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents)
+function reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents)
     fprintf("\n----- Summarized Simulation Inputs For Code Version %s -----\n", version_number);
     if networkFilename == ""
         fprintf("\n- Using Connected Network\n\n");
@@ -322,7 +328,8 @@ function reportSimulationInputs(version_number, networkFilename, N, numSteps, ma
         fprintf("\n- Network Input Filename = %s\n\n", networkFilename);
     end
     fprintf("- Number Agents = %d, Time Steps (Duration) = %d, Maximum Search Path Level = %d\n\n", N, numSteps, maxSearchLevels);
-    fprintf("- UBI = %.2f drachmas/agent/dt, Demurrage = %.2f percent/agent/ dt\n\n", amountUBI, percentDemurrage*100);
+    fprintf("- UBI = %.2f drachmas/agent, applied every %.0f time steps\n\n", amountUBI, timeStepUBI);
+    fprintf("- Demurrage = %.2f percent/agent, applied every %.0f time steps\n\n", percentDemurrage*100, timeStepDemurrage);
     fprintf("- Starting wallet size/agent = %.2f drachma\n\n", seedWalletSize);
     fprintf("- Price of goods = %.2f drachmas\n\n", price);
     fprintf("- Num buyers   = %d <= %d agents\n\n", numberOfBuyers, N);
@@ -576,6 +583,7 @@ function plotWalletByAgentId(polis, Wallet, ids, endTime, filePath)
         psnames = [psnames ; {name}];
     end
     legend(ps, psnames);
+    xlim([1 endTime]);
     xlabel('Time');
     ylabel('Drachma');
     title('Wallet By Agent Id');
@@ -624,6 +632,7 @@ function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors
     %plot(x,(sum(Wallet(:, x)) ./ N),'k--+');
     hold off;
     legend(ps,psnames);
+    xlim([1 endTime]);
     xlabel('Time');
     ylabel('Drachma');
     title('Wallet by Agent Type');
@@ -650,6 +659,7 @@ function plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, 
     p3 = plot(x, UBIAllAgents(1, x),'c-x');
     set(p3,'color',colors.gold);
     hold off;
+    xlim([1 endTime]);
     legend([p3, p2, p1],{'UBI','Demurrage','Money Supply'});
     xlabel('Time');
     ylabel('Drachma');
@@ -705,6 +715,7 @@ function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, e
     psnames = [psnames , {'UBI'}];
     hold off;
     legend(ps,psnames);
+    xlim([1 endTime]);
     xlabel('Time');
     ylabel('Drachma');
     title('Cumulative Demurrage By Agent Type + UBI');
@@ -740,6 +751,7 @@ function plotPuchsasedItemsByAgent(polis, Purchased, ids, endTime, filePath)
         psnames = [psnames ; {name}];
     end
     legend(ps, psnames);
+    xlim([1 endTime]);
     xlabel('Time');
     ylabel('Number of Items');
     title('Cumulative Purchased Items By Agent');
@@ -775,6 +787,7 @@ function plotSoldItemsByAgent(polis, Sold, ids, endTime, filePath)
         psnames = [psnames ; {name}];
     end
     legend(ps, psnames);
+    xlim([1 endTime]);
     xlabel('Time');
     ylabel('Number of Items');
     title('Cumulative Sold Items By Agent');
@@ -788,6 +801,7 @@ function plotLedgerRecordTotals(totalLedgerRecordsByAgent, filePath)
     [N, ~] = size(totalLedgerRecordsByAgent);
     x = 1:N;
     p = plot(x, totalLedgerRecordsByAgent, '--x');
+    xlim([1 N]);
     xlabel('Agent Id');
     ylabel('Total Records');
     title('Total Number Of Ledger Records By Agent');
