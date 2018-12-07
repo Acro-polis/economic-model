@@ -91,7 +91,7 @@ polis.setupBuyers(numberOfBuyers);
 [numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents] = polis.parseAgentCommerceRoleTypes();
 
 % Log Inputs
-reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
+reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents, "");
 
 % Report Initial Statistics
 sumWallets = polis.totalMoneySupplyAtTimestep(1);
@@ -243,12 +243,22 @@ fprintf('\n== Results Generation Required = %.2f Seconds\n',elapsedTime2 - elaps
 % ====== Reporting ======
 %
 
+% For saving results
+setSaveResults(true);
+if getSaveResults == true
+    outputFolder = "Output";
+    outputSubFolderName = "Economic_Model";     % TODO - make input variable?
+    outputPath = sprintf("%s/%s", outputFolder, outputSubFolderName);
+    [status, msg, msgID] = mkdir(outputPath);
+end
+
 % Simulation Inputs
-reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
+filePath = sprintf("%s/%s", outputPath, "results.txt");
+reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents, filePath);
 % Simulation Statistics
-reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2);
+reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2, filePath);
 % Transaction Failure Analysis
-reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, time);
+reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, time, filePath);
 
 %
 % ======  Plot some results  ======
@@ -257,16 +267,6 @@ fprintf("\n----- Begin Plotting -----\n");
 close all
 yScale = 1.5;
 colors = Colors();
-
-% For when we want to save the plots
-savePlots = true;                               % true saves plots, false does not (TODO - make input variable?)
-setPlotting(savePlots);
-if getPlotting
-    outputFolder = "Output";
-    outputSubFolderName = "Economic_Model";     % TODO - make input variable?
-    outputPath = sprintf("%s/%s", outputFolder, outputSubFolderName);
-    [status, msg, msgID] = mkdir(outputPath);
-end
 
 % Plot the 4 panal summary plot
 filePath = sprintf("%s/%s", outputPath, "Summary.fig");
@@ -310,68 +310,124 @@ plotLedgerRecordTotals(totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTr
 %
 % ======  Helping Functions  ======
 %
-function setPlotting(value)
- global plot;
- plot = value;
+function setSaveResults(value)
+ global saveResults;
+ saveResults = value;
 end
 
-function result = getPlotting
- global plot;
- result = plot;
+function result = getSaveResults
+ global saveResults;
+ result = saveResults;
 end
 
-function reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents)
-    fprintf("\n----- Summarized Simulation Inputs For Code Version %s -----\n", version_number);
+function reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents, filePath)
+    o1 = sprintf("\n----- Summarized Simulation Inputs For Code Version %s -----\n", version_number);
+    o2 = "";
     if networkFilename == ""
-        fprintf("\n- Using Connected Network\n\n");
+        o2 = sprintf("\n- Using Connected Network\n\n");
     else
-        fprintf("\n- Network Input Filename = %s\n\n", networkFilename);
+        o2 = sprintf("\n- Network Input Filename = %s\n\n", networkFilename);
     end
-    fprintf("- Number Agents = %d, Time Steps (Duration) = %d, Maximum Search Path Level = %d\n\n", N, numSteps, maxSearchLevels);
-    fprintf("- UBI = %.2f drachmas/agent, applied every %.0f time steps\n\n", amountUBI, timeStepUBI);
-    fprintf("- Demurrage = %.2f percent/agent, applied every %.0f time steps\n\n", percentDemurrage*100, timeStepDemurrage);
-    fprintf("- Starting wallet size/agent = %.2f drachma\n\n", seedWalletSize);
-    fprintf("- Price of goods = %.2f drachmas\n\n", price);
-    fprintf("- Num buyers   = %d <= %d agents\n\n", numberOfBuyers, N);
-    fprintf("- Num sellers  = %d <= %d agents\n\n", numberOfSellers, N);
-    fprintf("- Num Buyers&Sellers = %d, Buyers Only = %d, Sellers Only = %d, Non-Participants = %d\n",numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
+    o3  = sprintf("- Number Agents = %d, Time Steps (Duration) = %d, Maximum Search Path Level = %d\n\n", N, numSteps, maxSearchLevels);
+    o4  = sprintf("- UBI = %.2f drachmas/agent, applied every %.0f time steps\n\n", amountUBI, timeStepUBI);
+    o5  = sprintf("- Demurrage = %.2f percent/agent, applied every %.0f time steps\n\n", percentDemurrage*100, timeStepDemurrage);
+    o6  = sprintf("- Starting wallet size/agent = %.2f drachma\n\n", seedWalletSize);
+    o7  = sprintf("- Price of goods = %.2f drachmas\n\n", price);
+    o8  = sprintf("- Num buyers   = %d <= %d agents\n\n", numberOfBuyers, N);
+    o9  = sprintf("- Num sellers  = %d <= %d agents\n\n", numberOfSellers, N);
+    o10 = sprintf("- Num Buyers&Sellers = %d, Buyers Only = %d, Sellers Only = %d, Non-Participants = %d\n",numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
+
+    fprintf(o1);
+    fprintf(o2);
+    fprintf(o3);
+    fprintf(o4);
+    fprintf(o5);
+    fprintf(o6);
+    fprintf(o7);
+    fprintf(o8);
+    fprintf(o9);
+    fprintf(o10);
+
+    fileId = fopen(filePath, "w");
+    if fileId > 0
+        fprintf(fileId, o1);
+        fprintf(fileId, o2);
+        fprintf(fileId, o3);
+        fprintf(fileId, o4);
+        fprintf(fileId, o5);
+        fprintf(fileId, o6);
+        fprintf(fileId, o7);
+        fprintf(fileId, o8);
+        fprintf(fileId, o9);
+        fprintf(fileId, o10);
+        fclose(fileId);    
+    end
 end
 
-function reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2)
+function reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2, filePath)
 
-       sumWallets = polis.totalMoneySupplyAtTimestep(time);
-       cumDemurrage = polis.totalDemurrageAtTimestep(time);
-       cumUBI = polis.totalUBIAtTimestep(time);
+    sumWallets = polis.totalMoneySupplyAtTimestep(time);
+    cumDemurrage = polis.totalDemurrageAtTimestep(time);
+    cumUBI = polis.totalUBIAtTimestep(time);
 
-       sumSellerInventoryUnits = polis.totalInventoryAtTimestep(time);
-       sumSellerInventoryValue = sumSellerInventoryUnits*price;
-       sumBought = polis.totalPurchasesAtTimestep(time);
-       sumSold = polis.totalSalesAtTimestep(time);
+    sumSellerInventoryUnits = polis.totalInventoryAtTimestep(time);
+    sumSellerInventoryValue = sumSellerInventoryUnits*price;
+    sumBought = polis.totalPurchasesAtTimestep(time);
+    sumSold = polis.totalSalesAtTimestep(time);
 
-       fprintf("\n----- Summarized Results, End Of Time Step = %d -----\n\n",time);
-       t1 = elapsedTime1/60;
-       t2 = (elapsedTime2 - elapsedTime1)/60;
-       fprintf("* Simulation Time = %.2f + Results Generation Time = %.2f = %.2f Minutes\n\n", t1, t2, t1 + t2);
-       fprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. TMS - (UBI + Demurrage) = %.2f)\n\n", sumWallets, cumDemurrage, cumUBI, (sumWallets - (cumUBI + cumDemurrage)));
-       fprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = $%.2f, Total Inventory Exchanged = %2.f (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, sumBought, (sumBought - sumSold));
+    o1 = sprintf("\n----- Summarized Results, End Of Time Step = %d -----\n\n",time);
+    t1 = elapsedTime1/60;
+    t2 = (elapsedTime2 - elapsedTime1)/60;
+    o2 = sprintf("* Simulation Time = %.2f + Results Generation Time = %.2f = %.2f Minutes\n\n", t1, t2, t1 + t2);
+    o3 = sprintf("* Total Money Supply = %.2f drachma, Total Demurrage = %.2f drachma, Total UBI = %.2f drachma (check: Tot. TMS - (UBI + Demurrage) = %.2f)\n\n", sumWallets, cumDemurrage, cumUBI, (sumWallets - (cumUBI + cumDemurrage)));
+    o4 = sprintf("* Remaining Inventory Supply = %.2f, Remaining Inventory Value = $%.2f, Total Inventory Exchanged = %2.f (check: Purchased - Sold = %.2f)\n\n",sumSellerInventoryUnits, sumSellerInventoryValue, sumBought, (sumBought - sumSold));
+    
+    fprintf(o1);
+    fprintf(o2);
+    fprintf(o3);
+    fprintf(o4);
+    
+    fileId = fopen(filePath, "a");
+    if fileId > 0
+        fprintf(fileId, o1);
+        fprintf(fileId, o2);
+        fprintf(fileId, o3);
+        fprintf(fileId, o4);
+        fclose(fileId);
+    end
 end
 
-function reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPaths, FailNoInventory, Purchased, endTime)
+function reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPaths, FailNoInventory, Purchased, endTime, filePath)
     numBuyers = polis.countBuyers;
     sumNoMoney = sum(sum(FailNoMoney(:,1:endTime)));
     sumNoLiquidity = sum(sum(FailNoLiquidity(:,1:endTime)));
     sumNoPaths = sum(sum(FailNoPaths(:,1:endTime)));
     sumNoInventory = sum(sum(FailNoInventory(:,1:endTime)));
     sumPurchased = sum(sum(Purchased(:,1:endTime)));
-    fprintf("* Items Purchased = %.2f, Failed No Money = %.2f, Failed No Liquidity = %.2f, Failed No Paths = %.2f, Failed No Inventory = %.2f\n", sumPurchased, sumNoMoney, sumNoLiquidity, sumNoPaths, sumNoInventory);
+    o1 = sprintf("* Items Purchased = %.2f, Failed No Money = %.2f, Failed No Liquidity = %.2f, Failed No Paths = %.2f, Failed No Inventory = %.2f\n", sumPurchased, sumNoMoney, sumNoLiquidity, sumNoPaths, sumNoInventory);
     expectedPurchased = numBuyers*endTime;
     checkSum = sumPurchased + sumNoMoney + sumNoLiquidity + sumNoPaths + sumNoInventory;
+    o2 = "";
+    o3 = "";
     if expectedPurchased == checkSum
-        fprintf("* Expected Purchases = Items Purchased + Sum Of Failures = %2.f\n", expectedPurchased);
-        fprintf("* Selling Efficency = %.2f percent\n\n", (sumPurchased/expectedPurchased)*100.0);
+        o2 = sprintf("* Expected Purchases = Items Purchased + Sum Of Failures = %2.f\n", expectedPurchased);
+        o3 = sprintf("* Selling Efficency = %.2f percent\n\n", (sumPurchased/expectedPurchased)*100.0);
     else
-        fprintf("\n***\n*** Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n***\n", expectedPurchased, checkSum)
+        o2 = sprintf("\n***\n*** Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n***\n", expectedPurchased, checkSum);
+        o3 = sprintf("--\n");
     end
+
+    fprintf(o1);
+    fprintf(o2);
+    fprintf(o3);
+    
+    fileId = fopen(filePath, "a");
+    if fileId > 0
+        fprintf(fileId, o1);
+        fprintf(fileId, o2);
+        fprintf(fileId, o3);
+        fclose(fileId);
+    end    
 end
 
 function [wallets, ubi, demurrage, purchased, sold, ids, agentTypes] = sortByAgentType(wallets, ubi, demurrage, purchased, sold, ids, agentTypes)
@@ -465,7 +521,7 @@ function plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, Fa
     title("No Money Failures By Agent");
     legend("Failures");
     
-    if getPlotting
+    if getSaveResults
         saveas(f, filePath, 'fig');
     end
 end
@@ -556,7 +612,7 @@ function plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, end
     ylabel('Drachma');
     title('Money Supply');
     legend('Net', 'Seed','UBI', 'Dumurrage');
-    if getPlotting
+    if getSaveResults
         saveas(f, filePath, 'fig');
     end
 end
@@ -588,7 +644,7 @@ function plotWalletByAgentId(polis, Wallet, ids, endTime, filePath)
     xlabel('Time');
     ylabel('Drachma');
     title('Wallet By Agent Id');
-    if getPlotting
+    if getSaveResults
         saveas(f, filePath, 'fig');
     end
 end
@@ -637,7 +693,7 @@ function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors
     xlabel('Time');
     ylabel('Drachma');
     title('Wallet by Agent Type');
-    if getPlotting
+    if getSaveResults
         saveas(f, filePath, 'fig');
     end
 end
@@ -665,10 +721,9 @@ function plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, 
     xlabel('Time');
     ylabel('Drachma');
     title('Cumulative UBI, Demurrage & Money Supply');
-    if getPlotting
+    if getSaveResults
         saveas(f, filePath, 'fig');
     end
-
 end
 
 function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, endTime, colors, filePath)
@@ -720,7 +775,7 @@ function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, e
     xlabel('Time');
     ylabel('Drachma');
     title('Cumulative Demurrage By Agent Type + UBI');
-    if getPlotting
+    if getSaveResults
         saveas(f, filePath, 'fig');
     end
 end
@@ -756,7 +811,7 @@ function plotPuchsasedItemsByAgent(polis, Purchased, ids, endTime, filePath)
     xlabel('Time');
     ylabel('Number of Items');
     title('Cumulative Purchased Items By Agent');
-    if getPlotting
+    if getSaveResults
         saveas(f, filePath, 'fig');
     end
 end
@@ -792,7 +847,7 @@ function plotSoldItemsByAgent(polis, Sold, ids, endTime, filePath)
     xlabel('Time');
     ylabel('Number of Items');
     title('Cumulative Sold Items By Agent');
-    if getPlotting
+    if getSaveResults
         saveas(f, filePath, 'fig');
     end
 end
@@ -811,7 +866,7 @@ function plotLedgerRecordTotals(totalLedgerRecordsByAgent, totalLedgerRecordsByA
     xlabel('Agent Id');
     ylabel('Number of Records');
     title('Total Number Of Ledger Records By Agent');
-    if getPlotting
+    if getSaveResults
         saveas(f, filePath, 'fig');
     end
 end
