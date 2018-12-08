@@ -1,10 +1,10 @@
 
 Commerce Model Input Parameters
 
-1)  Number of Time Steps (dt): 104
+1)  Number of Time Steps (dt): 52
 2)  Number of Agents: 101
 3)  Network Filename:Edges Hybrid SN=1 FN=101 T=50 a=0.00 V1.1.0.csv
-4)  Number of search steps (find path): 1
+4)  Number of search steps (find path): 2
 5)  Initial Wallet Size (drachma / agent): 0.00
 6)  UBI Amount (drachma / ubi interval): 2200.00
 7)  UBI Interval: 1
@@ -13,7 +13,7 @@ Commerce Model Input Parameters
 10) Percentage of Agents Buying: 0.75
 11) Percentage of Agents Selling: 0.75
 12) Price of Goods (drachma / unit): 2000.00
-13) Initial Inventory (# units / agent): 100.00
+13) Initial Inventory (# units / agent): 300.00
 
 Wallet Test Plan 10 Agents.csv
 Edges Hybrid SN=2 FN=25 T=23 a=0.99 V1.1.0.csv

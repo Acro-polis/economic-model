@@ -1,4 +1,4 @@
-function outputModel(title, Am, SN, T, alpha, version_number)
+function outputNetworkModelForGephi(title, Am, SN, T, alpha, version_number)
 %=====================================================
 %
 % Write nodes and edges output files for external 

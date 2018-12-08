@@ -260,6 +260,11 @@ reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2, fileP
 % Transaction Failure Analysis
 reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, time, filePath);
 
+% Output Network
+nodesFilePath = sprintf("%s/%s", outputPath, "nodes.txt");
+edgesFilePath = sprintf("%s/%s", outputPath, "edges.txt");
+outputNetwork(AM, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, nodesFilePath, edgesFilePath);
+
 %
 % ======  Plot some results  ======
 %
@@ -441,6 +446,16 @@ function [wallets, ubi, demurrage, purchased, sold, ids, agentTypes] = sortByAge
             ids = ids(indices);
 end
 
+function outputNetwork(AM, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, nodesFilePath, edgesFilePath)
+    % Output the network with some statistics for external processing
+    sumPurchased    = sum(Purchased,2);
+    sumNoPath       = sum(FailNoPath,2);
+    sumNoLiquidity  = sum(FailNoLiquidity,2);
+    sumNoInventory  = sum(FailNoInventory,2);
+    sumNoMoney      = sum(FailNoMoney,2);
+    outputEMNetworkForGephi(AM, sumPurchased, sumNoPath, sumNoLiquidity, sumNoInventory, sumNoMoney, nodesFilePath, edgesFilePath);
+end
+
 %
 % ====== Plotting Functions ======
 %
@@ -448,7 +463,7 @@ function plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, Fa
 
     sumNoMoney      = sum(FailNoMoney,2);
     sumNoLiquidity  = sum(FailNoLiquidity,2);
-    sumNoPath      = sum(FailNoPath,2);
+    sumNoPath       = sum(FailNoPath,2);
     sumNoInventory  = sum(FailNoInventory,2);
     sumPurchased    = sum(Purchased,2);
 
@@ -870,3 +885,5 @@ function plotLedgerRecordTotals(totalLedgerRecordsByAgent, totalLedgerRecordsByA
         saveas(f, filePath, 'fig');
     end
 end
+
+
