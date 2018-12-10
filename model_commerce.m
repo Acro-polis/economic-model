@@ -105,10 +105,10 @@ OutOfTime       = 0;
 OutOfInventory  = 1;
 OutOfMoney      = 2;
 SuspendCode     = OutOfTime;
-FailNoMoney     = zeros(N, numSteps);
-FailNoLiquidity = zeros(N, numSteps);
 FailNoPath      = zeros(N, numSteps);
+FailNoLiquidity = zeros(N, numSteps);
 FailNoInventory = zeros(N, numSteps);
+FailNoMoney     = zeros(N, numSteps);
 
 startTime = tic();
 
@@ -261,8 +261,8 @@ reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2, fileP
 reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, time, filePath);
 
 % Output Network
-nodesFilePath = sprintf("%s/%s", outputPath, "nodes.txt");
-edgesFilePath = sprintf("%s/%s", outputPath, "edges.txt");
+nodesFilePath = sprintf("%s/%s", outputPath, "nodes.csv");
+edgesFilePath = sprintf("%s/%s", outputPath, "edges.csv");
 outputNetwork(AM, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, nodesFilePath, edgesFilePath);
 
 %
@@ -470,8 +470,9 @@ function plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, Fa
     f = figure;
     numAgents = polis.numberOfAgents;
     x = 1:numAgents;
+    sp = 6;
     
-    ax1 = subplot(5,1,1);
+    ax1 = subplot(sp,1,1);
     maxYHeight = max(sumPurchased)*yScale;
     if (maxYHeight <= 0) 
         maxYHeight = 1; 
@@ -484,7 +485,7 @@ function plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, Fa
     title("Purchases By Agent");
     legend("Purchases");
     
-    ax2 = subplot(5,1,2);
+    ax2 = subplot(sp,1,2);
     maxYHeight = max(sumNoPath)*yScale;
     if (maxYHeight <= 0) 
         maxYHeight = 1; 
@@ -497,7 +498,7 @@ function plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, Fa
     title("No Path Failures By Agent");
     legend("Failures");
     
-    ax3 = subplot(5,1,3);
+    ax3 = subplot(sp,1,3);
     maxYHeight = max(sumNoLiquidity)*yScale;
     if (maxYHeight <= 0) 
         maxYHeight = 1; 
@@ -510,7 +511,7 @@ function plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, Fa
     title("No Liquidity Failures By Agent");
     legend("Failures");
 
-    ax4 = subplot(5,1,4);
+    ax4 = subplot(sp,1,4);
     maxYHeight = max(sumNoInventory)*yScale;
     if (maxYHeight <= 0) 
         maxYHeight = 1; 
@@ -523,7 +524,7 @@ function plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, Fa
     title("No Inventory Failures By Agent");
     legend("Failures");
 
-    ax5 = subplot(5,1,5);
+    ax5 = subplot(sp,1,5);
     maxYHeight = max(sumNoMoney)*yScale;
     if (maxYHeight <= 0) 
         maxYHeight = 1; 
@@ -535,6 +536,16 @@ function plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, Fa
     ylabel('Number');
     title("No Money Failures By Agent");
     legend("Failures");
+    
+    [Buyers, Sellers] = polis.parseBuyersAndSellers();
+    ax6 = subplot(sp,1,6);
+    plot(ax6, x, Buyers, 'x', x, Sellers, 'o');
+    xlim([1 numAgents]);
+    ylim([0.9 1.1]);
+    xlabel('Agent');
+    ylabel('Type');
+    title('Buyers & Sellers');
+    legend('Buyers','Sellers');
     
     if getSaveResults
         saveas(f, filePath, 'fig');
@@ -582,17 +593,7 @@ function plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, end
     legend('Bought','Sold');
 
     % Section 3: Distribution Buyers & Sellers
-    Buyers = zeros(1,numAgents);
-    Sellers = zeros(1,numAgents);
-    for i = 1:numAgents
-        agent = polis.agents(i);
-        if agent.isBuyer
-            Buyers(1,i) = 1;
-        end
-        if agent.isSeller
-            Sellers(1,i) = 1;
-        end
-    end
+    [Buyers, Sellers] = polis.parseBuyersAndSellers();
     ax3 = subplot(4,1,3);
     x = 1:numAgents;
     plot(ax3, x, Buyers, 'x', x, Sellers, 'o');

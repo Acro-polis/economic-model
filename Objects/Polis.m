@@ -113,6 +113,24 @@ classdef Polis < handle
         %
         % Tabulation Methods
         %
+        
+        function [buyers, sellers] = parseBuyersAndSellers(obj)
+            % Identify which agents are buyers and seller (can be both or
+            % none)
+            N = obj.numberOfAgents;
+            buyers = zeros(1,N);
+            sellers = zeros(1,N);
+            for i = 1:N
+                agent = obj.agents(i);
+                if agent.isBuyer
+                    buyers(1,i) = 1;
+                end
+                if agent.isSeller
+                    sellers(1,i) = 1;
+                end
+            end
+        end
+        
         function [buyerseller, buyer, seller, nonparticipant] = parseAgentCommerceRoleTypes(obj)
             % Count the number of different commerce roles for the current
             % agent poplulation
