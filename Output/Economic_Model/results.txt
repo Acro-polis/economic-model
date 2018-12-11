@@ -1,0 +1,33 @@
+
+----- Summarized Simulation Inputs For Code Version 1.2.1 -----
+
+- Network Input Filename = Edges Hybrid SN=1 FN=101 T=50 a=0.00 V1.1.0.csv
+
+- Number Agents = 101, Time Steps (Duration) = 52, Maximum Search Path Level = 6
+
+- UBI = 550.00 drachmas/agent, applied every 1 time steps
+
+- Demurrage = 2.50 percent/agent, applied every 4 time steps
+
+- Starting wallet size/agent = 1500.00 drachma
+
+- Price of goods = 500.00 drachmas
+
+- Num buyers   = 76 <= 101 agents
+
+- Num sellers  = 76 <= 101 agents
+
+- Num Buyers&Sellers = 60, Buyers Only = 16, Sellers Only = 16, Non-Participants = 9
+
+----- Summarized Results, End Of Time Step = 52 -----
+
+* Simulation Time = 9.41 + Results Generation Time = 0.53 = 9.94 Minutes
+
+* Total Money Supply = 2445916.67 drachma, Total Demurrage = -442683.33 drachma, Total UBI = 2888600.00 drachma (check: Tot. TMS - (UBI + Demurrage) = -0.00)
+
+* Remaining Inventory Supply = 21094.00, Remaining Inventory Value = $10547000.00, Total Inventory Exchanged = 1706 (check: Purchased - Sold = 0.00)
+
+* Items Purchased = 1706.00, Failed No Money = 0.00, Failed No Liquidity = 1988.00, Failed No Paths = 258.00, Failed No Inventory = 0.00
+* Expected Purchases = Items Purchased + Sum Of Failures = 3952
+* Selling Efficency = 43.17 percent
+

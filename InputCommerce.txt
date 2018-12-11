@@ -1,12 +1,12 @@
 
 Commerce Model Input Parameters
 
-1)  Number of Time Steps (dt): 312
+1)  Number of Time Steps (dt): 52
 2)  Number of Agents: 101
 3)  Network Filename:Edges Hybrid SN=1 FN=101 T=50 a=0.00 V1.1.0.csv
 4)  Number of search steps (find path): 6
-5)  Initial Wallet Size (drachma / agent): 0.00
-6)  UBI Amount (drachma / ubi interval): 1500.0
+5)  Initial Wallet Size (drachma / agent): 1500.00
+6)  UBI Amount (drachma / ubi interval): 550.0
 7)  UBI Interval: 1
 8)  Percent Demurrage: 0.025
 9)  Demurrage Interval: 4
