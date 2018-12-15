@@ -1,7 +1,7 @@
 
 Random Network Generation Input Parameters
 
-1)  Number Of Inital Nodes: 2
-2)  Number Of Generation Steps: 49
-3)  Number Of New Nodes Per Step: 2
+1)  Number Of Inital Nodes: 5
+2)  Number Of Generation Steps: 19
+3)  Number Of New Nodes Per Step: 5
 4)  Alpha (0 = Preferred, 1 = Random): 0.0

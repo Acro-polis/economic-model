@@ -292,8 +292,12 @@ filePath = sprintf("%s/%s", outputPath, "Sales.fig");
 plotSoldItemsByAgent(polis, Sold, ids, time, filePath);
 
 % Plot transaction failures by agent
-filePath = sprintf("%s/%s", outputPath, "Transaction_Log.fig");
-plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, filePath);
+filePath = sprintf("%s/%s", outputPath, "Transaction_Log_Agent.fig");
+plotTransactionFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, filePath);
+
+% Plot transaction failures in time
+filePath = sprintf("%s/%s", outputPath, "Transaction_Log_Time.fig");
+plotTransactionFailuresInTime(time, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, filePath);
 
 % Now sort the data by agentType for the remaining output
 [Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = sortByAgentType(Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes);
@@ -459,7 +463,7 @@ end
 %
 % ====== Plotting Functions ======
 %
-function plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, filePath)
+function plotTransactionFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, filePath)
 
     sumNoMoney      = sum(FailNoMoney,2);
     sumNoLiquidity  = sum(FailNoLiquidity,2);
@@ -547,6 +551,26 @@ function plotTransactionFailures(yScale, polis, FailNoMoney, FailNoLiquidity, Fa
     title('Buyers & Sellers');
     legend('Buyers','Sellers');
     
+    if getSaveResults
+        saveas(f, filePath, 'fig');
+    end
+       
+end
+
+function plotTransactionFailuresInTime(time, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, filePath)
+    f = figure;
+    x = 1:time;
+    hold on;
+    p1 = plot(x, sum(FailNoPath(:,x)), '--x');
+    p2 = plot(x, sum(FailNoLiquidity(:,x)), '-b');
+    p3 = plot(x, sum(FailNoInventory(:,x)), '-r');
+    p4 = plot(x, sum(FailNoMoney(:,x)), '-g');
+    hold off;
+    xlim([1 time]);
+    legend([p1, p2, p3, p4],{'Path','Liquidity','Inventory','Money'});
+    xlabel('Time');
+    ylabel('Number of Failures');
+    title('Deal Failures By Type In Time');
     if getSaveResults
         saveas(f, filePath, 'fig');
     end
