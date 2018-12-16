@@ -3,7 +3,7 @@
 
 - Network Input Filename = Edges Hybrid SN=1 FN=101 T=50 a=0.00 V1.1.0.csv
 
-- Number Agents = 101, Time Steps (Duration) = 52, Maximum Search Path Level = 6
+- Number Agents = 101, Time Steps (Duration) = 52, Maximum Search Path Level = 8
 
 - UBI = 1500.00 drachmas/agent, applied every 1 time steps
 

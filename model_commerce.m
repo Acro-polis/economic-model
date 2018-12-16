@@ -43,7 +43,8 @@ end
 
 % Create the polis
 maxSearchLevels =  round(parseInputString(fgetl(fileId), inputTypeDouble)); % Search Levels (Input 4)
-assert(maxSearchLevels >= 0,"Error: Max. Search Levels < 0");
+maxSearchLevels = maxSearchLevels - 2;
+assert(maxSearchLevels >= 0,"Error: Max. Search Levels < 2");
 polis = Polis(AM, maxSearchLevels); 
 polis.createAgents(1, numSteps);
 
@@ -337,7 +338,7 @@ function reportSimulationInputs(version_number, networkFilename, N, numSteps, ma
     else
         o2 = sprintf("\n- Network Input Filename = %s\n\n", networkFilename);
     end
-    o3  = sprintf("- Number Agents = %d, Time Steps (Duration) = %d, Maximum Search Path Level = %d\n\n", N, numSteps, maxSearchLevels);
+    o3  = sprintf("- Number Agents = %d, Time Steps (Duration) = %d, Maximum Search Path Level = %d\n\n", N, numSteps, (maxSearchLevels+2));
     o4  = sprintf("- UBI = %.2f drachmas/agent, applied every %.0f time steps\n\n", amountUBI, timeStepUBI);
     o5  = sprintf("- Demurrage = %.2f percent/agent, applied every %.0f time steps\n\n", percentDemurrage*100, timeStepDemurrage);
     o6  = sprintf("- Starting wallet size/agent = %.2f drachma\n\n", seedWalletSize);
