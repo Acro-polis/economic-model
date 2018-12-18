@@ -6,7 +6,7 @@
 % Created: 2018.08.30
 %===================================================
 
-version_number = "1.2.1"; % Tagged version in github
+version_number = "1.3.0"; % Tagged version in github
 
 inputTypeDouble = 0;
 inputTypeString = 1;
