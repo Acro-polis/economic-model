@@ -15,7 +15,7 @@ fprintf(fileId,'\nCommerce Model Input Parameters\n\n');
 fprintf(fileId,'1)  Number of Time Steps (dt): %.0f\n',52.0);
 fprintf(fileId,'2)  Number of Agents: %.0f\n',101);
 fprintf(fileId,'3)  Network Filename: %s\n',"use blank for connected network");
-fprintf(fileId,'4)  Number of search steps (find path): %.0f\n',0.0);
+fprintf(fileId,'4)  Number of search steps (>=2): %.0f\n',0.0);
 fprintf(fileId,'5)  Initial Wallet Size (drachma / agent): %.2f\n',0.00);
 fprintf(fileId,'6)  UBI Amount (drachma / ubi interval): %.2f\n',100.00);
 fprintf(fileId,'7)  UBI Interval: %.0f\n',1.0);
