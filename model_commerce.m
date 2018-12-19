@@ -38,15 +38,12 @@ if networkFilename == ""
     AM = connectedGraph(N);                                                
 else
     AM = importNetworkModelFromCSV(N, networkFilename);
-%    [N, ~] = size(AM);                                                  % Reset N based on AM
 end
 
-% Create the polis
+% Transaction Distance
 maxSearchLevels =  round(parseInputString(fgetl(fileId), inputTypeDouble)); % Search Levels (Input 4)
 maxSearchLevels = maxSearchLevels - 2;
-assert(maxSearchLevels >= 0,"Error: Max. Search Levels < 2");
-polis = Polis(AM, maxSearchLevels); 
-polis.createAgents(1, numSteps);
+assert(maxSearchLevels >= 0,"Error: Transaction-Distance < 2");
 
 % Wallet
 seedWalletSize = parseInputString(fgetl(fileId), inputTypeDouble); % Wallet Size (Input 5)
@@ -87,240 +84,277 @@ outputSubFolderName = parseInputString(fgetl(fileId), inputTypeString);  % Outpu
 
 fclose(fileId);
 
-% Setup Buyers and Sellers
-[numberOfBuyers, numberOfSellers] = polis.setupBuyersAndSellers(numberOfPassiveAgents, percentSellers, inventoryInitialUnits);
+setSalesEfficiencyByIteration(zeros(numberIterations,1));
 
-% Parse Roles
-[numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents] = polis.parseAgentCommerceRoleTypes();
+% Loop over the number of iterations
+for iteration = 1:numberIterations
+    
+    fprintf("\n\n//////////// Starting Iteration #%d ////////////\n\n",iteration);
+    
+    % (re)Create the polis
+    if exist('polis','var')
+        polis.delete;
+    end
+    polis = Polis(AM, maxSearchLevels); 
+    polis.createAgents(1, numSteps);
+    
+    % Set the output folder name
+    iterationFolder = sprintf("Iteration_%d",iteration);
 
-% Log Inputs
-reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, "");
+    % Setup Buyers and Sellers
+    [numberOfBuyers, numberOfSellers] = polis.setupBuyersAndSellers(numberOfPassiveAgents, percentSellers, inventoryInitialUnits);
 
-% Report Initial Statistics
-sumWallets = polis.totalMoneySupplyAtTimestep(1);
-sumSellerInventoryUnits = polis.totalInventoryAtTimestep(1);
-sumSellerInventoryValue = sumSellerInventoryUnits*price;
-fprintf("\n- Initial Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = $%.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
+    % Parse Roles
+    [numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents] = polis.parseAgentCommerceRoleTypes();
 
-%--------------------------------------------------------------------------
-% Simulation finish states
-OutOfTime       = 0;
-OutOfInventory  = 1;
-OutOfMoney      = 2;
-SuspendCode     = OutOfTime;
-FailNoPath      = zeros(N, numSteps);
-FailNoLiquidity = zeros(N, numSteps);
-FailNoInventory = zeros(N, numSteps);
-FailNoMoney     = zeros(N, numSteps);
+    % Log Inputs
+    reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, "");
 
-startTime = tic();
+    % Report Initial Statistics
+    sumWallets = polis.totalMoneySupplyAtTimestep(1);
+    sumSellerInventoryUnits = polis.totalInventoryAtTimestep(1);
+    sumSellerInventoryValue = sumSellerInventoryUnits*price;
+    fprintf("\n- Initial Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = $%.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
 
-intervalUBI = 1;
-intervalDemurrage = 1;
+    %--------------------------------------------------------------------------
+    % Simulation finish states
+    OutOfTime       = 0;
+    OutOfInventory  = 1;
+    OutOfMoney      = 2;
+    SuspendCode     = OutOfTime;
+    FailNoPath      = zeros(N, numSteps);
+    FailNoLiquidity = zeros(N, numSteps);
+    FailNoInventory = zeros(N, numSteps);
+    FailNoMoney     = zeros(N, numSteps);
 
-% Start simulation
-for time = 1:numSteps
+    startTime = tic();
 
-   fprintf("\n++++++++ Start of time step = %d ++++++++\n", time);
+    intervalUBI = 1;
+    intervalDemurrage = 1;
 
-   % Apply demurrage
-   if intervalDemurrage < timeStepDemurrage
-       intervalDemurrage = intervalDemurrage + 1;
-   else
-       fprintf("\n-- Applying Demurrage at time = %d --\n", time);
-       polis.applyDemurrageWithPercentage(percentDemurrage, time);
-       intervalDemurrage = 1;
-   end
-   
-   % Deposit UBI
-   if intervalUBI < intervalUBI
-       intervalUBI = intervalUBI + 1;
-   else
-        fprintf("\n-- Depositing UBI at time = %d --\n", time);
-        polis.depositUBI(amountUBI, time);
-        intervalUBI = 1;
-   end
-   
-   % Randomly order buyers before each time step
-   numBuyerIndex = 1:N;
-   randBuyerIndex = numBuyerIndex(randperm(length(numBuyerIndex)));
-   
-   for buyer = 1:numel(randBuyerIndex)
-       
-       agentBuyerId = randBuyerIndex(buyer);
-       agentBuying = polis.agents(agentBuyerId);
-       
-       % Skip non-buying agents
-       if agentBuying.isBuyer == false
-           fprintf("\n+ B(%d) is not a buyer\n",agentBuyerId);
-           continue;
-       end
-       
-       % Skip agents out of money
-       if agentBuying.balanceAllTransactionsAtTimestep(time) < price
-           FailNoMoney(agentBuyerId, time) = FailNoMoney(agentBuyerId, time) + 1;
-           fprintf("\n- B(%d) is a buyer out of money\n",agentBuyerId);
-           continue;
-       end
-       
-       % Find sellers that are not the buying agent
-       sellingAgents = polis.identifySellers(agentBuying);
-       numberOfAvailableSellers = size(sellingAgents,1);
-             
-       if  numberOfAvailableSellers > 0
-           
-           % Pick a seller randomly
-           j = randsample(numberOfAvailableSellers,1);
-           agentSelling = sellingAgents(j);
-           
-           fprintf("\n++ Proposed Purchase Of Agent %d From Agent %d\n", agentBuying.id, agentSelling.id);
-           % Submit the purchase
-           numUnits = 1;           
-           result = agentBuying.submitPurchase(polis.AM, numUnits, numUnits*price, agentSelling, time);
-           
-           if result == TransactionType.TRANSACTION_SUCCEEDED
-               fprintf("\nSale Successful!\n");
-               agentSelling.recordSale(numUnits, time);
-               agentBuying.recordPurchase(numUnits, time);
-           else
-               if result == TransactionType.FAILED_NO_LIQUIDITY
-                   FailNoLiquidity(agentBuyerId, time) = FailNoLiquidity(agentBuyerId, time) + 1;
-                   fprintf("\nSale Failed, No Liquidity\n");
-               elseif result == TransactionType.FAILED_NO_PATH_FOUND
-                   FailNoPath(agentBuyerId, time) = FailNoPath(agentBuyerId, time) + 1;
-                   fprintf("\nSale Failed, No Path Found\n");
-               elseif result == TransactionType.FAILED_NO_INVENTORY
-                   FailNoInventory(agentBuyerId, time) = FailNoInventory(agentBuyerId, time) + 1;
-                   fprintf("\nSale Failed, No Inventory\n");
-               else
-                   fprintf("\nUnrecognized result. Check it out!\n");
-                   assert(true,"Should not be here, investigate!");
-               end
-           end
-                      
+    % Start simulation
+    for time = 1:numSteps
+
+       fprintf("\n++++++++ Start of time step = %d ++++++++\n", time);
+
+       % Apply demurrage
+       if intervalDemurrage < timeStepDemurrage
+           intervalDemurrage = intervalDemurrage + 1;
        else
-           % No sale :-(
-           fprintf("\nNo sellers available\n");
-           assert(true,"Should not be here, investigate!");
+           fprintf("\n-- Applying Demurrage at time = %d --\n", time);
+           polis.applyDemurrageWithPercentage(percentDemurrage, time);
+           intervalDemurrage = 1;
        end
-   end
-      
-   if polis.totalInventoryAtTimestep(time) <= 0
-       SuspendCode = OutOfInventory;
-       break;
-   end
-   
-   % TODO - Break if out of money any time other than time = 1
-%    if sumWallets <= 0 && time ~= 1
-%        SuspendCode = OutOfMoney;
-%        reportIncrementalStatistics(polis, price, time);
-%        break;
-%    end   
-   
-end
 
-% Simulation Completion Status
-if SuspendCode == OutOfTime
-    fprintf("\nSimulation Ended Normally At Time Step = %d\n",time);
-elseif SuspendCode == OutOfInventory
-    fprintf("\nSimulation Halted: Out Of Inventory At Time = %d\n",time);
-elseif SuspendCode == OutOfMoney
-    fprintf("\nSimulation Halted: Out Of Money At Time = %d\n",time);
-end
+       % Deposit UBI
+       if intervalUBI < intervalUBI
+           intervalUBI = intervalUBI + 1;
+       else
+            fprintf("\n-- Depositing UBI at time = %d --\n", time);
+            polis.depositUBI(amountUBI, time);
+            intervalUBI = 1;
+       end
 
-elapsedTime1 = toc(startTime);
-fprintf('\n== Simulation Run Time = %.2f Seconds\n',elapsedTime1);
+       % Randomly order buyers before each time step
+       numBuyerIndex = 1:N;
+       randBuyerIndex = numBuyerIndex(randperm(length(numBuyerIndex)));
 
-%
-% Tabluate results for ouput
-%
-fprintf("\n=============================\n");
-fprintf("\nTabulating Results For Output\n");
-fprintf("\n=============================\n");
-[Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = polis.transactionTimeHistories(time);
+       for buyer = 1:numel(randBuyerIndex)
 
-elapsedTime2 = toc(startTime);
-fprintf('\n== Results Generation Required = %.2f Seconds\n',elapsedTime2 - elapsedTime1);
+           agentBuyerId = randBuyerIndex(buyer);
+           agentBuying = polis.agents(agentBuyerId);
 
-%
-% ====== Reporting ======
-%
+           % Skip non-buying agents
+           if agentBuying.isBuyer == false
+               fprintf("\n+ B(%d) is not a buyer\n",agentBuyerId);
+               continue;
+           end
 
-% For saving results
-setSaveResults(true);
-if getSaveResults == true
-    outputFolder = "Output";
-    outputPath = sprintf("%s/%s", outputFolder, outputSubFolderName);
-    [status, msg, msgID] = mkdir(outputPath);
-end
+           % Skip agents out of money
+           if agentBuying.balanceAllTransactionsAtTimestep(time) < price
+               FailNoMoney(agentBuyerId, time) = FailNoMoney(agentBuyerId, time) + 1;
+               fprintf("\n- B(%d) is a buyer out of money\n",agentBuyerId);
+               continue;
+           end
 
-% Simulation Inputs
-filePath = sprintf("%s/%s", outputPath, "results.txt");
-reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, filePath);
-% Simulation Statistics
-reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2, filePath);
-% Transaction Failure Analysis
-reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, time, filePath);
+           % Find sellers that are not the buying agent
+           sellingAgents = polis.identifySellers(agentBuying);
+           numberOfAvailableSellers = size(sellingAgents,1);
 
-% Output Network
-nodesFilePath = sprintf("%s/%s", outputPath, "nodes.csv");
-edgesFilePath = sprintf("%s/%s", outputPath, "edges.csv");
-outputNetwork(AM, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, nodesFilePath, edgesFilePath);
+           if  numberOfAvailableSellers > 0
 
-%
-% ======  Plot some results  ======
-%
-fprintf("\n----- Begin Plotting -----\n");
-close all
-yScale = 1.5;
-colors = Colors();
+               % Pick a seller randomly
+               j = randsample(numberOfAvailableSellers,1);
+               agentSelling = sellingAgents(j);
 
-% Plot the 4 panal summary plot
-filePath = sprintf("%s/%s", outputPath, "Summary.fig");
-plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, time, filePath);
+               fprintf("\n++ Proposed Purchase Of Agent %d From Agent %d\n", agentBuying.id, agentSelling.id);
+               % Submit the purchase
+               numUnits = 1;           
+               result = agentBuying.submitPurchase(polis.AM, numUnits, numUnits*price, agentSelling, time);
 
-% Plot cumulative money supply, UBI and Demurrage
-filePath = sprintf("%s/%s", outputPath, "Cum_MS_UBI_Dem.fig");
-plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, time, colors, filePath);
+               if result == TransactionType.TRANSACTION_SUCCEEDED
+                   fprintf("\nSale Successful!\n");
+                   agentSelling.recordSale(numUnits, time);
+                   agentBuying.recordPurchase(numUnits, time);
+               else
+                   if result == TransactionType.FAILED_NO_LIQUIDITY
+                       FailNoLiquidity(agentBuyerId, time) = FailNoLiquidity(agentBuyerId, time) + 1;
+                       fprintf("\nSale Failed, No Liquidity\n");
+                   elseif result == TransactionType.FAILED_NO_PATH_FOUND
+                       FailNoPath(agentBuyerId, time) = FailNoPath(agentBuyerId, time) + 1;
+                       fprintf("\nSale Failed, No Path Found\n");
+                   elseif result == TransactionType.FAILED_NO_INVENTORY
+                       FailNoInventory(agentBuyerId, time) = FailNoInventory(agentBuyerId, time) + 1;
+                       fprintf("\nSale Failed, No Inventory\n");
+                   else
+                       fprintf("\nUnrecognized result. Check it out!\n");
+                       assert(true,"Should not be here, investigate!");
+                   end
+               end
 
-% Plot wallets by agent id
-filePath = sprintf("%s/%s", outputPath, "Wallets_By_Id.fig");
-plotWalletByAgentId(polis, Wallet, ids, time, filePath);
+           else
+               % No sale :-(
+               fprintf("\nNo sellers available\n");
+               assert(true,"Should not be here, investigate!");
+           end
+       end
 
-% Plot purchased & sold items by agent id
-filePath = sprintf("%s/%s", outputPath, "Purchases.fig");
-plotPuchsasedItemsByAgent(polis, Purchased, ids, time, filePath);
-filePath = sprintf("%s/%s", outputPath, "Sales.fig");
-plotSoldItemsByAgent(polis, Sold, ids, time, filePath);
+       if polis.totalInventoryAtTimestep(time) <= 0
+           SuspendCode = OutOfInventory;
+           break;
+       end
 
-% Plot transaction failures by agent
-filePath = sprintf("%s/%s", outputPath, "Transaction_Log_Agent.fig");
-plotTransactionFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, filePath);
+       % TODO - Break if out of money any time other than time = 1
+    %    if sumWallets <= 0 && time ~= 1
+    %        SuspendCode = OutOfMoney;
+    %        reportIncrementalStatistics(polis, price, time);
+    %        break;
+    %    end   
 
-% Plot transaction failures in time
-filePath = sprintf("%s/%s", outputPath, "Transaction_Log_Time.fig");
-plotTransactionFailuresInTime(time, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, filePath);
+    end
 
-% Now sort the data by agentType for the remaining output
-[Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = sortByAgentType(Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes);
-[numBS, numB, numS, numNP] = polis.countAgentCommerceTypes(agentTypes);
+    % Simulation Completion Status
+    if SuspendCode == OutOfTime
+        fprintf("\nSimulation Ended Normally At Time Step = %d\n",time);
+    elseif SuspendCode == OutOfInventory
+        fprintf("\nSimulation Halted: Out Of Inventory At Time = %d\n",time);
+    elseif SuspendCode == OutOfMoney
+        fprintf("\nSimulation Halted: Out Of Money At Time = %d\n",time);
+    end
 
-% Plot wallets grouped by agent type
-filePath = sprintf("%s/%s", outputPath, "Wallet_Agent_Type.fig");
-plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, time, colors, filePath);
+    elapsedTime1 = toc(startTime);
+    fprintf('\n== Simulation Run Time = %.2f Seconds\n',elapsedTime1);
 
-% Plot cumlative UBI & Demurrage grouped by agent type
-filePath = sprintf("%s/%s", outputPath, "Cum_UBI_ETC_BY_Agent_Type.fig");
-plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colors, filePath);
+    %
+    % Tabluate results for ouput
+    %
+    fprintf("\n=============================\n");
+    fprintf("\nTabulating Results For Output\n");
+    fprintf("\n=============================\n");
+    [Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = polis.transactionTimeHistories(time);
 
-% Plot total ledger records by agent
-[totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTransitive, totalLedgerRecordsByAgentTransitive] = polis.totalLedgerRecordsByAgent(time);
-filePath = sprintf("%s/%s", outputPath, "Ledger.fig");
-plotLedgerRecordTotals(totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTransitive, totalLedgerRecordsByAgentTransitive, filePath);
+    elapsedTime2 = toc(startTime);
+    fprintf('\n== Results Generation Required = %.2f Seconds\n',elapsedTime2 - elapsedTime1);
+
+    %
+    % ====== Reporting ======
+    %
+
+    % For saving results
+    setSaveResults(true);
+    if getSaveResults == true
+        outputFolder = "Output";
+        outputPath = sprintf("%s/%s/%s", outputFolder, outputSubFolderName, iterationFolder);
+        summaryResultsPath = sprintf("%s/%s", outputFolder, outputSubFolderName);
+        [status, msg, msgID] = mkdir(outputPath);
+    end
+
+    % Simulation Inputs
+    filePath = sprintf("%s/%s", outputPath, "results.txt");
+    reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, filePath);
+    % Simulation Statistics
+    reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2, filePath);
+    % Transaction Failure Analysis
+    reportTransactionFailures(polis, iteration, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, time, filePath);
+
+    % Output Network
+    nodesFilePath = sprintf("%s/%s", outputPath, "nodes.csv");
+    edgesFilePath = sprintf("%s/%s", outputPath, "edges.csv");
+    outputNetwork(AM, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, nodesFilePath, edgesFilePath);
+
+    %
+    % ======  Plot some results  ======
+    %
+    fprintf("\n----- Begin Plotting -----\n");
+    close all
+    yScale = 1.5;
+    colors = Colors();
+
+    % Plot the 4 panal summary plot
+    filePath = sprintf("%s/%s", outputPath, "Summary.fig");
+    plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, time, filePath);
+
+    % Plot cumulative money supply, UBI and Demurrage
+    filePath = sprintf("%s/%s", outputPath, "Cum_MS_UBI_Dem.fig");
+    plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, time, colors, filePath);
+
+    % Plot wallets by agent id
+    filePath = sprintf("%s/%s", outputPath, "Wallets_By_Id.fig");
+    plotWalletByAgentId(polis, Wallet, ids, time, filePath);
+
+    % Plot purchased & sold items by agent id
+    filePath = sprintf("%s/%s", outputPath, "Purchases.fig");
+    plotPuchsasedItemsByAgent(polis, Purchased, ids, time, filePath);
+    filePath = sprintf("%s/%s", outputPath, "Sales.fig");
+    plotSoldItemsByAgent(polis, Sold, ids, time, filePath);
+
+    % Plot transaction failures by agent
+    filePath = sprintf("%s/%s", outputPath, "Transaction_Log_Agent.fig");
+    plotTransactionFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, filePath);
+
+    % Plot transaction failures in time
+    filePath = sprintf("%s/%s", outputPath, "Transaction_Log_Time.fig");
+    plotTransactionFailuresInTime(time, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, filePath);
+
+    % Now sort the data by agentType for the remaining output
+    [Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = sortByAgentType(Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes);
+    [numBS, numB, numS, numNP] = polis.countAgentCommerceTypes(agentTypes);
+
+    % Plot wallets grouped by agent type
+    filePath = sprintf("%s/%s", outputPath, "Wallet_Agent_Type.fig");
+    plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, time, colors, filePath);
+
+    % Plot cumlative UBI & Demurrage grouped by agent type
+    filePath = sprintf("%s/%s", outputPath, "Cum_UBI_ETC_BY_Agent_Type.fig");
+    plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colors, filePath);
+
+    % Plot total ledger records by agent
+    [totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTransitive, totalLedgerRecordsByAgentTransitive] = polis.totalLedgerRecordsByAgent(time);
+    filePath = sprintf("%s/%s", outputPath, "Ledger.fig");
+    plotLedgerRecordTotals(totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTransitive, totalLedgerRecordsByAgentTransitive, filePath);
+    
+    fprintf("\n----- Finsihed Plotting -----\n");
+
+    fprintf("\n\n//////////// Ending Iteration #%d ////////////\n",iteration);
+
+end % End Of Iterations Loop
+
+resultsFile = sprintf("%s/%s", summaryResultsPath, "summaryResults.txt");
+reportGlobalStatistics(resultsFile);
 
 %
 % ======  Helping Functions  ======
 %
+function setSalesEfficiencyByIteration(value)
+ global salesEfficiencyByIteration;
+ salesEfficiencyByIteration = value;
+end
+
+function result = getSalesEfficiencyByIteration
+ global salesEfficiencyByIteration;
+ result = salesEfficiencyByIteration;
+end
+
 function setSaveResults(value)
  global saveResults;
  saveResults = value;
@@ -329,6 +363,32 @@ end
 function result = getSaveResults
  global saveResults;
  result = saveResults;
+end
+
+function reportGlobalStatistics(filePath)
+
+    results = getSalesEfficiencyByIteration();
+    meanR = mean(results);
+    stdR = std(results);
+    
+    o1 = sprintf("\nIterations Complete, Outputing Summary Statistics\n\n");
+    o2 = sprintf("<Sales Efficiency> = %.2f\n", meanR*100);
+    o3 = sprintf("Standard Deviation = %.2f\n", stdR*100);
+    o4 = sprintf("\nSummary Output Complete\n");
+    
+    fprintf(o1);
+    fprintf(o2);
+    fprintf(o3);
+    fprintf(o4);
+
+    fileId = fopen(filePath, "w");
+    if fileId > 0
+        fprintf(fileId, o1);
+        fprintf(fileId, o2);
+        fprintf(fileId, o3);
+        fprintf(fileId, o4);
+        fclose(fileId);    
+    end
 end
 
 function reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, filePath)
@@ -408,7 +468,7 @@ function reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTim
     end
 end
 
-function reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPaths, FailNoInventory, Purchased, endTime, filePath)
+function reportTransactionFailures(polis, iteration, FailNoMoney, FailNoLiquidity, FailNoPaths, FailNoInventory, Purchased, endTime, filePath)
     numBuyers = polis.countBuyers;
     sumNoMoney = sum(sum(FailNoMoney(:,1:endTime)));
     sumNoLiquidity = sum(sum(FailNoLiquidity(:,1:endTime)));
@@ -422,7 +482,14 @@ function reportTransactionFailures(polis, FailNoMoney, FailNoLiquidity, FailNoPa
     o3 = "";
     if expectedPurchased == checkSum
         o2 = sprintf("* Expected Purchases = Items Purchased + Sum Of Failures = %2.f\n", expectedPurchased);
-        o3 = sprintf("* Selling Efficency = %.2f percent\n\n", (sumPurchased/expectedPurchased)*100.0);
+        salesEfficiency = (sumPurchased/expectedPurchased);
+        o3 = sprintf("* Selling Efficency = %.2f percent\n\n", salesEfficiency*100.0);
+        
+        % Record the sales efficiency for this iteration
+        result = getSalesEfficiencyByIteration();
+        result(iteration) = salesEfficiency;
+        setSalesEfficiencyByIteration(result);
+        
     else
         o2 = sprintf("\n***\n*** Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n***\n", expectedPurchased, checkSum);
         o3 = sprintf("--\n");
