@@ -18,6 +18,7 @@ classdef Polis < handle
     end
     
     properties (Constant)
+        LoggingLevel = 0;   % Current Levels 0, 1, 2
         PolisId = 0 
         PercentDemurage = 0.05
     end

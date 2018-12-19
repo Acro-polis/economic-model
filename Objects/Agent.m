@@ -164,8 +164,8 @@ classdef Agent < handle
             [indices, ~] = size(paths);
             for index = 1:indices
                 path = cell2mat(paths(index, 1));
-                fprintf("\nPath %d of %d\n", index, indices);
- %Log               logIntegerArray("Analyzing Path",path);
+                logStatement("\nPath %d of %d\n", [index, indices], 2, obj.polis.LoggingLevel)
+                logIntegerArray("Analyzing Path",path, 2, obj.polis.LoggingLevel);
                 if obj.checkIfPathIsValid(AM, path, amount) 
                     selectedPath = path;
                     return;
@@ -217,7 +217,7 @@ classdef Agent < handle
             
             % Find all possible paths
             paths = obj.findAllNetworkPathsToAgent(AM, targetAgent.id);
-%Log            obj.logPaths(paths);
+            obj.logPaths(paths);
             if isempty(paths)
                 result = TransactionType.FAILED_NO_PATH_FOUND;
                 return;
@@ -226,7 +226,7 @@ classdef Agent < handle
             % Find a path that satisfies the transaction criteria (e.g. all
             % agents have enough balance)
             path = obj.findALiquidPathForTheTransactionAmount(AM, paths, amount);
-%Log            logIntegerArray("Ths selected path is",path);
+            logIntegerArray("Ths selected path is", path, 2, obj.polis.LoggingLevel);
             if isempty(path) 
                 result = TransactionType.FAILED_NO_LIQUIDITY;
                 return;
@@ -399,39 +399,39 @@ classdef Agent < handle
             uncommonConnections = uncommonConnections(uncommonConnections ~= thatAgentId);
         end
       
-        function logPaths(paths)
+    end
+
+    methods (Access = private)
+      
+        function logPaths(obj, paths)
             % Output all paths to the console (format is a cell array with
             % each element being an integer array signifying a path through
             % the network from one agent to another and the path lentghs
             % are expected to be different).
             [totPaths, ~] = size(paths);
-            fprintf("\nThere are %d total paths\n", totPaths);
+            logStatement("\nThere are %d total paths\n", totPaths, 2, obj.polis.LoggingLevel)
             for i = 1:totPaths
-                fprintf("\nPath = %d\n",i);
+                logStatement("\nPath = %d\n", i, 2, obj.polis.LoggingLevel);
                 aPath = cell2mat(paths(i,1));
-                logIntegerArray("Path",aPath);
+                logIntegerArray("Path", aPath, 2, obj.polis.LoggingLevel);
             end
         end
-
-    end
-
-    methods (Access = private)
         
         function pathIsGood = checkIfPathIsValid(obj, AM, path, amount)
             % Determine if this path carries enough balance to support the
             % transaction amount
             pathIsGood = true;
-            logIntegerArray("Working on path",path);
+            logIntegerArray("Working on path", path, 2, obj.polis.LoggingLevel);
             [~, segments] = size(path);
             for segment = 2:segments
                 thisAgentId = path(segment - 1);
                 thatAgentId = path(segment);
-                fprintf("Checking segment %d to %d\n",thisAgentId, thatAgentId);
+                logStatement("Checking segment %d to %d\n", [thisAgentId, thatAgentId], 2, obj.polis.LoggingLevel);
                 mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId);
                 availableBalance = obj.polis.agents(thisAgentId).availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
-                fprintf("Available Balance = %.2f, Amount = %.2f\n",availableBalance, amount);
+                logStatement("Available Balance = %.2f, Amount = %.2f\n", [availableBalance, amount], 2, obj.polis.LoggingLevel);
                 if availableBalance <= amount
-                    fprintf("Path failed, no balance\n");
+                    logStatement("Path failed, no balance\n", [], 2, obj.polis.LoggingLevel);
                     pathIsGood = false;
                     break;
                 end
@@ -444,13 +444,13 @@ classdef Agent < handle
             % or we run out of uncommon connections (and ensureing we do
             % not traverse the object agent (obj.id))
             
-            %logIntegerArray("Starting Path", currentPath)
-            %fprintf("Agents: This = %d, That = %d, Target = %d, Search Level = %d\n\n", thisAgentId, thatAgentId, targetAgentId, searchLevel);
+            logIntegerArray("Starting Path", currentPath, 2, obj.polis.LoggingLevel)
+            logStatement("Agents: This = %d, That = %d, Target = %d, Search Level = %d\n\n", [thisAgentId, thatAgentId, targetAgentId, searchLevel], 4, obj.polis.LoggingLevel);
             
             if thatAgentId == targetAgentId
                 % Found it, we are done!
                 paths = [paths ; {currentPath}];
-                %fprintf("!!!! Done: Found Target Agent = %d !!!!\n\n",targetAgentId);
+                logStatement("!!!! Done: Found Target Agent = %d !!!!\n\n", targetAgentId, 2, obj.polis.LoggingLevel);
                 return;
             end
             
@@ -459,7 +459,7 @@ classdef Agent < handle
             % return (see below). Same if we run out of search levels
             if searchLevel > obj.polis.maximumSearchLevels
                 % No luck, go home empty handed
-                %fprintf("**** Abandon Ship - Max Level Reached ****\n\n");
+                logStatement("**** Abandon Ship - Max Level Reached ****\n\n", [], 2, obj.polis.LoggingLevel);
                 return;
             else
                 searchLevel = searchLevel + 1;
@@ -469,16 +469,16 @@ classdef Agent < handle
             uncommonConnections = obj.removeMeIfIAmPresent(obj.findAgentsUncommonConnections(AM, thisAgentId, thatAgentId));
             [~, indices] = size(uncommonConnections);
             if indices > 0 
-                %logIntegerArray("---- Uncommon Connections", uncommonConnections)
+                logIntegerArray("---- Uncommon Connections", uncommonConnections, 2, obj.polis.LoggingLevel)
                 for index = 1:indices
                     nextAgent = uncommonConnections(index);
-                    %fprintf("---- Searching Uncommon Connection = %d\n",nextAgent);
+                    logStatement("---- Searching Uncommon Connection = %d\n", nextAgent, 2, obj.polis.LoggingLevel);
                     nextPathSegment = [currentPath , nextAgent];
                     paths = obj.findNextNetworkConnection(AM, searchLevel, nextPathSegment, thatAgentId, nextAgent, targetAgentId, paths);
                 end
             else
                 % No luck, go home empty handed
-                %fprintf("**** Abandon Ship - No More Uncommon Connections ****\n\n");
+                logStatement("**** Abandon Ship - No More Uncommon Connections ****\n\n", [], 2, obj.polis.LoggingLevel);
                 return;
             end
         end

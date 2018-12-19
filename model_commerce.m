@@ -88,15 +88,15 @@ setSalesEfficiencyByIteration(zeros(numberIterations,1));
 
 % Loop over the number of iterations
 for iteration = 1:numberIterations
-    
-    fprintf("\n\n//////////// Starting Iteration #%d ////////////\n\n",iteration);
-    
+        
     % (re)Create the polis
     if exist('polis','var')
         polis.delete;
     end
     polis = Polis(AM, maxSearchLevels); 
     polis.createAgents(1, numSteps);
+    
+    logStatement("\n\n//////////// Starting Iteration #%d ////////////\n", iteration, 0, polis.LoggingLevel);
     
     % Set the output folder name
     iterationFolder = sprintf("Iteration_%d",iteration);
@@ -114,7 +114,7 @@ for iteration = 1:numberIterations
     sumWallets = polis.totalMoneySupplyAtTimestep(1);
     sumSellerInventoryUnits = polis.totalInventoryAtTimestep(1);
     sumSellerInventoryValue = sumSellerInventoryUnits*price;
-    fprintf("\n- Initial Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = $%.2f\n\n", sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue);
+    logStatement("\n- Initial Money Supply = %.2f drachma, Inventory Supply = %.2f, Inventory Value = $%.2f\n\n", [sumWallets, sumSellerInventoryUnits, sumSellerInventoryValue], 0, polis.LoggingLevel);
 
     %--------------------------------------------------------------------------
     % Simulation finish states
@@ -135,13 +135,13 @@ for iteration = 1:numberIterations
     % Start simulation
     for time = 1:numSteps
 
-       fprintf("\n++++++++ Start of time step = %d ++++++++\n", time);
+       logStatement("\n++++++++ Start of time step = %d ++++++++\n", time, 0, polis.LoggingLevel);
 
        % Apply demurrage
        if intervalDemurrage < timeStepDemurrage
            intervalDemurrage = intervalDemurrage + 1;
        else
-           fprintf("\n-- Applying Demurrage at time = %d --\n", time);
+           logStatement("\n-- Applying Demurrage at time = %d --\n", time, 1, polis.LoggingLevel);
            polis.applyDemurrageWithPercentage(percentDemurrage, time);
            intervalDemurrage = 1;
        end
@@ -150,7 +150,7 @@ for iteration = 1:numberIterations
        if intervalUBI < intervalUBI
            intervalUBI = intervalUBI + 1;
        else
-            fprintf("\n-- Depositing UBI at time = %d --\n", time);
+            logStatement("\n-- Depositing UBI at time = %d --\n", time, 1, polis.LoggingLevel);
             polis.depositUBI(amountUBI, time);
             intervalUBI = 1;
        end
@@ -166,14 +166,14 @@ for iteration = 1:numberIterations
 
            % Skip non-buying agents
            if agentBuying.isBuyer == false
-               fprintf("\n+ B(%d) is not a buyer\n",agentBuyerId);
+               logStatement("\n+ B(%d) is not a buyer\n", agentBuyerId, 2, polis.LoggingLevel);
                continue;
            end
 
            % Skip agents out of money
            if agentBuying.balanceAllTransactionsAtTimestep(time) < price
                FailNoMoney(agentBuyerId, time) = FailNoMoney(agentBuyerId, time) + 1;
-               fprintf("\n- B(%d) is a buyer out of money\n",agentBuyerId);
+               logStatement("\n- B(%d) is a buyer out of money\n", agentBuyerId, 2, polis.LoggingLevel);
                continue;
            end
 
@@ -187,34 +187,34 @@ for iteration = 1:numberIterations
                j = randsample(numberOfAvailableSellers,1);
                agentSelling = sellingAgents(j);
 
-               fprintf("\n++ Proposed Purchase Of Agent %d From Agent %d\n", agentBuying.id, agentSelling.id);
+               logStatement("\n++ Proposed Purchase Of Agent %d From Agent %d\n", [agentBuying.id, agentSelling.id], 1, polis.LoggingLevel);
                % Submit the purchase
                numUnits = 1;           
                result = agentBuying.submitPurchase(polis.AM, numUnits, numUnits*price, agentSelling, time);
 
                if result == TransactionType.TRANSACTION_SUCCEEDED
-                   fprintf("\nSale Successful!\n");
+                   logStatement("\nSale Successful!\n", [], 1, polis.LoggingLevel);
                    agentSelling.recordSale(numUnits, time);
                    agentBuying.recordPurchase(numUnits, time);
                else
                    if result == TransactionType.FAILED_NO_LIQUIDITY
                        FailNoLiquidity(agentBuyerId, time) = FailNoLiquidity(agentBuyerId, time) + 1;
-                       fprintf("\nSale Failed, No Liquidity\n");
+                       logStatement("\nSale Failed, No Liquidity\n", [], 1, polis.LoggingLevel);
                    elseif result == TransactionType.FAILED_NO_PATH_FOUND
                        FailNoPath(agentBuyerId, time) = FailNoPath(agentBuyerId, time) + 1;
-                       fprintf("\nSale Failed, No Path Found\n");
+                       logStatement("\nSale Failed, No Path Found\n", [], 1, polis.LoggingLevel);
                    elseif result == TransactionType.FAILED_NO_INVENTORY
                        FailNoInventory(agentBuyerId, time) = FailNoInventory(agentBuyerId, time) + 1;
-                       fprintf("\nSale Failed, No Inventory\n");
+                       logStatement("\nSale Failed, No Inventory\n", [], 1, polis.LoggingLevel);
                    else
-                       fprintf("\nUnrecognized result. Check it out!\n");
+                       logStatement("\nUnrecognized result. Check it out!\n", [], 0, polis.LoggingLevel);
                        assert(true,"Should not be here, investigate!");
                    end
                end
 
            else
                % No sale :-(
-               fprintf("\nNo sellers available\n");
+               logStatement("\nNo sellers available\n", [], 0, polis.LoggingLevel);
                assert(true,"Should not be here, investigate!");
            end
        end
@@ -224,7 +224,7 @@ for iteration = 1:numberIterations
            break;
        end
 
-       % TODO - Break if out of money any time other than time = 1
+    % TODO - Break if out of money any time other than time = 1
     %    if sumWallets <= 0 && time ~= 1
     %        SuspendCode = OutOfMoney;
     %        reportIncrementalStatistics(polis, price, time);
@@ -235,26 +235,26 @@ for iteration = 1:numberIterations
 
     % Simulation Completion Status
     if SuspendCode == OutOfTime
-        fprintf("\nSimulation Ended Normally At Time Step = %d\n",time);
+        logStatement("\n- Simulation Ended Normally At Time Step = %d\n", time, 0, polis.LoggingLevel);
     elseif SuspendCode == OutOfInventory
-        fprintf("\nSimulation Halted: Out Of Inventory At Time = %d\n",time);
+        logStatement("\n- Simulation Halted: Out Of Inventory At Time = %d\n", time, 0, polis.LoggingLevel);
     elseif SuspendCode == OutOfMoney
-        fprintf("\nSimulation Halted: Out Of Money At Time = %d\n",time);
+        logStatement("\n- Simulation Halted: Out Of Money At Time = %d\n", time, 0, polis.LoggingLevel);
     end
 
     elapsedTime1 = toc(startTime);
-    fprintf('\n== Simulation Run Time = %.2f Seconds\n',elapsedTime1);
+    logStatement('\n===== Simulation Run Time = %.2f Seconds\n', elapsedTime1, 0, polis.LoggingLevel);
 
     %
     % Tabluate results for ouput
     %
-    fprintf("\n=============================\n");
-    fprintf("\nTabulating Results For Output\n");
-    fprintf("\n=============================\n");
+    logStatement("\n=============================\n", [], 0, polis.LoggingLevel);
+    logStatement("\nTabulating Results For Output\n", [], 0, polis.LoggingLevel);
+    logStatement("\n=============================\n", [], 0, polis.LoggingLevel);
     [Wallet, UBI, Demurrage, Purchased, Sold, ids, agentTypes] = polis.transactionTimeHistories(time);
 
     elapsedTime2 = toc(startTime);
-    fprintf('\n== Results Generation Required = %.2f Seconds\n',elapsedTime2 - elapsedTime1);
+    logStatement('\n===== Results Generation Required = %.2f Seconds\n', (elapsedTime2 - elapsedTime1), 0, polis.LoggingLevel);
 
     %
     % ====== Reporting ======
@@ -285,7 +285,7 @@ for iteration = 1:numberIterations
     %
     % ======  Plot some results  ======
     %
-    fprintf("\n----- Begin Plotting -----\n");
+    logStatement("\n----- Begin Plotting -----\n", [], 0, polis.LoggingLevel);
     close all
     yScale = 1.5;
     colors = Colors();
@@ -333,9 +333,8 @@ for iteration = 1:numberIterations
     filePath = sprintf("%s/%s", outputPath, "Ledger.fig");
     plotLedgerRecordTotals(totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTransitive, totalLedgerRecordsByAgentTransitive, filePath);
     
-    fprintf("\n----- Finsihed Plotting -----\n");
-
-    fprintf("\n\n//////////// Ending Iteration #%d ////////////\n",iteration);
+    logStatement("\n----- Finsihed Plotting -----\n", [], 0, polis.LoggingLevel);
+    logStatement("\n//////////// Ending Iteration #%d ////////////\n", iteration, 0, polis.LoggingLevel);
 
 end % End Of Iterations Loop
 

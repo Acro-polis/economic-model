@@ -1,4 +1,4 @@
-function logIntegerArray(text, theArray)
+function logIntegerArray(text, theArray, logLevel, LoggingLevel)
 %========================================
 %
 % Log an array on one line of text
@@ -7,9 +7,11 @@ function logIntegerArray(text, theArray)
 % Created: 2018.11.07
 %========================================
 
-fprintf("\n%s = [",text);
-fprintf("% d ",theArray);
-fprintf("]\n");
+    if logLevel <= LoggingLevel
+        fprintf("\n%s = [",text);
+        fprintf("% d ",theArray);
+        fprintf("]\n");
+    end
 
 end
 

@@ -67,7 +67,7 @@ Buying - subtracting currency
             % Record the first leg
             thatAgent = agentsInPath(1);
             mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, obj.agent.id, thatAgent.id);
-            fprintf("\nFirst Leg:  id 1 = %d, id 2 = %d\n", obj.agent.id, thatAgent.id);
+            logStatement("\nFirst Leg:  id 1 = %d, id 2 = %d\n", [obj.agent.id, thatAgent.id], 2, obj.agent.polis.LoggingLevel);
             obj.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY, TransactionType.SELL_TRANSITIVE, transactionId, timeStep);
             
             % Record the intermediate legs, if needed
@@ -76,7 +76,7 @@ Buying - subtracting currency
                     thisAgent = agentsInPath(leg);
                     thatAgent = agentsInPath(leg + 1);
                     mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, thisAgent.id, thatAgent.id);
-                    fprintf("Middle Leg: id %d = %d, id %d = %d\n", leg, thisAgent.id, leg + 1, thatAgent.id);
+                    logStatement("Middle Leg: id %d = %d, id %d = %d\n", [leg, thisAgent.id, leg + 1, thatAgent.id], 2, obj.agent.polis.LoggingLevel);
                     thisAgent.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY_TRANSITIVE, TransactionType.SELL_TRANSITIVE, transactionId, timeStep);            
                 end
             end
@@ -85,7 +85,7 @@ Buying - subtracting currency
             thisAgent = agentsInPath(numberAgents - 1);
             thatAgent = agentsInPath(numberAgents);
             mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, thisAgent.id, thatAgent.id);
-            fprintf("Last Leg:   id %d = %d, id %d = %d\n", numberAgents - 1, thisAgent.id, numberAgents, thatAgent.id);
+            logStatement("Last Leg:   id %d = %d, id %d = %d\n", [numberAgents - 1, thisAgent.id, numberAgents, thatAgent.id], 2, obj.agent.polis.LoggingLevel);
             thisAgent.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY_TRANSITIVE, TransactionType.SELL, transactionId, timeStep);            
             
         end
@@ -291,8 +291,8 @@ Buying - subtracting currency
         function dump(obj)
             % Log this agents complete ledger
             [rows, ~] = size(obj.transactions);
-            fprintf('\nLedger for Agent Id = %d, # records = %d\n',obj.agent.id, rows);
-            fprintf('id\t tranId\t time\t type amount\t cur\t src\t dest\t note\t\n');
+            logStatement('\nLedger for Agent Id = %d, # records = %d\n', [obj.agent.id, rows], 0, obj.agent.polis.LoggingLevel);
+            logStatement('id\t tranId\t time\t type amount\t cur\t src\t dest\t note\t\n', [], 0, obj.agent.polis.LoggingLevel);
             for i = 1:rows
                 obj.transactions(i).dump();
             end
