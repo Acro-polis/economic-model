@@ -15,16 +15,18 @@ fprintf(fileId,'\nCommerce Model Input Parameters\n\n');
 fprintf(fileId,'1)  Number of Time Steps (dt): %.0f\n',52.0);
 fprintf(fileId,'2)  Number of Agents: %.0f\n',101);
 fprintf(fileId,'3)  Network Filename: %s\n',"use blank for connected network");
-fprintf(fileId,'4)  Number of search steps (>=2): %.0f\n',0.0);
+fprintf(fileId,'4)  Transaction-Distance (max. steps, >= 2): %.0f\n',2.0);
 fprintf(fileId,'5)  Initial Wallet Size (drachma / agent): %.2f\n',0.00);
 fprintf(fileId,'6)  UBI Amount (drachma / ubi interval): %.2f\n',100.00);
 fprintf(fileId,'7)  UBI Interval: %.0f\n',1.0);
 fprintf(fileId,'8)  Percent Demurrage: %.2f\n',0.05);
 fprintf(fileId,'9)  Demurrage Interval: %.0f\n',4.0);
-fprintf(fileId,'10) Percentage of Agents Buying: %.2f\n',0.75);
-fprintf(fileId,'11) Percentage of Agents Selling: %.2f\n',0.75);
+fprintf(fileId,'10) Percentage of Passive Agents: %.2f\n',0.75);
+fprintf(fileId,'11) Percentage of Selling Agents: %.2f\n',0.75);
 fprintf(fileId,'12) Price of Goods (drachma / unit): %.2f\n',75.00);
 fprintf(fileId,'13) Initial Inventory (# units / agent): %.2f\n',300.00);
+fprintf(fileId,'14) Number of Iterations %.0f\n',1);
+fprintf(fileId,'15) Output folder name: %s\n',"Economic_Model");
 
 fclose(fileId);
 

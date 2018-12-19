@@ -79,25 +79,37 @@ classdef Polis < handle
             obj.lastTransactionId = obj.lastTransactionId + 1;
             uniqueId = obj.lastTransactionId;
         end
-        
-        function setupSellers(obj, numberOfSellers, initialInventory)
-            % Randomly select the agents that will be sellers
+                
+        function [numberOfBuyers, numberOfSellers] = setupBuyersAndSellers(obj, numberOfPassiveAgents, percentSellers, initialInventory)
+            % First randomly select the number of passive agents and make
+            % all the other agents buyers. Then from the pool of buyers
+            % randomly select those that will also be sellers.
             % TODO - Make preferrential selection?
-            selectedAgents = randsample(obj.numberOfAgents, numberOfSellers);
+            
+            % Setup Buyers
+            N = obj.numberOfAgents;
+            numberOfBuyers = N - numberOfPassiveAgents;
+            numberOfSellers = round(percentSellers*numberOfBuyers);
+            buyers = zeros(numberOfBuyers);
+            
+            selectedAgents = randsample(N, numberOfPassiveAgents);
+            j = 1;
+            for i = 1:N
+                if ~ismember(i,selectedAgents)
+                    obj.agents(i).setupAsBuyer();
+                    buyers(j) = i;
+                    j = j + 1;
+                end
+            end
+            
+            % Setup Sellers
+            selectedAgents = datasample(buyers, numberOfSellers, 'Replace', false);
             for i = 1:numberOfSellers
-                obj.agents(selectedAgents(i,1)).setupAsSeller(initialInventory);
+                obj.agents(selectedAgents(i)).setupAsSeller(initialInventory);
             end
+            
         end
-        
-        function setupBuyers(obj, numberOfBuyers)
-            % Randomly select the agents that will be buyers
-            % TODO - Make preferrential selection?
-            selectedAgents = randsample(obj.numberOfAgents, numberOfBuyers);
-            for i = 1:numberOfBuyers
-                obj.agents(selectedAgents(i,1)).setupAsBuyer();
-            end
-        end
-        
+                
         function sellers = identifySellers(obj, testAgent)
             % Return a list of all selling agents that are not the
             % testAgent

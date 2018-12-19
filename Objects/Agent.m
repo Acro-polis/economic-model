@@ -30,7 +30,7 @@ classdef Agent < handle
         % Agent Commerce Types
         TYPE_BUYER_SELLER            = 3000;
         TYPE_BUYER_ONLY              = 3001;
-        TYPE_SELLER_ONLY             = 3002;
+        TYPE_SELLER_ONLY             = 3002;    % Deprecated in V1.3.0
         TYPE_NONPARTICIPANT          = 3003;
     end
     

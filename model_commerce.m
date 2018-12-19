@@ -54,45 +54,47 @@ seedWalletSize = parseInputString(fgetl(fileId), inputTypeDouble); % Wallet Size
 % Rate of UBI
 amountUBI = parseInputString(fgetl(fileId), inputTypeDouble); % UBI amount (Input 6)
 assert(amountUBI > 0,'Assert: UBI must be > 0!');
-timeStepUBI = parseInputString(fgetl(fileId), inputTypeDouble); % UBI amount (Input 6)
+timeStepUBI = parseInputString(fgetl(fileId), inputTypeDouble); % UBI amount (Input 7)
 assert(timeStepUBI >= 1,'Assert: UBI Time Step must be >= 1');
 
 % Percentage of Demurrage
-percentDemurrage = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Demurrage (Input 7)
+percentDemurrage = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Demurrage (Input 8)
 assert(percentDemurrage >= 0 && percentDemurrage <= 1.0,'Assert: Percentage Demurrage Out Of Range!');
-timeStepDemurrage = parseInputString(fgetl(fileId), inputTypeDouble); % UBI amount (Input 6)
+timeStepDemurrage = parseInputString(fgetl(fileId), inputTypeDouble); % UBI amount (Input 9)
 assert(timeStepDemurrage >= 1,'Assert: Demurrage Time Step must be >= 1');
 
-% Buyers
-percentBuyers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Buyers (Input 8)
-assert(percentBuyers > 0 && percentBuyers <= 1.0,'Assert: Percentage Buyers Out Of Range!')
-numberOfBuyers = round(percentBuyers*N);
+% Percentage Passive Agents
+percentPassiveAgents = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Passive Agents (Input 10)
+assert(percentPassiveAgents > 0 && percentPassiveAgents <= 1.0,'Assert: Percentage Buyers Out Of Range!')
+numberOfPassiveAgents = round(percentPassiveAgents*N);
 
-% Sellers
-percentSellers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Sellers (Input 9)
+% Percentage Seller Agents as a function of the number of Buyers
+percentSellers = parseInputString(fgetl(fileId), inputTypeDouble); % Percentage Sellers (Input 11)
 assert(percentSellers > 0 && percentSellers <= 1.0,'Assert: Percentage Sellers Out Of Range!')
-numberOfSellers = round(percentSellers*N);
 
 % Cost of goods
-price = parseInputString(fgetl(fileId), inputTypeDouble); % Price Goods (Input 10);
+price = parseInputString(fgetl(fileId), inputTypeDouble); % Price Goods (Input 12);
 
 % Seller Inventory
-inventoryInitialUnits = parseInputString(fgetl(fileId), inputTypeDouble); % Inital Inventory (Input 11)
+inventoryInitialUnits = parseInputString(fgetl(fileId), inputTypeDouble); % Inital Inventory (Input 13)
 inventoryInitialValue = inventoryInitialUnits*price;
+
+% Iterations
+numberIterations =  round(parseInputString(fgetl(fileId), inputTypeDouble));   % Number Iterations (Input 14)
+
+% Ouput filename
+outputSubFolderName = parseInputString(fgetl(fileId), inputTypeString);  % Output folder (Input 15)
 
 fclose(fileId);
 
-% Randomely select sellers
-polis.setupSellers(numberOfSellers, inventoryInitialUnits);
+% Setup Buyers and Sellers
+[numberOfBuyers, numberOfSellers] = polis.setupBuyersAndSellers(numberOfPassiveAgents, percentSellers, inventoryInitialUnits);
 
-% Randomely select buyers
-polis.setupBuyers(numberOfBuyers);
-
-% Roles
-[numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents] = polis.parseAgentCommerceRoleTypes();
+% Parse Roles
+[numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents] = polis.parseAgentCommerceRoleTypes();
 
 % Log Inputs
-reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents, "");
+reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, "");
 
 % Report Initial Statistics
 sumWallets = polis.totalMoneySupplyAtTimestep(1);
@@ -248,14 +250,13 @@ fprintf('\n== Results Generation Required = %.2f Seconds\n',elapsedTime2 - elaps
 setSaveResults(true);
 if getSaveResults == true
     outputFolder = "Output";
-    outputSubFolderName = "Economic_Model";     % TODO - make input variable?
     outputPath = sprintf("%s/%s", outputFolder, outputSubFolderName);
     [status, msg, msgID] = mkdir(outputPath);
 end
 
 % Simulation Inputs
 filePath = sprintf("%s/%s", outputPath, "results.txt");
-reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents, filePath);
+reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, filePath);
 % Simulation Statistics
 reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2, filePath);
 % Transaction Failure Analysis
@@ -330,7 +331,7 @@ function result = getSaveResults
  result = saveResults;
 end
 
-function reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents, filePath)
+function reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, filePath)
     o1 = sprintf("\n----- Summarized Simulation Inputs For Code Version %s -----\n", version_number);
     o2 = "";
     if networkFilename == ""
@@ -345,7 +346,7 @@ function reportSimulationInputs(version_number, networkFilename, N, numSteps, ma
     o7  = sprintf("- Price of goods = %.2f drachmas\n\n", price);
     o8  = sprintf("- Num buyers   = %d <= %d agents\n\n", numberOfBuyers, N);
     o9  = sprintf("- Num sellers  = %d <= %d agents\n\n", numberOfSellers, N);
-    o10 = sprintf("- Num Buyers&Sellers = %d, Buyers Only = %d, Sellers Only = %d, Non-Participants = %d\n",numBuySellAgents, numBuyAgents, numSellAgents, numNonparticipatingAgents);
+    o10 = sprintf("- Num Buyers&Sellers = %d, Buyers Only = %d, Passive Agents = %d, Sellers Only = %d\n",numBuySellAgents, numBuyAgents, numPassiveAgents, numSellAgents);
 
     fprintf(o1);
     fprintf(o2);
@@ -722,7 +723,7 @@ function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors
         a2 = numBS + numB + numS + numNP;
         p4 = plot(x, Wallet(a1:a2, x),'Color',colors.red,'LineStyle','-','Marker','x','LineWidth',0.5);
         ps = [ps ; p4(1)];
-        psnames = [psnames , {'NP'}];
+        psnames = [psnames , {'Passive'}];
     end
     %
     % Add the average wallet size
@@ -798,7 +799,7 @@ function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, e
         a2 = numBS + numB + numS + numNP;
         p4 = plot(x, -Demurrage(a1:a2, x),'Color',colors.red,'LineStyle','-','Marker','x','LineWidth',0.5);
         ps = [ps ; p4(1)];
-        psnames = [psnames , {'Dem. NP'}];
+        psnames = [psnames , {'Dem. Passive'}];
     end
     
     [rows, ~] = size(UBI);
