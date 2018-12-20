@@ -84,23 +84,26 @@ outputSubFolderName = parseInputString(fgetl(fileId), inputTypeString);  % Outpu
 
 fclose(fileId);
 
-setSalesEfficiencyByIteration(zeros(numberIterations,1));
+% Final Setup
+outputFolderPath = "Output";
+outputSubfolderPath = sprintf("%s/%s/", outputFolderPath, outputSubFolderName);
+[status, msg, msgID] = mkdir(outputSubfolderPath);
+
+salesEfficiencyByIteration = zeros(numberIterations,1);
 
 % Loop over the number of iterations
+%parpool('local', 2);
 for iteration = 1:numberIterations
         
-    % (re)Create the polis
-    if exist('polis','var')
-        polis.delete;
-    end
     polis = Polis(AM, maxSearchLevels); 
     polis.createAgents(1, numSteps);
     
     logStatement("\n\n//////////// Starting Iteration #%d ////////////\n", iteration, 0, polis.LoggingLevel);
     
-    % Set the output folder name
-    iterationFolder = sprintf("Iteration_%d",iteration);
-
+    % For saving results
+    outputPathIteration = sprintf("%s%s/", outputSubfolderPath, sprintf("Iteration_%d",iteration));
+    [status, msg, msgID] = mkdir(outputPathIteration);
+    
     % Setup Buyers and Sellers
     [numberOfBuyers, numberOfSellers] = polis.setupBuyersAndSellers(numberOfPassiveAgents, percentSellers, inventoryInitialUnits);
 
@@ -260,26 +263,17 @@ for iteration = 1:numberIterations
     % ====== Reporting ======
     %
 
-    % For saving results
-    setSaveResults(true);
-    if getSaveResults == true
-        outputFolder = "Output";
-        outputPath = sprintf("%s/%s/%s", outputFolder, outputSubFolderName, iterationFolder);
-        summaryResultsPath = sprintf("%s/%s", outputFolder, outputSubFolderName);
-        [status, msg, msgID] = mkdir(outputPath);
-    end
-
     % Simulation Inputs
-    filePath = sprintf("%s/%s", outputPath, "results.txt");
+    filePath = sprintf("%s%s", outputPathIteration, "results.txt");
     reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, filePath);
     % Simulation Statistics
     reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2, filePath);
     % Transaction Failure Analysis
-    reportTransactionFailures(polis, iteration, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, time, filePath);
+    salesEfficiencyByIteration = reportTransactionFailures(polis, iteration, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, time, filePath, salesEfficiencyByIteration);
 
     % Output Network
-    nodesFilePath = sprintf("%s/%s", outputPath, "nodes.csv");
-    edgesFilePath = sprintf("%s/%s", outputPath, "edges.csv");
+    nodesFilePath = sprintf("%s%s", outputPathIteration, "nodes.csv");
+    edgesFilePath = sprintf("%s%s", outputPathIteration, "edges.csv");
     outputNetwork(AM, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, nodesFilePath, edgesFilePath);
 
     %
@@ -291,29 +285,29 @@ for iteration = 1:numberIterations
     colors = Colors();
 
     % Plot the 4 panal summary plot
-    filePath = sprintf("%s/%s", outputPath, "Summary.fig");
+    filePath = sprintf("%s%s", outputPathIteration, "Summary.fig");
     plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, time, filePath);
 
     % Plot cumulative money supply, UBI and Demurrage
-    filePath = sprintf("%s/%s", outputPath, "Cum_MS_UBI_Dem.fig");
+    filePath = sprintf("%s%s", outputPathIteration, "Cum_MS_UBI_Dem.fig");
     plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, time, colors, filePath);
 
     % Plot wallets by agent id
-    filePath = sprintf("%s/%s", outputPath, "Wallets_By_Id.fig");
+    filePath = sprintf("%s%s", outputPathIteration, "Wallets_By_Id.fig");
     plotWalletByAgentId(polis, Wallet, ids, time, filePath);
 
     % Plot purchased & sold items by agent id
-    filePath = sprintf("%s/%s", outputPath, "Purchases.fig");
+    filePath = sprintf("%s%s", outputPathIteration, "Purchases.fig");
     plotPuchsasedItemsByAgent(polis, Purchased, ids, time, filePath);
-    filePath = sprintf("%s/%s", outputPath, "Sales.fig");
+    filePath = sprintf("%s%s", outputPathIteration, "Sales.fig");
     plotSoldItemsByAgent(polis, Sold, ids, time, filePath);
 
     % Plot transaction failures by agent
-    filePath = sprintf("%s/%s", outputPath, "Transaction_Log_Agent.fig");
+    filePath = sprintf("%s%s", outputPathIteration, "Transaction_Log_Agent.fig");
     plotTransactionFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, filePath);
 
     % Plot transaction failures in time
-    filePath = sprintf("%s/%s", outputPath, "Transaction_Log_Time.fig");
+    filePath = sprintf("%s%s", outputPathIteration, "Transaction_Log_Time.fig");
     plotTransactionFailuresInTime(time, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, filePath);
 
     % Now sort the data by agentType for the remaining output
@@ -321,16 +315,16 @@ for iteration = 1:numberIterations
     [numBS, numB, numS, numNP] = polis.countAgentCommerceTypes(agentTypes);
 
     % Plot wallets grouped by agent type
-    filePath = sprintf("%s/%s", outputPath, "Wallet_Agent_Type.fig");
+    filePath = sprintf("%s%s", outputPathIteration, "Wallet_Agent_Type.fig");
     plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, time, colors, filePath);
 
     % Plot cumlative UBI & Demurrage grouped by agent type
-    filePath = sprintf("%s/%s", outputPath, "Cum_UBI_ETC_BY_Agent_Type.fig");
+    filePath = sprintf("%s%s", outputPathIteration, "Cum_UBI_ETC_BY_Agent_Type.fig");
     plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, time, colors, filePath);
 
     % Plot total ledger records by agent
     [totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTransitive, totalLedgerRecordsByAgentTransitive] = polis.totalLedgerRecordsByAgent(time);
-    filePath = sprintf("%s/%s", outputPath, "Ledger.fig");
+    filePath = sprintf("%s%s", outputPathIteration, "Ledger.fig");
     plotLedgerRecordTotals(totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTransitive, totalLedgerRecordsByAgentTransitive, filePath);
     
     logStatement("\n----- Finsihed Plotting -----\n", [], 0, polis.LoggingLevel);
@@ -338,35 +332,15 @@ for iteration = 1:numberIterations
 
 end % End Of Iterations Loop
 
-resultsFile = sprintf("%s/%s", summaryResultsPath, "summaryResults.txt");
-reportGlobalStatistics(resultsFile);
+resultsFile = sprintf("%s%s", outputSubfolderPath, "summaryResults.txt");
+reportGlobalStatistics(resultsFile, salesEfficiencyByIteration);
 
 %
 % ======  Helping Functions  ======
 %
-function setSalesEfficiencyByIteration(value)
- global salesEfficiencyByIteration;
- salesEfficiencyByIteration = value;
-end
 
-function result = getSalesEfficiencyByIteration
- global salesEfficiencyByIteration;
- result = salesEfficiencyByIteration;
-end
+function reportGlobalStatistics(filePath, results)
 
-function setSaveResults(value)
- global saveResults;
- saveResults = value;
-end
-
-function result = getSaveResults
- global saveResults;
- result = saveResults;
-end
-
-function reportGlobalStatistics(filePath)
-
-    results = getSalesEfficiencyByIteration();
     meanR = mean(results);
     stdR = std(results);
     
@@ -380,7 +354,7 @@ function reportGlobalStatistics(filePath)
     fprintf(o3);
     fprintf(o4);
 
-    fileId = fopen(filePath, "w");
+    fileId = fopen(filePath, "wt");
     if fileId > 0
         fprintf(fileId, o1);
         fprintf(fileId, o2);
@@ -467,7 +441,7 @@ function reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTim
     end
 end
 
-function reportTransactionFailures(polis, iteration, FailNoMoney, FailNoLiquidity, FailNoPaths, FailNoInventory, Purchased, endTime, filePath)
+function salesEfficiencyByIteration = reportTransactionFailures(polis, iteration, FailNoMoney, FailNoLiquidity, FailNoPaths, FailNoInventory, Purchased, endTime, filePath, salesEfficiencyByIteration)
     numBuyers = polis.countBuyers;
     sumNoMoney = sum(sum(FailNoMoney(:,1:endTime)));
     sumNoLiquidity = sum(sum(FailNoLiquidity(:,1:endTime)));
@@ -485,9 +459,7 @@ function reportTransactionFailures(polis, iteration, FailNoMoney, FailNoLiquidit
         o3 = sprintf("* Selling Efficency = %.2f percent\n\n", salesEfficiency*100.0);
         
         % Record the sales efficiency for this iteration
-        result = getSalesEfficiencyByIteration();
-        result(iteration) = salesEfficiency;
-        setSalesEfficiencyByIteration(result);
+        salesEfficiencyByIteration(iteration) = salesEfficiency;
         
     else
         o2 = sprintf("\n***\n*** Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n***\n", expectedPurchased, checkSum);
@@ -619,9 +591,7 @@ function plotTransactionFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquid
     title('Buyers & Sellers');
     legend('Buyers','Sellers');
     
-    if getSaveResults
-        saveas(f, filePath, 'fig');
-    end
+    saveas(f, filePath, 'fig');
        
 end
 
@@ -639,9 +609,8 @@ function plotTransactionFailuresInTime(time, FailNoMoney, FailNoLiquidity, FailN
     xlabel('Time');
     ylabel('Number of Failures');
     title('Deal Failures By Type In Time');
-    if getSaveResults
-        saveas(f, filePath, 'fig');
-    end
+    
+    saveas(f, filePath, 'fig');
 end
 
 function plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, endTime, filePath)
@@ -720,9 +689,8 @@ function plotSummary(yScale, polis, Wallet, UBI, Demurrage, Purchased, Sold, end
     ylabel('Drachma');
     title('Money Supply');
     legend('Net', 'Seed','UBI', 'Dumurrage');
-    if getSaveResults
-        saveas(f, filePath, 'fig');
-    end
+    
+    saveas(f, filePath, 'fig');
 end
 
 function plotWalletByAgentId(polis, Wallet, ids, endTime, filePath)
@@ -752,9 +720,8 @@ function plotWalletByAgentId(polis, Wallet, ids, endTime, filePath)
     xlabel('Time');
     ylabel('Drachma');
     title('Wallet By Agent Id');
-    if getSaveResults
-        saveas(f, filePath, 'fig');
-    end
+    
+    saveas(f, filePath, 'fig');
 end
 
 function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors, filePath)
@@ -801,9 +768,8 @@ function plotWalletByAgentType(Wallet, numBS, numB, numS, numNP, endTime, colors
     xlabel('Time');
     ylabel('Drachma');
     title('Wallet by Agent Type');
-    if getSaveResults
-        saveas(f, filePath, 'fig');
-    end
+    
+    saveas(f, filePath, 'fig');
 end
 
 function plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, endTime, colors, filePath)
@@ -829,9 +795,8 @@ function plotCumulativeMoneySupplyUBIDemurrageAllAgents(Wallet, UBI, Demurrage, 
     xlabel('Time');
     ylabel('Drachma');
     title('Cumulative UBI, Demurrage & Money Supply');
-    if getSaveResults
-        saveas(f, filePath, 'fig');
-    end
+    
+    saveas(f, filePath, 'fig');
 end
 
 function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, endTime, colors, filePath)
@@ -883,9 +848,8 @@ function plotUBIDemurrageByAgentType(UBI, Demurrage, numBS, numB, numS, numNP, e
     xlabel('Time');
     ylabel('Drachma');
     title('Cumulative Demurrage By Agent Type + UBI');
-    if getSaveResults
-        saveas(f, filePath, 'fig');
-    end
+    
+    saveas(f, filePath, 'fig');
 end
 
 function plotPuchsasedItemsByAgent(polis, Purchased, ids, endTime, filePath)
@@ -919,9 +883,8 @@ function plotPuchsasedItemsByAgent(polis, Purchased, ids, endTime, filePath)
     xlabel('Time');
     ylabel('Number of Items');
     title('Cumulative Purchased Items By Agent');
-    if getSaveResults
-        saveas(f, filePath, 'fig');
-    end
+    
+    saveas(f, filePath, 'fig');
 end
 
 function plotSoldItemsByAgent(polis, Sold, ids, endTime, filePath)
@@ -955,9 +918,8 @@ function plotSoldItemsByAgent(polis, Sold, ids, endTime, filePath)
     xlabel('Time');
     ylabel('Number of Items');
     title('Cumulative Sold Items By Agent');
-    if getSaveResults
-        saveas(f, filePath, 'fig');
-    end
+    
+    saveas(f, filePath, 'fig');
 end
 
 function plotLedgerRecordTotals(totalLedgerRecordsByAgent, totalLedgerRecordsByAgentNonTransitive, totalLedgerRecordsByAgentTransitive, filePath)
@@ -974,9 +936,8 @@ function plotLedgerRecordTotals(totalLedgerRecordsByAgent, totalLedgerRecordsByA
     xlabel('Agent Id');
     ylabel('Number of Records');
     title('Total Number Of Ledger Records By Agent');
-    if getSaveResults
-        saveas(f, filePath, 'fig');
-    end
+    
+    saveas(f, filePath, 'fig');
 end
 
 
