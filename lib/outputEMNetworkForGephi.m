@@ -1,4 +1,4 @@
-function outputEMNetworkForGephi(Am, purchases, pathFailures, liquidityFailures, inventoryFailures, noMoneyFailures, nodesFilePath, edgesFilePath)
+function outputEMNetworkForGephi(Am, polis, purchases, pathFailures, liquidityFailures, inventoryFailures, noMoneyFailures, nodesFilePath, edgesFilePath)
 %=====================================================
 %
 % Output the netowrk model with statistics
@@ -8,12 +8,14 @@ function outputEMNetworkForGephi(Am, purchases, pathFailures, liquidityFailures,
 %=====================================================
 
     N = size(Am,1);
-
+    agents = polis.agents;
+    
     fileIdNodes = fopen(nodesFilePath, "w");
     if fileIdNodes > 0
-        fprintf(fileIdNodes,"Id,Label,Purchases,PathFail,LiquidityFail,InventoryFail,NoMoneyFail\n");
+        fprintf(fileIdNodes,"Id,Label,Purchases,PathFail,LiquidityFail,InventoryFail,NoMoneyFail,AgentType\n");
         for i = 1:N
-                fprintf(fileIdNodes, '%d,\"Node %d\", %.2f, %.2f, %.2f, %.2f, %.2f\n', i, i, purchases(i), pathFailures(i), liquidityFailures(i), inventoryFailures(i), noMoneyFailures(i));
+                agentType = typeOfAgent(agents(i));
+                fprintf(fileIdNodes, '%d,\"Node %d\", %.2f, %.2f, %.2f, %.2f, %.2f, %2.f\n', i, i, purchases(i), pathFailures(i), liquidityFailures(i), inventoryFailures(i), noMoneyFailures(i), agentType);
         end
         fclose(fileIdNodes);
     end
@@ -33,3 +35,11 @@ function outputEMNetworkForGephi(Am, purchases, pathFailures, liquidityFailures,
 
 end
 
+function agentType = typeOfAgent(agent)
+    agentType = 0;      % Passive agent
+    if agent.isBuyer && agent.isSeller
+        agentType = 2;  % Buyer + Seller
+    elseif agent.isBuyer
+        agentType = 1;  % Buyer Only (Seller Only is removed)
+    end
+end

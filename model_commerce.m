@@ -292,7 +292,7 @@ parfor iteration = 1:numberIterations
     % Output Network
     nodesFilePath = sprintf("%s%s", outputPathIteration, "nodes.csv");
     edgesFilePath = sprintf("%s%s", outputPathIteration, "edges.csv");
-    outputNetwork(AM, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, nodesFilePath, edgesFilePath);
+    outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, nodesFilePath, edgesFilePath);
 
     %
     % ======  Plot some results  ======
@@ -573,14 +573,14 @@ function [wallets, ubi, demurrage, purchased, sold, ids, agentTypes] = sortByAge
             ids = ids(indices);
 end
 
-function outputNetwork(AM, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, nodesFilePath, edgesFilePath)
+function outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, nodesFilePath, edgesFilePath)
     % Output the network with some statistics for external processing
     sumPurchased    = sum(Purchased,2);
     sumNoPath       = sum(FailNoPath,2);
     sumNoLiquidity  = sum(FailNoLiquidity,2);
     sumNoInventory  = sum(FailNoInventory,2);
     sumNoMoney      = sum(FailNoMoney,2);
-    outputEMNetworkForGephi(AM, sumPurchased, sumNoPath, sumNoLiquidity, sumNoInventory, sumNoMoney, nodesFilePath, edgesFilePath);
+    outputEMNetworkForGephi(AM, polis, sumPurchased, sumNoPath, sumNoLiquidity, sumNoInventory, sumNoMoney, nodesFilePath, edgesFilePath);
 end
 
 %
