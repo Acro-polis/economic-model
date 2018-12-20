@@ -89,11 +89,16 @@ outputFolderPath = "Output";
 outputSubfolderPath = sprintf("%s/%s/", outputFolderPath, outputSubFolderName);
 [status, msg, msgID] = mkdir(outputSubfolderPath);
 
-salesEfficiencyByIteration = zeros(numberIterations,1);
+iterationDataSalesEfficency = zeros(numberIterations, 1);
+iterationDataNoPath         = zeros(numberIterations, 1);
+iterationDataNoLiquidity    = zeros(numberIterations, 1);
+iterationDataNoInventory    = zeros(numberIterations, 1);
+iterationDataNoMoney        = zeros(numberIterations, 1);
+iterationDataElapsedTime    = zeros(numberIterations, 1);
 
 % Loop over the number of iterations
 %parpool('local', 2);
-for iteration = 1:numberIterations
+parfor iteration = 1:numberIterations
         
     polis = Polis(AM, maxSearchLevels); 
     polis.createAgents(1, numSteps);
@@ -266,11 +271,24 @@ for iteration = 1:numberIterations
     % Simulation Inputs
     filePath = sprintf("%s%s", outputPathIteration, "results.txt");
     reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, filePath);
+    
     % Simulation Statistics
     reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2, filePath);
+    
     % Transaction Failure Analysis
-    salesEfficiencyByIteration = reportTransactionFailures(polis, iteration, FailNoMoney, FailNoLiquidity, FailNoPath, FailNoInventory, Purchased, time, filePath, salesEfficiencyByIteration);
-
+    [numBuyers, sumPurchased, sumNoPath, sumNoLiquidity, sumNoInventory, sumNoMoney] = calculateSummations(polis, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, time);
+    expectedPurchased = numBuyers*time;
+    salesEfficiency = calculateSalesEfficiency(expectedPurchased, sumPurchased);
+    
+    iterationDataSalesEfficency(iteration) = salesEfficiency;
+    iterationDataNoPath(iteration)         = sumNoPath / expectedPurchased;
+    iterationDataNoLiquidity(iteration)    = sumNoLiquidity / expectedPurchased;
+    iterationDataNoInventory(iteration)    = sumNoInventory / expectedPurchased;
+    iterationDataNoMoney(iteration)        = sumNoMoney / expectedPurchased;
+    iterationDataElapsedTime(iteration)    = elapsedTime2;
+    
+    reportTransactionFailures(expectedPurchased, sumPurchased, sumNoPath, sumNoLiquidity, sumNoInventory, sumNoMoney, filePath);
+    
     % Output Network
     nodesFilePath = sprintf("%s%s", outputPathIteration, "nodes.csv");
     edgesFilePath = sprintf("%s%s", outputPathIteration, "edges.csv");
@@ -332,34 +350,96 @@ for iteration = 1:numberIterations
 
 end % End Of Iterations Loop
 
+% Tabulate and report global statistics for the entire run
 resultsFile = sprintf("%s%s", outputSubfolderPath, "summaryResults.txt");
-reportGlobalStatistics(resultsFile, salesEfficiencyByIteration);
+gs1 = iterationDataSalesEfficency;
+gs2 = iterationDataNoPath;
+gs3 = iterationDataNoLiquidity;
+gs4 = iterationDataNoInventory;
+gs5 = iterationDataNoMoney;
+gs6 = iterationDataElapsedTime;
+reportGlobalStatistics(resultsFile, gs1, gs2, gs3, gs4, gs5, gs6);
 
 %
 % ======  Helping Functions  ======
 %
 
-function reportGlobalStatistics(filePath, results)
-
-    meanR = mean(results);
-    stdR = std(results);
+function reportGlobalStatistics(filePath, salesEfficiency, noPath, noLiquidity, noIventory, noMoney, elapsedTime)
+        
+    os = sprintf("\nIterations Complete, Outputing Summary Statistics\n\n");
     
-    o1 = sprintf("\nIterations Complete, Outputing Summary Statistics\n\n");
-    o2 = sprintf("<Sales Efficiency> = %.2f\n", meanR*100);
-    o3 = sprintf("Standard Deviation = %.2f\n", stdR*100);
-    o4 = sprintf("\nSummary Output Complete\n");
+    meanSE = mean(salesEfficiency);
+    stdSE = std(salesEfficiency);
+    o1 = sprintf("<Sales Efficiency> = %.2f Percent\n", meanSE*100);
+    o2 = sprintf("Standard Deviation = %.2f\n\n", stdSE*100);
+
+    meanNP = mean(noPath);
+    stdNP = std(noPath);
+    o3 = sprintf("<No Path> = %.2f Percent\n", meanNP*100);
+    o4 = sprintf("Standard Deviation = %.2f\n\n", stdNP*100);
+    
+    meanNL = mean(noLiquidity);
+    stdNL = std(noLiquidity);
+    o5 = sprintf("<No Liquidity> = %.2f Percent\n", meanNL*100);
+    o6 = sprintf("Standard Deviation = %.2f\n\n", stdNL*100);
+
+    meanNI = mean(noIventory);
+    stdNI = std(noIventory);
+    o7 = sprintf("<No Liquidity> = %.2f Percent\n", meanNI*100);
+    o8 = sprintf("Standard Deviation = %.2f\n\n", stdNI*100);
+    
+    meanNM = mean(noMoney);
+    stdNM = std(noMoney);
+    o9 = sprintf("<No Liquidity> = %.2f Percent\n", meanNM*100);
+    o10 = sprintf("Standard Deviation = %.2f\n\n", stdNM*100);
+    
+    meanET = mean(elapsedTime);
+    stdET = std(elapsedTime);
+    totET = sum(elapsedTime);
+    o13 = sprintf("<Elapsed Time> = %.2f Minutes\n", meanET / 60.0);
+    o14 = sprintf("Standard Deviation = %.2f\n", stdET / 60.0);
+    o15 = sprintf("Total Time = %.2f Minutes\n\n", totET / 60.0);
+
+    oe = sprintf("\nSummary Output Complete\n");
+    
+    fprintf(os);
     
     fprintf(o1);
     fprintf(o2);
     fprintf(o3);
     fprintf(o4);
+    fprintf(o5);
+    fprintf(o6);
+    fprintf(o7);
+    fprintf(o8);
+    fprintf(o9);
+    fprintf(o10);
+    fprintf(o13);
+    fprintf(o14);
+    fprintf(o15);
+    
+    fprintf(oe);
 
     fileId = fopen(filePath, "wt");
     if fileId > 0
+        fprintf(fileId, os);
+        
         fprintf(fileId, o1);
         fprintf(fileId, o2);
         fprintf(fileId, o3);
         fprintf(fileId, o4);
+        fprintf(fileId, o5);
+        fprintf(fileId, o6);
+        fprintf(fileId, o7);
+        fprintf(fileId, o8);
+        fprintf(fileId, o9);
+        fprintf(fileId, o10);
+        
+        fprintf(fileId, o13);
+        fprintf(fileId, o14);
+        fprintf(fileId, o15);
+        
+        fprintf(fileId, oe);
         fclose(fileId);    
     end
 end
@@ -441,26 +521,29 @@ function reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTim
     end
 end
 
-function salesEfficiencyByIteration = reportTransactionFailures(polis, iteration, FailNoMoney, FailNoLiquidity, FailNoPaths, FailNoInventory, Purchased, endTime, filePath, salesEfficiencyByIteration)
+function [numBuyers, sumPurchased, sumNoPath, sumNoLiquidity, sumNoInventory, sumNoMoney] = calculateSummations(polis, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, endTime)
     numBuyers = polis.countBuyers;
-    sumNoMoney = sum(sum(FailNoMoney(:,1:endTime)));
-    sumNoLiquidity = sum(sum(FailNoLiquidity(:,1:endTime)));
-    sumNoPaths = sum(sum(FailNoPaths(:,1:endTime)));
-    sumNoInventory = sum(sum(FailNoInventory(:,1:endTime)));
     sumPurchased = sum(sum(Purchased(:,1:endTime)));
+    sumNoPath = sum(sum(FailNoPath(:,1:endTime)));
+    sumNoLiquidity = sum(sum(FailNoLiquidity(:,1:endTime)));
+    sumNoInventory = sum(sum(FailNoInventory(:,1:endTime)));
+    sumNoMoney = sum(sum(FailNoMoney(:,1:endTime)));
+end
+
+function salesEfficiency = calculateSalesEfficiency(expectedPurchased, sumPurchased)
+    salesEfficiency = sumPurchased / expectedPurchased;
+end
+
+function reportTransactionFailures(expectedPurchased, sumPurchased, sumNoPaths, sumNoLiquidity, sumNoInventory, sumNoMoney, filePath)
+
     o1 = sprintf("* Items Purchased = %.2f, Failed No Money = %.2f, Failed No Liquidity = %.2f, Failed No Paths = %.2f, Failed No Inventory = %.2f\n", sumPurchased, sumNoMoney, sumNoLiquidity, sumNoPaths, sumNoInventory);
-    expectedPurchased = numBuyers*endTime;
     checkSum = sumPurchased + sumNoMoney + sumNoLiquidity + sumNoPaths + sumNoInventory;
     o2 = "";
     o3 = "";
     if expectedPurchased == checkSum
         o2 = sprintf("* Expected Purchases = Items Purchased + Sum Of Failures = %2.f\n", expectedPurchased);
-        salesEfficiency = (sumPurchased/expectedPurchased);
-        o3 = sprintf("* Selling Efficency = %.2f percent\n\n", salesEfficiency*100.0);
-        
-        % Record the sales efficiency for this iteration
-        salesEfficiencyByIteration(iteration) = salesEfficiency;
-        
+        salesEfficiency = calculateSalesEfficiency(expectedPurchased, sumPurchased);
+        o3 = sprintf("* Selling Efficency = %.2f percent\n\n", salesEfficiency*100.0);        
     else
         o2 = sprintf("\n***\n*** Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n***\n", expectedPurchased, checkSum);
         o3 = sprintf("--\n");
