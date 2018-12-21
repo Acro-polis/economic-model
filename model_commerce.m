@@ -17,8 +17,8 @@ fprintf("Modeling Start\n")
 fprintf("===========================================================\n");
 
 % Open Input File, read header
-fileName = 'InputCommerce.txt';
-fileId = fopen(fileName, "r");
+% Set the inputFileName as an environment variable (or we'll crash out)
+fileId = fopen(inputFileName, "r");
 for i = 1:3
     fgetl(fileId);
 end
