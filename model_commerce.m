@@ -385,12 +385,12 @@ function reportGlobalStatistics(filePath, salesEfficiency, noPath, noLiquidity, 
 
     meanNI = mean(noIventory);
     stdNI = std(noIventory);
-    o7 = sprintf("<No Liquidity> = %.2f Percent\n", meanNI*100);
+    o7 = sprintf("<No Inventory> = %.2f Percent\n", meanNI*100);
     o8 = sprintf("Standard Deviation = %.2f\n\n", stdNI*100);
     
     meanNM = mean(noMoney);
     stdNM = std(noMoney);
-    o9 = sprintf("<No Liquidity> = %.2f Percent\n", meanNM*100);
+    o9 = sprintf("<No Money> = %.2f Percent\n", meanNM*100);
     o10 = sprintf("Standard Deviation = %.2f\n\n", stdNM*100);
     
     meanET = mean(elapsedTime);
