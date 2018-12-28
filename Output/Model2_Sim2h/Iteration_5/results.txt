@@ -7,7 +7,7 @@
 
 - UBI = 720.00 drachmas/agent, applied every 1 time steps
 
-- Demurrage = 10.00 percent/agent, applied every 4 time steps
+- Demurrage = 5.00 percent/agent, applied every 4 time steps
 
 - Starting wallet size/agent = 0.00 drachma
 
@@ -21,13 +21,13 @@
 
 ----- Summarized Results, End Of Time Step = 52 -----
 
-* Simulation Time = 24.04 + Results Generation Time = 0.59 = 24.63 Minutes
+* Simulation Time = 40.83 + Results Generation Time = 0.88 = 41.71 Minutes
 
-* Total Money Supply = 1986846.94 drachma, Total Demurrage = -1757153.06 drachma, Total UBI = 3744000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = 0.00)
+* Total Money Supply = 2698031.49 drachma, Total Demurrage = -1045968.51 drachma, Total UBI = 3744000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = 0.00)
 
-* Remaining Inventory Supply = 16647.00, Remaining Inventory Value = $5410275.00, Total Inventory Exchanged = 4653 (check: Purchased - Sold = 0.00)
+* Remaining Inventory Supply = 16679.00, Remaining Inventory Value = $5420675.00, Total Inventory Exchanged = 4621 (check: Purchased - Sold = 0.00)
 
-* Items Purchased = 4653.00, Failed No Money = 0.00, Failed No Liquidity = 232.00, Failed No Paths = 55.00, Failed No Inventory = 0.00
+* Items Purchased = 4621.00, Failed No Money = 0.00, Failed No Liquidity = 176.00, Failed No Paths = 143.00, Failed No Inventory = 0.00
 * Expected Purchases = Items Purchased + Sum Of Failures = 4940
-* Selling Efficency = 94.19 percent
+* Selling Efficency = 93.54 percent
 
