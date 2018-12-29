@@ -29,7 +29,7 @@ numSteps = round(T);                                                    % Number
 assert(numSteps >= 1,'Assert: Number of time steps must be >= 1!');
 
 N =  round(parseInputString(fgetl(fileId), inputTypeDouble));           % Number of Agents (nodes) (Input 2)
-assert(N >= 2,'Assert: Number of agemts must be >= 2!');
+assert(N >= 2,'Assert: Number of agents must be >= 2!');
 
 networkFilename = parseInputString(fgetl(fileId), inputTypeString);     % Network FileName (Input 3)
 
