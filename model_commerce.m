@@ -89,12 +89,12 @@ outputFolderPath = "Output";
 outputSubfolderPath = sprintf("%s/%s/", outputFolderPath, outputSubFolderName);
 [status, msg, msgID] = mkdir(outputSubfolderPath);
 
-iterationDataSalesEfficency = zeros(numberIterations, 1);
-iterationDataNoPath         = zeros(numberIterations, 1);
-iterationDataNoLiquidity    = zeros(numberIterations, 1);
-iterationDataNoInventory    = zeros(numberIterations, 1);
-iterationDataNoMoney        = zeros(numberIterations, 1);
-iterationDataElapsedTime    = zeros(numberIterations, 1);
+iterationDataSalesEfficiency = zeros(numberIterations, 1);
+iterationDataNoPath          = zeros(numberIterations, 1);
+iterationDataNoLiquidity     = zeros(numberIterations, 1);
+iterationDataNoInventory     = zeros(numberIterations, 1);
+iterationDataNoMoney         = zeros(numberIterations, 1);
+iterationDataElapsedTime     = zeros(numberIterations, 1);
 
 % Loop over the number of iterations
 %parpool('local', 2);
@@ -280,12 +280,12 @@ parfor iteration = 1:numberIterations
     expectedPurchased = numBuyers*time;
     salesEfficiency = calculateSalesEfficiency(expectedPurchased, sumPurchased);
     
-    iterationDataSalesEfficency(iteration) = salesEfficiency;
-    iterationDataNoPath(iteration)         = sumNoPath / expectedPurchased;
-    iterationDataNoLiquidity(iteration)    = sumNoLiquidity / expectedPurchased;
-    iterationDataNoInventory(iteration)    = sumNoInventory / expectedPurchased;
-    iterationDataNoMoney(iteration)        = sumNoMoney / expectedPurchased;
-    iterationDataElapsedTime(iteration)    = elapsedTime2;
+    iterationDataSalesEfficiency(iteration) = salesEfficiency;
+    iterationDataNoPath(iteration)          = sumNoPath / expectedPurchased;
+    iterationDataNoLiquidity(iteration)     = sumNoLiquidity / expectedPurchased;
+    iterationDataNoInventory(iteration)     = sumNoInventory / expectedPurchased;
+    iterationDataNoMoney(iteration)         = sumNoMoney / expectedPurchased;
+    iterationDataElapsedTime(iteration)     = elapsedTime2;
     
     reportTransactionFailures(expectedPurchased, sumPurchased, sumNoPath, sumNoLiquidity, sumNoInventory, sumNoMoney, filePath);
     
@@ -352,7 +352,7 @@ end % End Of Iterations Loop
 
 % Tabulate and report global statistics for the entire run
 resultsFile = sprintf("%s%s", outputSubfolderPath, "summaryResults.txt");
-gs1 = iterationDataSalesEfficency;
+gs1 = iterationDataSalesEfficiency;
 gs2 = iterationDataNoPath;
 gs3 = iterationDataNoLiquidity;
 gs4 = iterationDataNoInventory;
@@ -366,7 +366,7 @@ reportGlobalStatistics(resultsFile, gs1, gs2, gs3, gs4, gs5, gs6);
 
 function reportGlobalStatistics(filePath, salesEfficiency, noPath, noLiquidity, noIventory, noMoney, elapsedTime)
         
-    os = sprintf("\nIterations Complete, Outputing Summary Statistics\n\n");
+    os = sprintf("\nIterations Complete, Outputting Summary Statistics\n\n");
     
     meanSE = mean(salesEfficiency);
     stdSE = std(salesEfficiency);
@@ -459,7 +459,7 @@ function reportSimulationInputs(version_number, networkFilename, N, numSteps, ma
     o7  = sprintf("- Price of goods = %.2f drachmas\n\n", price);
     o8  = sprintf("- Num buyers   = %d <= %d agents\n\n", numberOfBuyers, N);
     o9  = sprintf("- Num sellers  = %d <= %d agents\n\n", numberOfSellers, N);
-    o10 = sprintf("- Num Buyers&Sellers = %d, Buyers Only = %d, Passive Agents = %d, Sellers Only = %d\n",numBuySellAgents, numBuyAgents, numPassiveAgents, numSellAgents);
+    o10 = sprintf("- Num Buyers & Sellers = %d, Buyers Only = %d, Passive Agents = %d, Sellers Only = %d\n",numBuySellAgents, numBuyAgents, numPassiveAgents, numSellAgents);
 
     fprintf(o1);
     fprintf(o2);
@@ -543,7 +543,7 @@ function reportTransactionFailures(expectedPurchased, sumPurchased, sumNoPaths, 
     if expectedPurchased == checkSum
         o2 = sprintf("* Expected Purchases = Items Purchased + Sum Of Failures = %2.f\n", expectedPurchased);
         salesEfficiency = calculateSalesEfficiency(expectedPurchased, sumPurchased);
-        o3 = sprintf("* Selling Efficency = %.2f percent\n\n", salesEfficiency*100.0);        
+        o3 = sprintf("* Selling Efficiency = %.2f percent\n\n", salesEfficiency*100.0);        
     else
         o2 = sprintf("\n***\n*** Error: Expected Items Purchased %.2f ~= Those Purchased + Failures = %.2f!\n***\n", expectedPurchased, checkSum);
         o3 = sprintf("--\n");
