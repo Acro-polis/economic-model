@@ -10,11 +10,13 @@ numberOfAgents = 10; % We need to know this; cannot derive it from the connectio
 AM = importNetworkModelFromCSV(numberOfAgents, "Wallet Test Plan 10 Agents.csv");
 time = 1;
 totalTimeSteps = 10;
-polis = Polis(AM, 6);
+polis = Polis(AM, 6); % Don't subtract 2
 polis.createAgents(time, totalTimeSteps);
 numItems = 1;
 inventoryInitialUnits = 100.0;
-polis.setupSellers(numberOfAgents, inventoryInitialUnits);
+numberOfPassiveAgents = 0;
+percentSellers = 1.0;
+[numberOfBuyers, numberOfSellers] = polis.setupBuyersAndSellers(numberOfPassiveAgents, percentSellers, inventoryInitialUnits);
 
 agent1 = polis.agents(1);
 agent2 = polis.agents(2);
