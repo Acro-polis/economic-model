@@ -15,12 +15,14 @@ AM = importNetworkModelFromCSV(numberOfAgents, "Wallet Test Plan 10 Agents.csv")
 time = 1;
 totalTimeSteps = 20;
 fprintf("\nTest Agent Wallets: time = %d\n\n",time);
-maxSearchLevels = 6;
+maxSearchLevels = 6; % Don't subtract 2
 polis = Polis(AM, maxSearchLevels); 
 polis.createAgents(time, totalTimeSteps);
 numItems = 1;
 inventoryInitialUnits = 100.0;
-polis.setupSellers(numberOfAgents, inventoryInitialUnits);
+numberOfPassiveAgents = 0;
+percentSellers = 1.0;
+[numberOfBuyers, numberOfSellers] = polis.setupBuyersAndSellers(numberOfPassiveAgents, percentSellers, inventoryInitialUnits);
 
 % Give everybody 500
 polis.depositUBI(500, time);
@@ -132,12 +134,14 @@ fprintf("\n\n----- Wallet Test Suite 2 ----\n\n");
 polis.delete
 time = 1;
 totalTimeSteps = 5;
-polis = Polis(AM, 6);
+polis = Polis(AM, 6); % don't subtract 2
 polis.createAgents(time, totalTimeSteps);
 polis.depositUBI(500.0, time);
 numItems = 1;
 inventoryInitialUnits = 100.0;
-polis.setupSellers(numberOfAgents, inventoryInitialUnits);
+numberOfPassiveAgents = 0;
+percentSellers = 1.0;
+[numberOfBuyers, numberOfSellers] = polis.setupBuyersAndSellers(numberOfPassiveAgents, percentSellers, inventoryInitialUnits);
 
 agent1 = polis.agents(1);
 agent2 = polis.agents(2);

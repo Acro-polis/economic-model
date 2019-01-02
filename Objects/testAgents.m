@@ -81,7 +81,7 @@ function testMutualConnectionsWithAgent(polis, testNumber, sourceAgentId, target
     fprintf("\nTest %da: Agent.findMutualConnectionsWithAgent\n\n", testNumber);
     fprintf("Seeking common connections between agents %d and %d\n", sourceAgentId, targetAgentId);
     commonConnections = Agent.findMutualConnectionsWithAgent(polis.AM, sourceAgentId, targetAgentId);
-    logIntegerArray("Common Connections",commonConnections);
+    logIntegerArray("Common Connections",commonConnections, 2, 2);
     [~, connections] = size(commonConnections);
     assert(connections == expectedConnections,"Error: expected %d connections, found %d connections", expectedConnections, connections);
 end
@@ -90,7 +90,7 @@ function testFindAgentsUncommonConnections(polis, testNumber, sourceAgentId, tar
     fprintf("\nTest %db: Agent.findAgentsUncommonConnections\n\n", testNumber);
     fprintf("Seeking uncommon connections agent %d has from %d\n", targetAgentId, sourceAgentId);
     uncommonConnections = Agent.findAgentsUncommonConnections(polis.AM, sourceAgentId, targetAgentId);
-    logIntegerArray("Uncommon Connections",uncommonConnections);
+    logIntegerArray("Uncommon Connections",uncommonConnections, 2, 2);
     [~, connections] = size(uncommonConnections);
     assert(connections == expectedConnections,"Error: expected %d uncommon connections, found %d uncommon connections", expectedConnections, connections);
 end
@@ -99,7 +99,7 @@ function testFindMyUncommonConnectionsFromAgent(polis, testNumber, sourceAgentId
     fprintf("\nTest %dc: Agent.findMyUncommonConnectionsFromAgent\n\n", testNumber);
     fprintf("Seeking uncommon connections agent %d has from %d\n", sourceAgentId, targetAgentId);
     uncommonConnections = Agent.findMyUncommonConnectionsFromAgent(polis.AM, sourceAgentId, targetAgentId);
-    logIntegerArray("Uncommon Connections",uncommonConnections);
+    logIntegerArray("Uncommon Connections",uncommonConnections, 2, 2);
     [~, connections] = size(uncommonConnections);
     assert(connections == expectedConnections,"Error: expected %d uncommon connections, found %d uncommon connections", expectedConnections, connections);
 end

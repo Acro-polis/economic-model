@@ -339,6 +339,20 @@ classdef Agent < handle
             % Write the contents of the wallet's ledger to the console
             obj.wallet.dump;
         end
+
+        function logPaths(obj, paths)
+            % Output all paths to the console (format is a cell array with
+            % each element being an integer array signifying a path through
+            % the network from one agent to another and the path lentghs
+            % are expected to be different).
+            [totPaths, ~] = size(paths);
+            logStatement("\nThere are %d total paths\n", totPaths, 2, obj.polis.LoggingLevel)
+            for i = 1:totPaths
+                logStatement("\nPath = %d\n", i, 2, obj.polis.LoggingLevel);
+                aPath = cell2mat(paths(i,1));
+                logIntegerArray("Path", aPath, 2, obj.polis.LoggingLevel);
+            end
+        end
         
     end
         
@@ -402,21 +416,7 @@ classdef Agent < handle
     end
 
     methods (Access = private)
-      
-        function logPaths(obj, paths)
-            % Output all paths to the console (format is a cell array with
-            % each element being an integer array signifying a path through
-            % the network from one agent to another and the path lentghs
-            % are expected to be different).
-            [totPaths, ~] = size(paths);
-            logStatement("\nThere are %d total paths\n", totPaths, 2, obj.polis.LoggingLevel)
-            for i = 1:totPaths
-                logStatement("\nPath = %d\n", i, 2, obj.polis.LoggingLevel);
-                aPath = cell2mat(paths(i,1));
-                logIntegerArray("Path", aPath, 2, obj.polis.LoggingLevel);
-            end
-        end
-        
+              
         function pathIsGood = checkIfPathIsValid(obj, AM, path, amount)
             % Determine if this path carries enough balance to support the
             % transaction amount
