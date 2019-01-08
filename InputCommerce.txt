@@ -2,8 +2,8 @@
 Commerce Model Input Parameters
 
 1)  Number of Time Steps (dt): 10
-2)  Number of Agents: 101
-3)  Network Filename (blank for connected):Edges Hybrid SN=1 FN=101 T=50 a=0.00 V1.1.0.csv
+2)  Number of Agents: 10
+3)  Network Filename (blank for connected):Wallet Test Plan 10 Agents.csv
 4)  Transaction-Distance (max. steps, >= 2): 2
 5)  Initial Wallet Size (drachma / agent): 0.00
 6)  UBI Amount (drachma / ubi interval): 360.00
