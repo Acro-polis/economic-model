@@ -6,10 +6,10 @@
 % Created: 2018.08.30
 %===================================================
 
-version_number = "1.3.1";
+version_number = "1.3.2";
 
-% Read the input parameters (specify input filename as an environment
-% variable)
+% Read the input parameters (specify "inputFilename" as an environment
+% variable prior to running)
 [numSteps,                ...
 N,                        ...
 networkFilename,          ...
@@ -28,12 +28,13 @@ numberIterations,         ...
 outputSubFolderName] = readInputCommerceFile(inputFilename);
 
 % Final Setup
+
+% Output Directory
 outputFolderPath = "Output";
 outputSubfolderPath = sprintf("%s/%s/", outputFolderPath, outputSubFolderName);
 [status, msg, msgID] = mkdir(outputSubfolderPath);
 
-inventoryInitialValue = inventoryInitialUnits*price;
-
+% Data collection arrays for each iteration
 iterationDataSalesEfficiency = zeros(numberIterations, 1);
 iterationDataNoPath          = zeros(numberIterations, 1);
 iterationDataNoLiquidity     = zeros(numberIterations, 1);
@@ -47,14 +48,15 @@ fprintf("===========================================================\n");
 
 % Loop over the number of iterations
 %parpool('local', 2);
-parfor iteration = 1:numberIterations
+%parfor iteration = 1:numberIterations
+for iteration = 1:numberIterations
         
     polis = Polis(AM, maxSearchLevels); 
     polis.createAgents(1, numSteps);
     
     logStatement("\n\n//////////// Starting Iteration #%d ////////////\n", iteration, 0, polis.LoggingLevel);
     
-    % For saving results
+    % Specifiy path for iteration results
     outputPathIteration = sprintf("%s%s/", outputSubfolderPath, sprintf("Iteration_%d",iteration));
     [status, msg, msgID] = mkdir(outputPathIteration);
     
@@ -144,8 +146,8 @@ parfor iteration = 1:numberIterations
                j = randsample(numberOfAvailableSellers,1);
                agentSelling = sellingAgents(j);
 
-               logStatement("\n++ Proposed Purchase Of Agent %d From Agent %d\n", [agentBuying.id, agentSelling.id], 1, polis.LoggingLevel);
                % Submit the purchase
+               logStatement("\n++ Proposed Purchase Of Agent %d From Agent %d\n", [agentBuying.id, agentSelling.id], 1, polis.LoggingLevel);
                numUnits = 1;           
                result = agentBuying.submitPurchase(polis.AM, numUnits, numUnits*price, agentSelling, time);
 

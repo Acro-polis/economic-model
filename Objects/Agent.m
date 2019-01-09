@@ -240,7 +240,7 @@ classdef Agent < handle
                 obj.wallet.commitPurchaseWithDirectConnection(amount, targetAgent, mutualAgentIds, timeStep);
             else
                 % Create an array of Agents from the paths array
-                agents = Agent.empty;
+                agents = Agent.empty; % Need to instantiate empty Agent objects to be able to preallocate
                 for i = 2:numberAgents
                     agents = [agents , obj.polis.agents(path(1,i))];
                 end
