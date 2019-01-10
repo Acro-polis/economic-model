@@ -48,8 +48,7 @@ fprintf("===========================================================\n");
 
 % Loop over the number of iterations
 %parpool('local', 2);
-%parfor iteration = 1:numberIterations
-for iteration = 1:numberIterations
+parfor iteration = 1:numberIterations
         
     polis = Polis(AM, maxSearchLevels); 
     polis.createAgents(1, numSteps);

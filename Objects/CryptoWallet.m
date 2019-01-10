@@ -35,8 +35,9 @@ Buying - subtracting currency
 %}
 
     properties (SetAccess=private)
-        agent         Agent % Agent who owns this wallet            
-        transactions        % This wallets ledger
+        agent         Agent     % Agent who owns this wallet            
+        transactions            % This wallets ledger
+        currencyAgentBalances   % Denormalize the balance by currencyAgentId for performance reasons
     end
     
     properties (Dependent)
@@ -49,6 +50,7 @@ Buying - subtracting currency
             % This wallet belongs to this agent
             obj.agent = agent;
             obj.transactions = Transaction.empty;
+            obj.currencyAgentBalances = zeros(agent.polis.numberOfAgents,2);
         end
         
         %
@@ -143,7 +145,13 @@ Buying - subtracting currency
         
         function addTransaction(obj, newTransaction)
             % Add a ledger record (building a vector (N x 1 transactions))
-            obj.transactions = [obj.transactions ; newTransaction]; 
+            obj.transactions = [obj.transactions ; newTransaction];
+            
+            % Update the running balance - this denormalization is done purely for performance,
+            % See CryptoWallet.balanceForAgentsCurrency
+            currencyAgentId = newTransaction.currencyAgentId;
+            newBalance = obj.currencyAgentBalances(currencyAgentId,2) + newTransaction.amount;
+            obj.currencyAgentBalances(currencyAgentId, 2) = newBalance;
         end
         
         function depositUBI(obj, amount, timeStep)
@@ -310,8 +318,14 @@ Buying - subtracting currency
                 
         function balance = balanceForAgentsCurrency(obj, agentId)
             % Total balance of this agents currency
-            results = findobj(obj.transactions,'currencyAgentId', agentId);
-            balance = sum([results.amount]);
+
+            % This is the original, un-normalized code
+            % results = findobj(obj.transactions,'currencyAgentId', agentId);
+            % balance = sum([results.amount]);
+
+            % Use the lookup for a large performance improvement, see
+            % CryptoWallet.addTransaction
+            balance = obj.currencyAgentBalances(agentId,2);
         end
         
     end
