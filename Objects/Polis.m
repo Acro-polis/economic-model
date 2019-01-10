@@ -85,6 +85,7 @@ classdef Polis < handle
             % First randomly select the number of passive agents and make
             % all the other agents buyers. Then from the pool of buyers
             % randomly select those that will also be sellers.
+            
             % TODO - Make preferrential selection?
             
             % Setup Buyers
@@ -114,13 +115,28 @@ classdef Polis < handle
         function sellers = identifySellers(obj, testAgent)
             % Return a list of all selling agents that are not the
             % testAgent
-            sellers = [];
-            for i = 1:obj.numberOfAgents
-                agent = obj.agents(i);
-                if agent.isSeller && agent.id ~= testAgent.id
-                    sellers = [sellers ; agent];
-                end
+            
+            % Vectorized version of the original
+            
+            % Build list of sellers
+            sellers = obj.agents;
+            ids = [sellers.isSeller] ~= true;
+            sellers(ids) = [];
+            
+            % Remove testAgent if testAgent is a seller
+            if testAgent.isSeller
+                id = [sellers.id] == testAgent.id;
+                sellers(id) = [];
             end
+
+% Original            
+%             for i = 1:obj.numberOfAgents
+%                 agent = obj.agents(i);
+%                 if agent.isSeller && agent.id ~= testAgent.id
+%                     sellers = [sellers ; agent];
+%                 end
+%             end
+
         end
         
         %
