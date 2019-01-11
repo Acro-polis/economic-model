@@ -1,0 +1,24 @@
+
+Iterations Complete, Outputting Summary Statistics
+
+<Sales Efficiency> = 97.31 Percent
+Standard Deviation = 0.49
+
+<No Path> = 0.01 Percent
+Standard Deviation = 0.02
+
+<No Liquidity> = 2.67 Percent
+Standard Deviation = 0.49
+
+<No Inventory> = 0.00 Percent
+Standard Deviation = 0.00
+
+<No Money> = 0.00 Percent
+Standard Deviation = 0.00
+
+<Elapsed Time> = 6.76 Minutes
+Standard Deviation = 0.66
+Total Time = 67.61 Minutes
+
+
+Summary Output Complete
