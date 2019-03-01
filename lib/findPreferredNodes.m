@@ -1,55 +1,47 @@
-function [selectedNodes] = findPreferredNodes(D, N, RN, randomAttachments)
+function selectedNodesIndexes = findPreferredNodes(nodeDimensions, numNodesToSelect)
 %===================================================
 %
-% Randomly (without replacement) identify a set of nodes 
-% with probabilities proportional to their degrees. This is 
-% the preferential attachment model.
+% Randomly identify a set of nodes with probabilities proportional to their
+% degree. This is the preferential attachment model.
 %
-% D                 = Dimensions of nodes at time t - 1
-% N                 = Number of nodes available for attachment
-% RN                = Number of random attachments to make
-% randomAttachments = nodes already attached during
-%                     prior t - 1 random attachment phase
+% nodeDimensions    = The dimensions of each node (number of connections)
+% numNodesToSelect  = The number of nodes to randomely select (without
+%                     replacment)
 %
 % Author: Jess
-% Created: 2018.07.19
+% Created: 2019.02.28
 %===================================================
-assert(N >= RN,'Error in identifyPreferredNodes: N < RN')
 
-nodes = 1:N;
-selectedNodes = [];
+numNodes = size(nodeDimensions');
+nodeIndexes = 1:numNodes;
+selectedNodesIndexes = zeros(numNodesToSelect);
 
-% Ignore nodes attached during prior random phase
-nodes(randomAttachments) = [];
-D(randomAttachments) = []; % Copy of D made when modified (thanks ML!)
-
-%TODO - can / should this be vecorized?
-
-for i = 1:RN
+for i = 1:numNodesToSelect
     
     % Calculate degree probabilities
-    d = sum(D);
-    P = D ./ d;
+    sumD = sum(nodeDimensions);
+    P = nodeDimensions ./ sumD;
     
     % Calculate CDF of sorted probabilities
-    [S, H] = sort(P,'descend');
-    cdf = cumsum(S);
+    [p, pIndexes] = sort(P,'descend');
+    cdf = cumsum(p);
     
-    % Find the index of the node that corresponds 
-    % to the inverse of the CDF
+    % Find the index of the node that corresponds to the inverse of the CDF
     r = unifrnd(0,1);
-    index = find([-1 cdf] < r, 1, 'last');
+    pIndex = find([-1 cdf] < r, 1, 'last');
     
-    % Map back the selected "index" to the corresponding nodes 
-    % original position
-    selectedNode = H(index);
+    % Map back the selected "index" to the corresponding nodes original position
+    selectedNodeIndex = pIndexes(pIndex);
     
-    % Store the selected node, and then remove it for the next iteration
-    selectedNodes = [selectedNodes nodes(selectedNode)];
-    nodes(selectedNode) = [];
-    D(selectedNode) = [];
-
+    % Store the selected node index 
+    selectedNodesIndexes(i) = nodeIndexes(selectedNodeIndex);
+    
+    % Remove the selected node for the next iteration (no replacement)
+    nodeIndexes(selectedNodeIndex) = [];
+    nodeDimensions(selectedNodeIndex) = [];    
+    
 end
+
 
 end
 

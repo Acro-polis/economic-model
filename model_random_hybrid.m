@@ -82,7 +82,7 @@ for time = 1:numT
         % Add random connections to the other nodes
         randomAttachments = [];
         if numNewRandomConnections >  0 
-            randomAttachments = findRandomNodes(nodesD, numNewRandomConnections);
+            randomAttachments = findPreferredNodesHyprid(nodesD, numNewRandomConnections);
             Am(randomAttachments, TN) = 1;
             Am(TN, randomAttachments) = 1;
             %fprintf('Found %d random attachments\n',size(attachments,2));
