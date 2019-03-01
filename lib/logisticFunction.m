@@ -1,10 +1,9 @@
 function [fx] = logisticFunction (a, b, c, d, x)
 %========================================
 %
-% For a given x return f(x) for the 
-% logistic function as defined below
+% For a given x return f(x) for the logistic function as defined
 %
-% f(x) = 1 / (1 + exp(-x)
+% f(x) = 1 / (1 + exp(-x))
 %
 % Author: Jess
 % Created: 2018.07.13

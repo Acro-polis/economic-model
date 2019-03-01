@@ -1,16 +1,13 @@
-function [Am] = connectedGraph(N)
+function AM = connectedGraph(N)
 %=====================================================
 %
-% Return a completely connected graph of dimension N
+% Return a connected, undirected graph of dimension N
 %
 % Author: Jess
 % Created: 2018.07.8
 %=====================================================
 
-Am = ones(N,N);
-
-for i = 1:N
-	Am(i,i) = 0;
-end
+AM = ones(N,N);
+AM(1:N+1:end) = 0;
 
 end

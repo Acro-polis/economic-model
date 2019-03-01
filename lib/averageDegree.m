@@ -1,4 +1,4 @@
-function [returnValue] = averageDegree(Am)
+function [avgDeg] = averageDegree(AM)
 %=====================================================
 %
 % Calculate the average degree for the given adjacency
@@ -8,10 +8,10 @@ function [returnValue] = averageDegree(Am)
 % Created: 2018.07.16
 %=====================================================
 
-N = size(Am,1);
-D = sum(Am);
+numberNodes = size(AM,1);
+D = sum(AM);
 sumD = sum(D);
-returnValue = sumD / N;
+avgDeg = sumD / numberNodes;
 
 end
 

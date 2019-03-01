@@ -7,7 +7,11 @@
 %=====================================================
 
 N = 10;
-Am = connectedGraph(N);
-avgDeg = averageDegree(Am);
+AM = connectedGraph(N);
+avgDeg = averageDegree(AM);
 
-fprintf('For N = %d nodes, the average degree is %f\n', N, avgDeg);
+if avgDeg == N-1
+    fprintf('\nTest averageDegree Successful\n');
+else
+    assert(avgDeg == N-1,'\nTest averageDegree Failed\n');
+end

@@ -1,25 +1,18 @@
-function [Am, OriginTimes] = addNewNodes(Am, numNewNodes, OriginTimes, T)
+function AM = addNewNodes(AM, numNewNodes)
 %=====================================================
 %
-% Am            = Existing Adjacency Matrix (NxN)
-% OriginTimes   = Origin Times for existing nodes (Nx1)
-% T             = Current time step (integer)
-% numNewNodes   = Number of new nodes to add to the network
+% Add new, unconnected node(s) to the existing adjacency matrix
 %
+% AM            = Adjacency Matrix
+% numNewNodes   = Number of new nodes
 %
 % Author: Jess
 % Created: 2018.07.16
 %=====================================================
 
-N = size(Am,1);
-
-% Add new row and column
-Am(:, end + numNewNodes) = 0;
-Am(end + numNewNodes, :) = 0;
-
-% Add new origin times T
-newTimes = ones(numNewNodes, 1) .* T;
-OriginTimes = [OriginTimes; newTimes];
+% Add new unconnected node(s)
+AM(:, end + numNewNodes) = 0;   % columns
+AM(end + numNewNodes, :) = 0;   % rows
 
 end
 
