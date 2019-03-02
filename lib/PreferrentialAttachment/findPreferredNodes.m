@@ -14,7 +14,7 @@ function selectedNodesIndexes = findPreferredNodes(nodeDimensions, numNodesToSel
 
 numNodes = size(nodeDimensions');
 nodeIndexes = 1:numNodes;
-selectedNodesIndexes = zeros(numNodesToSelect);
+selectedNodesIndexes = zeros(numNodesToSelect,1);
 
 for i = 1:numNodesToSelect
     

@@ -121,7 +121,7 @@ fprintf('\n');
 plottingStyle = 1;
 plotFrequecyDistributionHybrid(Am, N, T, alpha, plottingStyle);
 
-outputNetworkModelForGephi("Hybrid", Am, N, T, alpha, version_number);
+outputHybridNetworkModelForGephi("Hybrid", Am, N, T, alpha, version_number);
 fprintf('\n');
 
 %G = graph(Am);

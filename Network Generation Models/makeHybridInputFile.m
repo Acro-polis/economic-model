@@ -1,5 +1,6 @@
 %=====================================================
 %
+% Create an input file for use by the generateHybridNetwork algorithm
 %
 % Author: Jess
 % Created: 2018.10.16

@@ -19,7 +19,7 @@ preferredNodes = findPreferredNodes(nodeDimensions, numNewAttachments);
 
 % Add the new node to the AM and attach it to the preferred nodes 
 % (undirected attachment)
-newNodeIndex = size(nodeDemensions') + 1;
+newNodeIndex = size(nodeDimensions') + 1;
 AM = addNewNodes(AM, 1);
 AM(preferredNodes, newNodeIndex) = 1;
 AM(newNodeIndex, preferredNodes) = 1;
