@@ -5,7 +5,7 @@
 % Author: Jess
 % Created: 2018.07.19
 %===================================================
-version_number = "1.1.0";
+version_number = "H_1.1.0";
 	
 inputTypeDouble = 0;
 inputTypeString = 1;
@@ -16,7 +16,7 @@ fprintf("Starting Network Generation\n")
 fprintf("===========================================================\n");
 
 % Open Input File, read header
-fileName = 'InputNetworkGeneration.txt';
+fileName = 'inputFile_Hybrid.txt';
 fileId = fopen(fileName, "r");
 for i = 1:3
     fgetl(fileId);
@@ -82,7 +82,7 @@ for time = 1:numT
         % Add random connections to the other nodes
         randomAttachments = [];
         if numNewRandomConnections >  0 
-            randomAttachments = findRandomeNodes(nodesD, numNewRandomConnections);
+            randomAttachments = findRandomNodes(nodesD, numNewRandomConnections);
             Am(randomAttachments, TN) = 1;
             Am(TN, randomAttachments) = 1;
             %fprintf('Found %d random attachments\n',size(attachments,2));

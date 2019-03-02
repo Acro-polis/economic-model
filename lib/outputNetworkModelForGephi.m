@@ -21,12 +21,14 @@ if outputNodes
             fprintf(fIdNodes, '%d,\"Node %d\"\n', i, i);
     end
     fclose(fIdNodes);
+else
+    fprintf("Skipping Node Output\n");
 end
 
 fileEdges   = sprintf('Edges %s SN=%u FN=%u T=%u a=%.2f V%s.csv', title, SN, FN, T, alpha, version_number);
 fIdEdges	= fopen(fullfile([pwd '/Output'],fileEdges),"w");
 
-fprintf("Outputing Edges\n");
+fprintf("Outputting Edges\n");
 fprintf(fIdEdges,"Source,Target,Label,Type\n");
 for i = 1:FN
         for j = 1:FN

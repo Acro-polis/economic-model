@@ -6,15 +6,15 @@
 %=====================================================
 addpath lib
 
-fileName = 'InputNetworkGeneration.txt';
-fileId = fopen(fileName, "w");
+fileName = 'inputFile_Hybrid.txt';
+fileId = fopen(fullfile([pwd '/Network Generation Models'],fileName),"w");
 
 fprintf(fileId,'\nRandom Network Generation Input Parameters\n\n');
 
-fprintf(fileId,'1)  Number Of Inital Nodes: %d\n',2);
+fprintf(fileId,'1)  Number Of Inital Nodes: %d\n',5);
 fprintf(fileId,'2)  Number Of Generation Steps: %d\n',25);
-fprintf(fileId,'3)  Number Of New Nodes Per Step: %d\n',1);
-fprintf(fileId,'4)  Alpha (0 = Preferred, 1 = Random): %.1f\n',1.0);
+fprintf(fileId,'3)  Number Of New Nodes Per Step: %d\n',5);
+fprintf(fileId,'4)  Alpha (0 = Preferred, 1 = Random): %.1f\n',0.5);
 
 fclose(fileId);
 
