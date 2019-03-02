@@ -9,12 +9,12 @@ function [numberOfConnections] = numberOfConnections(Am,mode)
 % Created: 2018.07.30
 %===================================================
 
-D = 2;
+numberOfConnections = sum(sum(Am));
+
 if (mode ~= 1) 
-    D = 1;
+    numberOfConnections = numberOfConnections / 2.0;
 end
     
-numberOfConnections = sum(sum(Am)) / D;
 
 end
 

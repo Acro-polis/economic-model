@@ -82,7 +82,7 @@ for time = 1:numT
         % Add random connections to the other nodes
         randomAttachments = [];
         if numNewRandomConnections >  0 
-            randomAttachments = findPreferredNodesHyprid(nodesD, numNewRandomConnections);
+            randomAttachments = findRandomeNodes(nodesD, numNewRandomConnections);
             Am(randomAttachments, TN) = 1;
             Am(TN, randomAttachments) = 1;
             %fprintf('Found %d random attachments\n',size(attachments,2));
@@ -91,7 +91,7 @@ for time = 1:numT
         % Add preferred connections to the other nodes, minus the
         % randomAttachments if there are any
         if numNewPreferredConnections > 0
-            preferredAttachments = findPreferredNodes(D, nodesD, numNewPreferredConnections, randomAttachments);
+            preferredAttachments = findPreferredNodesHybrid(D, nodesD, numNewPreferredConnections, randomAttachments);
             Am(preferredAttachments, TN) = 1;
             Am(TN, preferredAttachments) = 1;
             %fprintf('Found %d preferred attachments\n',size(attachments,2));
