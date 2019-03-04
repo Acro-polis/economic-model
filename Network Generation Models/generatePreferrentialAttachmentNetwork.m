@@ -41,18 +41,19 @@ assert(percentageExistingNodesPerDt >= 0 && percentageExistingNodesPerDt <= 1.0,
 % Initializations
 dt = 1;                                 % Time Step 
 numTimeSteps = round(T / dt);           % Number of time steps (integer)
-OriginTimes = ones(N,1);               % The origin time for these nodes (t=0)
 AM = connectedGraph(N);                 % The initial netowrk is a connected graph with N agents
 modeUndirected = 1;                     % Connections: 1 for Undirected, 0 for Directed
 
 startTime = tic();
 numAgents = N;
 
+nodeOriginTimes = ones(N,1);           % The origin time for these nodes (t=0)
+
 % Loop over time
-for time = 2:numTimeSteps
+for timeStep = 2:numTimeSteps
     
-    if mod(time,100) == 1
-        fprintf('\nTime Step = %u\n',time);
+    if mod(timeStep,100) == 1
+        fprintf('\nTime Step = %u\n',timeStep);
     end
 
     %TODO treat existing nodes
@@ -60,20 +61,21 @@ for time = 2:numTimeSteps
     for newNode = 1:newNodesPerDt
         AM = addNewNodeWithPreferredAttachments(AM, numAttachmentsPerNewNode);
         numAgents = numAgents + 1;
-        OriginTimes(numAgents) = time;
+        nodeOriginTimes(numAgents) = timeStep;
     end
 
 end
 
 elapsedTime = toc(startTime);
 
-fprintf('\n');
-fprintf('Elapsed time = %.2f seconds\n',elapsedTime);
-fprintf('\n');
+fprintf('\nElapsed time = %.2f seconds\n',elapsedTime);
 
-%TODO plot degree distribution
+fprintf('\nPlotting degree distribution\n');
+fprintf('\n');
+plottingStyle = 1;
+plotFrequecyDistributionHybrid(AM, N, numTimeSteps, 0, plottingStyle);
 
-outputTimeSeriesNetworkModelForGephi("PA", AM, OriginTimes, N, numTimeSteps, version_number)
+outputTimeSeriesNetworkModelForGephi("PA", AM, nodeOriginTimes, N, numTimeSteps, version_number)
 fprintf('\n');
 
 fprintf("Generation Complete\n");
