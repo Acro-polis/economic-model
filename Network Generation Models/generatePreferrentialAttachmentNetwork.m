@@ -34,7 +34,7 @@ T =  parseInputString(fgetl(fileId), inputTypeDouble);                          
 newNodesPerDt = parseInputString(fgetl(fileId), inputTypeDouble);                   % Number of new nodes per genration step
 numAttachmentsPerNewNode = parseInputString(fgetl(fileId), inputTypeDouble);        % Number of attachments to make for each new node
 percentageExistingNodesPerDt = parseInputString(fgetl(fileId), inputTypeDouble);    % Percentage of existing nodes to treat per genration step
-newConnectionsPerDt = parseInputString(fgetl(fileId), inputTypeDouble);             % Number of new connections per node per genration step
+newAttachmentsPerDt = parseInputString(fgetl(fileId), inputTypeDouble);             % Number of new connections per node per genration step
 
 assert(percentageExistingNodesPerDt >= 0 && percentageExistingNodesPerDt <= 1.0,"Error: percentageExistingNodesPerDt out of bounds");
 
@@ -56,8 +56,15 @@ for timeStep = 2:numTimeSteps
         fprintf('\nTime Step = %u\n',timeStep);
     end
 
-    %TODO treat existing nodes
-
+    % add new attachments from existing nodes
+    numNodesToAddNewAttachments = round(numAgents*percentageExistingNodesPerDt);
+    listOfNodes = datasample(1:numAgents, numNodesToAddNewAttachments, 'Replace', false);
+    for i = 1:numNodesToAddNewAttachments
+        existingNodeIndex = listOfNodes(i);
+        AM = addAttachmentsToNodeWithPreferredAttachment(AM, existingNodeIndex, newAttachmentsPerDt);
+    end
+    
+    % add new nodes and attachments
     for newNode = 1:newNodesPerDt
         AM = addNewNodeWithPreferredAttachments(AM, numAttachmentsPerNewNode);
         numAgents = numAgents + 1;

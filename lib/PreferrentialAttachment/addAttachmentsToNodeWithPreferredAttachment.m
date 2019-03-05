@@ -5,6 +5,7 @@ function AM = addAttachmentsToNodeWithPreferredAttachment(AM, nodeIndex, numNewA
 % preferrential attachment model.
 %
 % AM                = The adjacency matrix
+% nodeIndex         = The source node making new connections
 % numNewAttachments = The number of attachments for the new node
 %
 % Author: Jess
