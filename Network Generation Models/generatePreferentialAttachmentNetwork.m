@@ -45,7 +45,7 @@ AM = connectedGraph(N);                 % The initial netowrk is a connected gra
 modeUndirected = 1;                     % Connections: 1 for Undirected, 0 for Directed
 
 startTime = tic();
-numAgents = N;
+numNodes = N;
 
 nodeOriginTimes = ones(N,1);           % The origin time for these nodes (t=0)
 
@@ -56,19 +56,20 @@ for timeStep = 2:numTimeSteps
         fprintf('\nTime Step = %u\n',timeStep);
     end
 
-    % add new attachments from existing nodes
-    numNodesToAddNewAttachments = round(numAgents*percentageExistingNodesPerDt);
-    listOfNodes = datasample(1:numAgents, numNodesToAddNewAttachments, 'Replace', false);
-    for i = 1:numNodesToAddNewAttachments
-        existingNodeIndex = listOfNodes(i);
-        AM = addAttachmentsToNodeWithPreferredAttachment(AM, existingNodeIndex, newAttachmentsPerDt);
+    % Add new attachments from existing nodes
+    numNodesToAddNewAttachments = round(numNodes*percentageExistingNodesPerDt);
+    if numNodesToAddNewAttachments > 0
+        listOfNodes = datasample(1:numNodes, numNodesToAddNewAttachments, 'Replace', false);
+        for i = 1:numNodesToAddNewAttachments
+            AM = addAttachmentsToNodeWithPreferentialAttachment(AM, listOfNodes(i), newAttachmentsPerDt);
+        end
     end
     
-    % add new nodes and attachments
+    % Add new nodes and attachments
     for newNode = 1:newNodesPerDt
-        AM = addNewNodeWithPreferredAttachments(AM, numAttachmentsPerNewNode);
-        numAgents = numAgents + 1;
-        nodeOriginTimes(numAgents) = timeStep;
+        AM = addNewNodeWithPreferentialAttachments(AM, numAttachmentsPerNewNode);
+        [numNodes, ~] = size(AM);
+        nodeOriginTimes(numNodes) = timeStep;
     end
 
 end

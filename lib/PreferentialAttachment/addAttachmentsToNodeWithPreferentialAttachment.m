@@ -1,8 +1,8 @@
-function AM = addAttachmentsToNodeWithPreferredAttachment(AM, nodeIndex, numNewAttachments)
+function AM = addAttachmentsToNodeWithPreferentialAttachment(AM, nodeIndex, numNewAttachments)
 %===================================================
 %
 % Add a node and connect it to a set of existing nodes using the
-% preferrential attachment model.
+% preferential attachment model.
 %
 % AM                = The adjacency matrix
 % nodeIndex         = The source node making new connections

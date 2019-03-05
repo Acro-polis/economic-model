@@ -27,7 +27,7 @@ else
     ylabel('Frequency');
 end
 
-text = sprintf('Frequency Distribution - Hybrd: SN = %u, EN = %u, T = %u, a = %.2f', N, size(AM,1), T, alpha);
+text = sprintf('Frequency Distribution: SN = %u, EN = %u, T = %u, a = %.2f', N, size(AM,1), T, alpha);
 title(text);
 legend('Simulated','Mean-field');
 
