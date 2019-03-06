@@ -47,7 +47,7 @@ for t = 1:numT
         [Am, OriginTimes] = addNewNodes(Am, numNewNodes, OriginTimes, t);
         N = size(Am,1);
         fprintf('For T = %d, New Nodes = %d & N = %d\n',t, numNewNodes, N);
-    end;
+    end
     
     % Loop over nodes
     for i = 1:N
@@ -57,7 +57,7 @@ for t = 1:numT
       adjustedTime = t - OriginTimes(i) - 1;
       if (adjustedTime < 0)
           adjustedTime = 0;
-      end;
+      end
       %fprintf('t = %d, i = %d, at = %d\n',t, i, adjustedTime);
       numNewConnections = round(logisticFunction(25, 1.0, 0.75, 4.0, adjustedTime)) - sum(Am(i,:));
       
@@ -72,11 +72,11 @@ for t = 1:numT
             Am(i,index) = 1;            % this might happen more than once, ignore for now
             Am(index,i) = 1;            % Make undirected relationship
             %fprintf('t=%d, i=%d, index=%d\n',t,i,index);
-          end;
-        end;
-      end;
-    end;
-end;
+          end
+        end
+      end
+    end
+end
 
 outputModel("Logistic", Am, N, T, -1.0, version_number);
 

@@ -1,6 +1,6 @@
 %===================================================
 %
-% Economic Commerce Model on a Network
+% Economic Commerce Model on a Static Network
 %
 % Author: Jess
 % Created: 2018.08.30

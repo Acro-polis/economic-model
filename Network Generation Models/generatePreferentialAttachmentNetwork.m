@@ -56,7 +56,7 @@ for timeStep = 2:numTimeSteps
         fprintf('\nTime Step = %u\n',timeStep);
     end
 
-    % Add new attachments from existing nodes
+    % Add new attachments to existing nodes
     numNodesToAddNewAttachments = round(numNodes*percentageExistingNodesPerDt);
     if numNodesToAddNewAttachments > 0
         listOfNodes = datasample(1:numNodes, numNodesToAddNewAttachments, 'Replace', false);
@@ -65,7 +65,7 @@ for timeStep = 2:numTimeSteps
         end
     end
     
-    % Add new nodes and attachments
+    % Add new nodes and new attachments
     for newNode = 1:newNodesPerDt
         AM = addNewNodeWithPreferentialAttachments(AM, numAttachmentsPerNewNode);
         [numNodes, ~] = size(AM);
