@@ -138,6 +138,45 @@ classdef Polis < handle
 %             end
 
         end
+
+        function sellerIds = identifySellersAvailabeToBuyingAgent(obj, buyingAgent)
+            
+            % Start with my connections
+            sellerIds = buyingAgent.findMyConnections(obj.AM);
+                        
+            % Recursively find all indirect connections within the
+            % transaction distance
+            for i = 1:numel(sellerIds)
+            end
+            
+            % Return only the agents that are sellers
+            
+        end
+        
+        function foundAgentIds = findAllIndirectConnections(obj, searchLevel, foundAgentIds, thisAgentId, thatAgentId)
+            % TODO description
+            
+            if searchLevel > obj.maximumSearchLevels 
+                % Reached the maximum search level
+                return; 
+            else
+                searchLevel = searchLevel + 1;
+            end
+            
+            uncommonConnections = findAgentsUncommonConnections(obj.AM, thisAgentId, thatAgentId);
+            
+            if numel(uncommonConnections) == 0
+                % No more connections to evaluate
+                return;
+            else
+                % Recursivley search for more indirect connections
+                for i = 1:numel(uncommonConnections)
+                    uncommonAgentId = uncommonConnections(i);
+                    foundAgentIds = [foundAgentIds ; obj.findAllIndirectConnections(searchLevel, foundAgentIds, thatAgentId, uncommonAgentId)];
+                end
+            end
+
+        end
         
         %
         % Tabulation Methods
