@@ -89,7 +89,7 @@ end
 function testFindAgentsUncommonConnections(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections)
     fprintf("\nTest %db: Agent.findAgentsUncommonConnections\n\n", testNumber);
     fprintf("Seeking uncommon connections agent %d has from %d\n", targetAgentId, sourceAgentId);
-    uncommonConnections = Agent.findAgentsUncommonConnections(polis.AM, sourceAgentId, targetAgentId);
+    uncommonConnections = findUncommonConnectionsBetweenTwoAgents(polis.AM, sourceAgentId, targetAgentId);
     logIntegerArray("Uncommon Connections",uncommonConnections, 2, 2);
     [~, connections] = size(uncommonConnections);
     assert(connections == expectedConnections,"Error: expected %d uncommon connections, found %d uncommon connections", expectedConnections, connections);

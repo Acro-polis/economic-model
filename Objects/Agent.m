@@ -40,7 +40,7 @@ classdef Agent < handle
     end
 
     methods
-        
+                
         function inventory = get.availabeInventory(obj)
             inventory = obj.initialInventory - sum(obj.numberItemsSold(1,:));
         end
@@ -56,6 +56,9 @@ classdef Agent < handle
                 type = Agent.TYPE_NONPARTICIPANT;
             end
         end
+    
+       output = findAgentsUncommonConnections(arg1, arg2, arg3);
+
     end
     
     methods (Access = public)
@@ -466,7 +469,7 @@ classdef Agent < handle
             end
             
             % Find the uncommon connections (remove this agent (obj.id), if it exists)
-            uncommonConnections = obj.removeMeIfIAmPresent(findAgentsUncommonConnections(AM, thisAgentId, thatAgentId));
+            uncommonConnections = obj.removeMeIfIAmPresent(findUncommonConnectionsBetweenTwoAgents(AM, thisAgentId, thatAgentId));
             [~, indices] = size(uncommonConnections);
             if indices > 0 
                 logIntegerArray("---- Uncommon Connections", uncommonConnections, 2, obj.polis.LoggingLevel)

@@ -35,6 +35,11 @@ classdef Polis < handle
     
     methods (Access = public)
         
+        function agent = getAgentById(obj, agentId)
+            % Given an agent id, return the corresponding agent object
+            agent = obj.agents(agentId);
+        end
+        
         function obj = Polis(AM, maximumSearchLevels)
             % Assign the adjacency matrix maximum search levels
             obj.AM = AM;
@@ -139,7 +144,9 @@ classdef Polis < handle
 
         end
 
-        function sellerIds = identifySellersAvailabeToBuyingAgent(obj, buyingAgent)
+        function sellerIds = identifySellersAvailabeToBuyingAgent(obj, buyingAgentId)
+            
+            buyingAgent = obj.agents(buyingAgentId);
             
             % Start with my connections
             sellerIds = buyingAgent.findMyConnections(obj.AM);
@@ -147,32 +154,45 @@ classdef Polis < handle
             % Recursively find all indirect connections within the
             % transaction distance
             for i = 1:numel(sellerIds)
+                sellerIds = [sellerIds ; findAllIndirectConnections(1, [], thisAgentId, thatAgentId)];
             end
             
             % Return only the agents that are sellers
             
         end
         
-        function foundAgentIds = findAllIndirectConnections(obj, searchLevel, foundAgentIds, thisAgentId, thatAgentId)
-            % TODO description
+        function uncommonConnectionAgentIds = findAllIndirectConnectionsBetweenTwoAgents(obj, searchLevel, uncommonConnectionAgentIds, thisAgentId, thatAgentId)
+            % For two connected agents, thisAgent and thatAgent, find the
+            % uncommon connections thatAgent has from thisAgent. Recursivly
+            % repead the process until the search level is reached or we
+            % run out of uncommon connections. Remove any duplicates along
+            % the way.
             
-            if searchLevel > obj.maximumSearchLevels 
-                % Reached the maximum search level
-                return; 
+            if searchLevel == obj.maximumSearchLevels 
+              logStatement("\nSearch Maximum Reached for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 0, obj.LoggingLevel);
+              return; 
             else
                 searchLevel = searchLevel + 1;
             end
             
-            uncommonConnections = findAgentsUncommonConnections(obj.AM, thisAgentId, thatAgentId);
-            
-            if numel(uncommonConnections) == 0
-                % No more connections to evaluate
+            % Find uncommon connections and remove any already found
+            logStatement("\nProcessing This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 0, obj.LoggingLevel);
+            newUncommonConnections = findUncommonConnectionsBetweenTwoAgents(obj.AM, thisAgentId, thatAgentId);
+            newUncommonConnections = setdiff(newUncommonConnections, uncommonConnectionAgentIds);
+
+            if numel(newUncommonConnections) == 0
+                logStatement("\nNone Found for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 0, obj.LoggingLevel);
                 return;
             else
+                logIntegerArray("Found Uncommon Connections", newUncommonConnections, 0, obj.LoggingLevel);
+                
+                % Accumulate what we found
+                uncommonConnectionAgentIds = [uncommonConnectionAgentIds , newUncommonConnections];
+                
                 % Recursivley search for more indirect connections
-                for i = 1:numel(uncommonConnections)
-                    uncommonAgentId = uncommonConnections(i);
-                    foundAgentIds = [foundAgentIds ; obj.findAllIndirectConnections(searchLevel, foundAgentIds, thatAgentId, uncommonAgentId)];
+                for i = 1:numel(newUncommonConnections)
+                    uncommonConnectionAgentId = newUncommonConnections(i);
+                    uncommonConnectionAgentIds = obj.findAllIndirectConnectionsBetweenTwoAgents(searchLevel, uncommonConnectionAgentIds, thatAgentId, uncommonConnectionAgentId);
                 end
             end
 
