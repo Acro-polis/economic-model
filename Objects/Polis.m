@@ -145,30 +145,41 @@ classdef Polis < handle
         end
 
         function sellerIds = identifySellersAvailabeToBuyingAgent(obj, buyingAgentId)
+            % Identify all sellers availble to the buying agent (limited by
+            % the transaction distance).
             
             buyingAgent = obj.agents(buyingAgentId);
-            
-            % Start with my connections
-            sellerIds = buyingAgent.findMyConnections(obj.AM);
+            buyingAgentDirectConnectionIds = buyingAgent.findMyConnections(obj.AM);
                         
             % Recursively find all indirect connections within the
-            % transaction distance
-            for i = 1:numel(sellerIds)
-                sellerIds = [sellerIds ; findAllIndirectConnections(1, [], thisAgentId, thatAgentId)];
+            % allowed transaction distance
+            indirectConnectionIds = {};
+            searchLevel = 0;
+            for i = 1:numel(buyingAgentDirectConnectionIds)
+                thatAgentId = buyingAgentDirectConnectionIds(i);
+                indirectConnectionIds = [indirectConnectionIds ; findAllIndirectConnections(searchLevel, [], buyingAgentId, thatAgentId)];
             end
             
-            % Return only the agents that are sellers
+            % Find the unique set of direct and indirect agent ids
+            buyerConnectionsIds = unique([cell2mat(indirectConnectionIds) , buyingAgentDirectConnectionIds]);
+            
+            % Return the direct and indirect agents that are sellers
+            allAgents = obj.agents;
+            nonSellerIdices = [allAgents.isSeller] ~= true;
+            sellers(nonSellerIdices) = [];
+            sellerIds = [sellers.id];
+            sellerIds = intersect(sellerIds, buyerConnectionsIds);
             
         end
         
         function uncommonConnectionAgentIds = findAllIndirectConnectionsBetweenTwoAgents(obj, searchLevel, uncommonConnectionAgentIds, thisAgentId, thatAgentId)
             % For two connected agents, thisAgent and thatAgent, find the
             % uncommon connections thatAgent has from thisAgent. Recursivly
-            % repead the process until the search level is reached or we
+            % repeat the process until the search level is reached or we
             % run out of uncommon connections. Remove any duplicates along
             % the way.
             
-            if searchLevel == obj.maximumSearchLevels 
+            if searchLevel >= obj.maximumSearchLevels 
               logStatement("\nSearch Maximum Reached for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 0, obj.LoggingLevel);
               return; 
             else
