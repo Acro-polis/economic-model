@@ -24,29 +24,32 @@ fprintf("\nTesting Agent.findAllNetworkPathsToAgent()\n\n");
 
 testNumber = 1;
 buyingAgentId = 10;
-buyingAgent = polis.getAgentById(buyingAgentId);
-buyingAgentsDirectConnections = buyingAgent.findMyConnections(AM);
-buyingAgentsIndirectConnections = {};
-for i = 1:numel(buyingAgentsDirectConnections)
-    targetAgentId = buyingAgentsDirectConnections(i);
-    buyingAgentsIndirectConnections = [buyingAgentsIndirectConnections , polis.findAllIndirectConnectionsBetweenTwoAgents(0, [], buyingAgentId, targetAgentId)]; 
-end
-allDirectAndIndirectConnections = unique([cell2mat(buyingAgentsIndirectConnections) , buyingAgentsDirectConnections]);
+expectedConnections = [5, 6, 8, 9];
+runConnectionsTest(polis, AM, buyingAgentId, testNumber, expectedConnections);
 
+testNumber = 2;
+buyingAgentId = 1;
+expectedConnections = [2, 3, 4, 5, 6, 7, 8, 9];
+runConnectionsTest(polis, AM, buyingAgentId, testNumber, expectedConnections);
 
-fprintf("\nTests Completed Successfully\n");
+fprintf("\n\nTests Completed Successfully\n");
 
 %+++++++++++++++++++++++++++++++++++++++++
-
 %
 % Test Function
 %
-function runPathTest(polis, sourceAgentId, targetAgentId, testNumber, expectedPaths)
+function runConnectionsTest(polis, AM, buyingAgentId, testNumber, expectedConnections)
     fprintf("\n------------------------------------------\n");
-    fprintf("\nTest %d - Testing connections between agents %d and %d\n", testNumber, sourceAgentId, targetAgentId);
-    paths = polis.agents(sourceAgentId).findAllNetworkPathsToAgent(polis.AM, targetAgentId);
-    polis.agents(sourceAgentId).logPaths(paths);
-    [numPaths, ~] = size(paths);
-    assert(numPaths == expectedPaths,"Test %d failed, expectd %d paths, found %d", testNumber, expectedPaths, numPaths);
-    fprintf("\nGood, %d Path(s) From Source Agent %d To Target Agent %d\n", expectedPaths, sourceAgentId, targetAgentId);
+    fprintf("\nTest %d - Testing buyingAgentId = %d\n", testNumber, buyingAgentId);
+    buyingAgent = polis.getAgentById(buyingAgentId);
+    buyingAgentsDirectConnections = buyingAgent.findMyConnections(AM);
+    buyingAgentsIndirectConnections = {};
+    for i = 1:numel(buyingAgentsDirectConnections)
+        targetAgentId = buyingAgentsDirectConnections(i);
+        buyingAgentsIndirectConnections = [buyingAgentsIndirectConnections , polis.findAllIndirectConnectionsBetweenTwoAgents(0, [], buyingAgentId, targetAgentId)]; 
+    end
+    allDirectAndIndirectConnections = unique([cell2mat(buyingAgentsIndirectConnections) , buyingAgentsDirectConnections]);
+    assert(isequal(allDirectAndIndirectConnections,expectedConnections) == 1,"Test %d failed, expected and found connections do not match", testNumber);
+    fprintf("\nGood, buyingAgentId = %d correctly has %d matched connections\n", buyingAgentId, numel(allDirectAndIndirectConnections));
 end
+

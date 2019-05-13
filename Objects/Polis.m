@@ -180,22 +180,22 @@ classdef Polis < handle
             % the way.
             
             if searchLevel >= obj.maximumSearchLevels 
-              logStatement("\nSearch Maximum Reached for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 0, obj.LoggingLevel);
+              logStatement("\nSearch Maximum Reached for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 2, obj.LoggingLevel);
               return; 
             else
                 searchLevel = searchLevel + 1;
             end
             
             % Find uncommon connections and remove any already found
-            logStatement("\nProcessing This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 0, obj.LoggingLevel);
+            logStatement("\nProcessing This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 2, obj.LoggingLevel);
             newUncommonConnections = findUncommonConnectionsBetweenTwoAgents(obj.AM, thisAgentId, thatAgentId);
             newUncommonConnections = setdiff(newUncommonConnections, uncommonConnectionAgentIds);
 
             if numel(newUncommonConnections) == 0
-                logStatement("\nNone Found for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 0, obj.LoggingLevel);
+                logStatement("\nNone Found for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 2, obj.LoggingLevel);
                 return;
             else
-                logIntegerArray("Found Uncommon Connections", newUncommonConnections, 0, obj.LoggingLevel);
+                logIntegerArray("Found Uncommon Connections", newUncommonConnections, 2, obj.LoggingLevel);
                 
                 % Accumulate what we found
                 uncommonConnectionAgentIds = [uncommonConnectionAgentIds , newUncommonConnections];

@@ -10,3 +10,4 @@ testAgents;
 testAgentWallets;
 testFindPaths;
 testTrustedTransactions;
+testFindAllIndirectConnectionsBetweenTwoAgents;
