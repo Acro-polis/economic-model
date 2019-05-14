@@ -144,6 +144,15 @@ classdef Polis < handle
 
         end
         
+        function agents = findAgentsByIndexes(obj, agentIndexes)
+            % Given a set of agent indexes, return the corresponding list
+            % of agent objects TODO - vectorize
+            agents = [];
+            for i = 1:numel(agentIndexes)
+                agents = [agents ; obj.agents(agentIndexes(i))];
+            end
+        end
+        
         function sellerIds = identifySellersAvailabeToBuyingAgent(obj, buyingAgentId)
             % Identify all sellers availble to the buying agent (limited by
             % the transaction distance).

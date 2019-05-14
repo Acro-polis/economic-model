@@ -48,7 +48,8 @@ fprintf("===========================================================\n");
 
 % Loop over the number of iterations
 %parpool('local', 2);
-parfor iteration = 1:numberIterations
+for iteration = 1:numberIterations
+%parfor iteration = 1:numberIterations
         
     polis = Polis(AM, maxSearchLevels); 
     polis.createAgents(1, numSteps);
@@ -136,7 +137,9 @@ parfor iteration = 1:numberIterations
            end
 
            % Find sellers that are not the buying agent
-           sellingAgents = polis.identifySellers(agentBuying);
+%           sellingAgents = polis.identifySellers(agentBuying);
+           sellingAgentIds = polis.identifySellersAvailabeToBuyingAgent(agentBuyerId);
+           sellingAgents = polis.findAgentsByIndexes(sellingAgentIds);
            numberOfAvailableSellers = size(sellingAgents,1);
 
            if  numberOfAvailableSellers > 0

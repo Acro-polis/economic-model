@@ -14,7 +14,7 @@ Commerce Model Input Parameters
 11) Percentage of Selling Agents: 0.75
 12) Price of Goods (drachma / unit): 325.00
 13) Initial Inventory (# units / agent): 300.00
-14) Number of Iterations: 10
+14) Number of Iterations: 1
 15) Output folder name:Model3_Sim2d
 
 Model 1: Edges Hybrid SN=1 FN=101 T=50 a=0.00 V1.1.0.csv
