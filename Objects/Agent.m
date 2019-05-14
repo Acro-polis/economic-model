@@ -89,6 +89,11 @@ classdef Agent < handle
             obj.initialInventory = initialInventory;
         end
         
+        function clearAsSeller(obj)
+            % Remove seller designation
+            obj.isSeller = false;
+        end
+
         function recordSale(obj, numItems, timeStep)
             % Record a sale
             assert(obj.availabeInventory >= numItems,"Error: unexpectedly out of inventory");

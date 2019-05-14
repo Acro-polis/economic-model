@@ -116,7 +116,7 @@ classdef Polis < handle
             end
             
         end
-                
+                        
         function sellers = identifySellers(obj, testAgent)
             % Return a list of all selling agents that are not the
             % testAgent
@@ -143,35 +143,40 @@ classdef Polis < handle
 %             end
 
         end
-
+        
         function sellerIds = identifySellersAvailabeToBuyingAgent(obj, buyingAgentId)
             % Identify all sellers availble to the buying agent (limited by
             % the transaction distance).
             
+            buyingAgentsIndirectConnectionsIds = {};
+            uncommonConnectionAgentIds = [];
+            initialSearchLevel = 0;
             buyingAgent = obj.agents(buyingAgentId);
             buyingAgentDirectConnectionIds = buyingAgent.findMyConnections(obj.AM);
                         
             % Recursively find all indirect connections within the
             % allowed transaction distance
-            indirectConnectionIds = {};
-            searchLevel = 0;
             for i = 1:numel(buyingAgentDirectConnectionIds)
-                thatAgentId = buyingAgentDirectConnectionIds(i);
-                indirectConnectionIds = [indirectConnectionIds ; findAllIndirectConnections(searchLevel, [], buyingAgentId, thatAgentId)];
+                targetAgentId = buyingAgentDirectConnectionIds(i);
+                buyingAgentsIndirectConnectionsIds = [buyingAgentsIndirectConnectionsIds , obj.findAllIndirectConnectionsBetweenTwoAgents(initialSearchLevel, uncommonConnectionAgentIds, buyingAgentId, targetAgentId)]; 
             end
-            
+
             % Find the unique set of direct and indirect agent ids
-            buyerConnectionsIds = unique([cell2mat(indirectConnectionIds) , buyingAgentDirectConnectionIds]);
+            buyerConnectionsIds = unique([cell2mat(buyingAgentsIndirectConnectionsIds) , buyingAgentDirectConnectionIds]);
             
+                        sellers = obj.agents;
+            ids = [sellers.isSeller] ~= true;
+            sellers(ids) = [];
+
             % Return the direct and indirect agents that are sellers
-            allAgents = obj.agents;
-            nonSellerIdices = [allAgents.isSeller] ~= true;
-            sellers(nonSellerIdices) = [];
-            sellerIds = [sellers.id];
-            sellerIds = intersect(sellerIds, buyerConnectionsIds);
+             sellerIds = obj.agents;
+             nonSellerIdices = [sellerIds.isSeller] ~= true;
+             sellerIds(nonSellerIdices) = [];
+             sellerIds = [sellers.id];
+             sellerIds = intersect(sellerIds, buyerConnectionsIds);
             
         end
-        
+           
         function uncommonConnectionAgentIds = findAllIndirectConnectionsBetweenTwoAgents(obj, searchLevel, uncommonConnectionAgentIds, thisAgentId, thatAgentId)
             % For two connected agents, thisAgent and thatAgent, find the
             % uncommon connections thatAgent has from thisAgent. Recursivly
@@ -208,7 +213,7 @@ classdef Polis < handle
             end
 
         end
-        
+                
         %
         % Tabulation Methods
         %
