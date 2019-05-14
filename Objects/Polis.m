@@ -164,16 +164,11 @@ classdef Polis < handle
             % Find the unique set of direct and indirect agent ids
             buyerConnectionsIds = unique([cell2mat(buyingAgentsIndirectConnectionsIds) , buyingAgentDirectConnectionIds]);
             
-                        sellers = obj.agents;
-            ids = [sellers.isSeller] ~= true;
-            sellers(ids) = [];
-
             % Return the direct and indirect agents that are sellers
-             sellerIds = obj.agents;
-             nonSellerIdices = [sellerIds.isSeller] ~= true;
-             sellerIds(nonSellerIdices) = [];
-             sellerIds = [sellers.id];
-             sellerIds = intersect(sellerIds, buyerConnectionsIds);
+            sellers = obj.agents;
+            indexes = [sellers.isSeller] ~= true;
+            sellers(indexes) = [];
+            sellerIds = intersect([sellers.id], buyerConnectionsIds);
             
         end
            
