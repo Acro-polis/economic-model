@@ -5,7 +5,7 @@
 % Author: Jess
 % Created: 2018.08.30
 %===================================================
-
+program_name = "Model Commerce With Dynamic Network";
 version_number = "1.0.0";
 
 % Read the input parameters (specify "inputFilename" as an environment
@@ -48,8 +48,8 @@ fprintf("===========================================================\n");
 
 % Loop over the number of iterations
 %parpool('local', 2);
-for iteration = 1:numberIterations
-%parfor iteration = 1:numberIterations
+%for iteration = 1:numberIterations
+parfor iteration = 1:numberIterations
         
     polis = Polis(AM, maxSearchLevels); 
     polis.createAgents(1, numSteps);
@@ -67,7 +67,7 @@ for iteration = 1:numberIterations
     [numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents] = polis.parseAgentCommerceRoleTypes();
 
     % Log Inputs
-    reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, "");
+    reportSimulationInputs(program_name, version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, "");
 
     % Report Initial Statistics
     sumWallets = polis.totalMoneySupplyAtTimestep(1);
@@ -136,13 +136,14 @@ for iteration = 1:numberIterations
                continue;
            end
 
-           % Find sellers that are not the buying agent
-%           sellingAgents = polis.identifySellers(agentBuying);
+           % Find sellers available to the buying agent
            sellingAgentIds = polis.identifySellersAvailabeToBuyingAgent(agentBuyerId);
-           sellingAgents = polis.findAgentsByIndexes(sellingAgentIds);
-           numberOfAvailableSellers = size(sellingAgents,1);
+           numberOfAvailableSellers = numel(sellingAgentIds);
 
            if  numberOfAvailableSellers > 0
+
+               % Convert Id's to objects
+               sellingAgents = polis.findAgentsByIndexes(sellingAgentIds);
 
                % Pick a seller randomly
                j = randsample(numberOfAvailableSellers,1);
@@ -175,8 +176,7 @@ for iteration = 1:numberIterations
 
            else
                % No sale :-(
-               logStatement("\nNo sellers available\n", [], 0, polis.LoggingLevel);
-               assert(true,"Should not be here, investigate!");
+               logStatement("\nNo sellers available for buyingAgent = %d\n", agentBuyerId, 0, polis.LoggingLevel);
            end
        end
 
@@ -223,7 +223,7 @@ for iteration = 1:numberIterations
 
     % Simulation Inputs
     filePath = sprintf("%s%s", outputPathIteration, "results.txt");
-    reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, filePath);
+    reportSimulationInputs(program_name, version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, filePath);
     
     % Simulation Statistics
     reportSimulationStatistics(polis, price, time, elapsedTime1, elapsedTime2, filePath);
@@ -397,8 +397,8 @@ function reportGlobalStatistics(filePath, salesEfficiency, noPath, noLiquidity, 
     end
 end
 
-function reportSimulationInputs(version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, filePath)
-    o1 = sprintf("\n----- Summarized Simulation Inputs For Code Version %s -----\n", version_number);
+function reportSimulationInputs(program_name, version_number, networkFilename, N, numSteps, maxSearchLevels, amountUBI, timeStepUBI, percentDemurrage, timeStepDemurrage, seedWalletSize, numberOfBuyers, numberOfSellers, price, numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents, filePath)
+    o1 = sprintf("\n----- Summarized Simulation Inputs For %s, Version %s -----\n", program_name, version_number);
     o2 = "";
     if networkFilename == ""
         o2 = sprintf("\n- Using Connected Network\n\n");

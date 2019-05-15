@@ -121,8 +121,6 @@ classdef Polis < handle
             % Return a list of all selling agents that are not the
             % testAgent
             
-            % Vectorized version of the original
-            
             % Build list of sellers
             sellers = obj.agents;
             ids = [sellers.isSeller] ~= true;
@@ -133,24 +131,12 @@ classdef Polis < handle
                 id = [sellers.id] == testAgent.id;
                 sellers(id) = [];
             end
-
-% Original            
-%             for i = 1:obj.numberOfAgents
-%                 agent = obj.agents(i);
-%                 if agent.isSeller && agent.id ~= testAgent.id
-%                     sellers = [sellers ; agent];
-%                 end
-%             end
-
         end
         
-        function agents = findAgentsByIndexes(obj, agentIndexes)
-            % Given a set of agent indexes, return the corresponding list
-            % of agent objects TODO - vectorize
-            agents = [];
-            for i = 1:numel(agentIndexes)
-                agents = [agents ; obj.agents(agentIndexes(i))];
-            end
+        function selectedAgents = findAgentsByIndexes(obj, agentIndexes)
+            % Given a set of agent indexes, return the corresponding agent
+            % objects
+            selectedAgents = obj.agents(agentIndexes(:));
         end
         
         function sellerIds = identifySellersAvailabeToBuyingAgent(obj, buyingAgentId)
