@@ -47,6 +47,10 @@ function [numSteps,                 ...
         end
 
         % Transaction Distance
+        % Max Search Level = 0 internally means we will always search for 
+        % your neighbors and neighbors neighbors. But we ask for 2 on 
+        % input as this makes more sense to a user - 2 legs searched.
+        % (i.e. if search level > max search level return (not >=))
         maxSearchLevels =  round(parseInputString(fgetl(fileId), inputTypeDouble)); % Search Levels (Input 4)
         maxSearchLevels = maxSearchLevels - 2;
         assert(maxSearchLevels >= 0,"Error: Transaction-Distance < 2");

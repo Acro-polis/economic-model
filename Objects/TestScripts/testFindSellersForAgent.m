@@ -11,7 +11,7 @@ numberOfAgents = 10; % We need to know this; cannot derive it from the connectio
 AM = importNetworkModelFromCSV(numberOfAgents, "Wallet Test Plan 10 Agents.csv");
 time = 1;
 totalTimeSteps = 10;
-maxSearchLevels = 2; % Don't subtract 2
+maxSearchLevels = 0; % Subtract 2
 polis = Polis(AM, maxSearchLevels);
 polis.createAgents(time, totalTimeSteps);
 numItems = 1;
@@ -41,12 +41,10 @@ polis.agents(6).clearAsSeller();
 testNumber = 3;
 buyingAgentId = 1;
 expectedSellers = [2, 5, 6];
-polis.agents(1).setupAsSeller(inventoryInitialUnits)
 polis.agents(2).setupAsSeller(inventoryInitialUnits)
 polis.agents(5).setupAsSeller(inventoryInitialUnits)
 polis.agents(6).setupAsSeller(inventoryInitialUnits)
 runFindSellersTest(polis, buyingAgentId, testNumber, expectedSellers);
-polis.agents(1).clearAsSeller();
 polis.agents(2).clearAsSeller();
 polis.agents(5).clearAsSeller();
 polis.agents(6).clearAsSeller();
@@ -55,7 +53,6 @@ testNumber = 4;
 buyingAgentId = 10;
 expectedSellers = [8, 9];
 polis.agents(1).setupAsSeller(inventoryInitialUnits)
-polis.agents(2).setupAsSeller(inventoryInitialUnits)
 polis.agents(9).setupAsSeller(inventoryInitialUnits)
 polis.agents(8).setupAsSeller(inventoryInitialUnits)
 runFindSellersTest(polis, buyingAgentId, testNumber, expectedSellers);

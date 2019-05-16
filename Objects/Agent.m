@@ -89,11 +89,6 @@ classdef Agent < handle
             obj.initialInventory = initialInventory;
         end
         
-        function clearAsSeller(obj)
-            % Remove seller designation
-            obj.isSeller = false;
-        end
-
         function recordSale(obj, numItems, timeStep)
             % Record a sale
             assert(obj.availabeInventory >= numItems,"Error: unexpectedly out of inventory");
@@ -361,7 +356,25 @@ classdef Agent < handle
                 logIntegerArray("Path", aPath, 2, obj.polis.LoggingLevel);
             end
         end
+
+        %
+        % Intended for testing or debugging
+        %
+        function clearAsSeller(obj)
+            % Remove seller designation
+            obj.isSeller = false;
+        end
+
+        function resetSellerStatus(obj, sellerStatus, inventory)
+            % state = true or false
+            obj.isSeller = sellerStatus;
+            obj.initialInventory = inventory;
+        end
         
+        function resetBuyerStatus(obj, buyerStatus)
+            obj.isBuyer = buyerStatus;
+        end
+
     end
         
     methods (Static)
@@ -465,7 +478,8 @@ classdef Agent < handle
             % If we run out of uncommon connections before we find the
             % target then we are out of luck, they are not connected and we
             % return (see below). Same if we run out of search levels
-            if searchLevel > obj.polis.maximumSearchLevels
+            % Must exceed search level to return
+            if searchLevel > obj.polis.maximumSearchLevels 
                 % No luck, go home empty handed
                 logStatement("**** Abandon Ship - Max Level Reached ****\n\n", [], 2, obj.polis.LoggingLevel);
                 return;

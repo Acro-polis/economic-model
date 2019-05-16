@@ -159,6 +159,10 @@ classdef Polis < handle
             % Find the unique set of direct and indirect agent ids
             buyerConnectionsIds = unique([cell2mat(buyingAgentsIndirectConnectionsIds) , buyingAgentDirectConnectionIds]);
             
+            % Remove the buyingAgentId if present (cannot buy from oneself)
+            id = buyerConnectionsIds == buyingAgentId;
+            buyerConnectionsIds(id) = [];
+            
             % Return the direct and indirect agents that are sellers
             sellers = obj.agents;
             indexes = [sellers.isSeller] ~= true;
@@ -174,20 +178,22 @@ classdef Polis < handle
             % run out of uncommon connections. Remove any duplicates along
             % the way.
             
-            if searchLevel >= obj.maximumSearchLevels 
-              logStatement("\nSearch Maximum Reached for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 2, obj.LoggingLevel);
+            logLevel = 2;
+            
+            if searchLevel > obj.maximumSearchLevels % Must exceed search level to return
+              logStatement("\nSearch Maximum Reached for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.LoggingLevel);
               return; 
             else
                 searchLevel = searchLevel + 1;
             end
             
             % Find uncommon connections and remove any already found
-            logStatement("\nProcessing This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 2, obj.LoggingLevel);
+            logStatement("\nProcessing This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.LoggingLevel);
             newUncommonConnections = findUncommonConnectionsBetweenTwoAgents(obj.AM, thisAgentId, thatAgentId);
             newUncommonConnections = setdiff(newUncommonConnections, uncommonConnectionAgentIds);
 
             if numel(newUncommonConnections) == 0
-                logStatement("\nNone Found for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], 2, obj.LoggingLevel);
+                logStatement("\nNone Found for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.LoggingLevel);
                 return;
             else
                 logIntegerArray("Found Uncommon Connections", newUncommonConnections, 2, obj.LoggingLevel);

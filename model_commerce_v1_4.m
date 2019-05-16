@@ -72,7 +72,7 @@ parfor iteration = 1:numberIterations
     
     % Setup Buyers and Sellers
     [numberOfBuyers, numberOfSellers] = polis.setupBuyersAndSellers(numberOfPassiveAgents, percentSellers, inventoryInitialUnits);
-
+    
     % Parse Roles
     [numBuySellAgents, numBuyAgents, numSellAgents, numPassiveAgents] = polis.parseAgentCommerceRoleTypes();
 
@@ -152,7 +152,7 @@ parfor iteration = 1:numberIterations
            numberOfAvailableSellers = numel(sellingAgentIds);
 
            if  numberOfAvailableSellers > 0
-
+               
                % Convert Id's to objects
                sellingAgents = polis.findAgentsByIndexes(sellingAgentIds);
 

@@ -11,7 +11,7 @@ numberOfAgents = 10; % We need to know this; cannot derive it from the connectio
 AM = importNetworkModelFromCSV(numberOfAgents, "Wallet Test Plan 10 Agents.csv");
 time = 1;
 totalTimeSteps = 10;
-maxSearchLevels = 2; % Don't subtract 2
+maxSearchLevels = 0; % Subtract 2
 polis = Polis(AM, maxSearchLevels);
 polis.createAgents(time, totalTimeSteps);
 numItems = 1;
@@ -24,12 +24,12 @@ fprintf("\nTesting Agent.findAllNetworkPathsToAgent()\n\n");
 
 testNumber = 1;
 buyingAgentId = 10;
-expectedConnections = [5, 6, 8, 9];
+expectedConnections = [8, 9];
 runConnectionsTest(polis, AM, buyingAgentId, testNumber, expectedConnections);
 
 testNumber = 2;
 buyingAgentId = 1;
-expectedConnections = [2, 3, 4, 5, 6, 7, 8, 9];
+expectedConnections = [2, 3, 4, 5, 6, 7, 8];
 runConnectionsTest(polis, AM, buyingAgentId, testNumber, expectedConnections);
 
 fprintf("\n\nTests Completed Successfully\n");
