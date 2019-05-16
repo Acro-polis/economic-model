@@ -1,0 +1,35 @@
+
+----- Summarized Simulation Inputs For Economic Commerce Model / Static Dynamic Network, Version ECM_1.4.0 -----
+
+- Network Input Filename = Wallet Test Plan 10 Agents.csv
+
+- Number Agents = 10, Time Steps (Duration) = 50, Maximum Search Path Level = 2
+
+- UBI = 100.00 drachmas/agent, applied every 1 time steps
+
+- Demurrage = 5.00 percent/agent, applied every 1 time steps
+
+- Starting wallet size/agent = 0.00 drachma
+
+- Price of goods = 75.00 drachmas
+
+- Initial Inventory = 300.00 Units
+
+- Num buyers   = 9 <= 10 agents
+
+- Num sellers  = 7 <= 10 agents
+
+- Num Buyers & Sellers = 7, Buyers Only = 2, Passive Agents = 1, Sellers Only = 0
+
+----- Summarized Results, End Of Time Step = 50 -----
+
+* Simulation Time = 0.05 + Results Generation Time = 0.05 = 0.11 Minutes
+
+* Total Money Supply = 18461.10 drachma, Total Demurrage = -31538.90 drachma, Total UBI = 50000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = -0.00)
+
+* Remaining Inventory Supply = 1700.00, Remaining Inventory Value = $127500.00, Total Inventory Exchanged = 400 (check: Purchased - Sold = 0.00)
+
+* Items Purchased = 400.00, Failed No Money = 0.00, Failed No Liquidity = 0.00, Failed No Paths = 0.00, Failed No Inventory = 0.00, Failed No Seller = 50.00
+* Expected Purchases = Items Purchased + Sum Of Failures = 450
+* Selling Efficiency = 88.89 percent
+
