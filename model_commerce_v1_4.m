@@ -39,8 +39,8 @@ outputSubFolderName] = readInputCommerceFile(inputFilename);
 
 % Final Setup
 
-% Reshuffle random number generator
-%rng('shuffle')
+% Shuffle random number generator
+rng('shuffle')
 
 % Output Directory
 outputFolderPath = "Output";

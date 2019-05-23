@@ -8,7 +8,7 @@
 
 clear;
 
-numberRuns = 3;
+numberRuns = 1;
 
 fileNames = ["" ; "" ; ""];
 fileNames(1) = "InputCommerce_1.txt";
@@ -17,8 +17,8 @@ fileNames(3) = "InputCommerce_3.txt";
 
 %TODO - implement parfor
 for i = 1:numberRuns
-    inputFileName = fileNames(i);
-    model_commerce;
+    inputFilename = fileNames(i);
+    model_commerce_v1_4;
 end
 
 
