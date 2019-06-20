@@ -1,7 +1,8 @@
 function outputEMNetworkForGephi(Am, polis, purchases, pathFailures, liquidityFailures, inventoryFailures, sumLiquidityFailuresCausedByAgent, noMoneyFailures, noSellerFailures, nodesFilePath, edgesFilePath)
 %=====================================================
 %
-% Output the netowrk model with statistics
+% Output the network model with statistics. We use Gephi to read and plot
+% this data.
 %
 % Author: Jess
 % Created: 2018.12.7

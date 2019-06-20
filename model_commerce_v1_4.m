@@ -11,6 +11,11 @@
 % converting "path" failures from "the selected seller is too far away" to 
 % "there is no available seller available within the transaction-distance".
 %
+% In Model v1.4.1 we now track and report which agents prevented a sale 
+% due to not having enough liquidity to propagate the deal along the path.
+% We have a new plot that shows this (Failures By Type By Agent) and we
+% export this data in the nodes file that can be read by Gephi.
+%
 % Author: Jess
 % Created: 2018.08.30
 %===================================================
@@ -285,15 +290,19 @@ parfor iteration = 1:numberIterations
     reportTransactionFailures(expectedPurchased, sumPurchased, sumNoPath, sumNoLiquidity, sumNoInventory, sumNoMoney, sumNoSeller, filePath);
     
     %
-    % Process Liquidity Failures - These are the number of failures that
-    % occurred caused by an agent on a given transaction path (as opposed 
-    % to the agent that lost a sale due to a liquidity problem among all 
-    % possible paths). 
+    % Process Caused By Agent Liquidity Failures - These failures record
+    % the agent that lacked sufficient liquidity to propagate the
+    % transaction along a given path between a Buyer and a Seller versus 
+    % the Buyer (agent) that lost a sale due to a lack of any liquid path 
+    % to the Seller. Thus the total of the former will always be >= 
+    % the total of the latter (No Liquidity Failures) since more than one
+    % path is typically analyzed when seeking a liquid path between a Buyer
+    % and a Seller.
     %
     sumLiquidityFailuresCausedByAgent = zeros(N,1);
     for agentId = 1:numel(polis.agents)
         sumLiquidityFailuresCausedByAgent(agentId,1) = polis.sumLiquidityFailuresCausedByAgent(agentId);
-        %fprintf("Agent %d caused %d failures\n", agentId, sumLiquidityFailuresForAgent(agentId,1));
+        logStatement('Agent %d caused %d failures\n', [agentId, sumLiquidityFailuresCausedByAgent(agentId,1)], 2, polis.LoggingLevel);
     end
     
     % Output Network
@@ -327,9 +336,13 @@ parfor iteration = 1:numberIterations
     filePath = sprintf("%s%s", outputPathIteration, "Sales.fig");
     plotSoldItemsByAgent(polis, Sold, ids, time, filePath);
 
-    % Plot transaction failures by agent
+    % Plot transaction purchases and failures by agent
     filePath = sprintf("%s%s", outputPathIteration, "Transaction_Log_Agent.fig");
-    plotTransactionFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoInventory, FailNoSeller, Purchased, filePath);
+    plotTransactionPurchasesAndFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoInventory, FailNoSeller, Purchased, filePath);
+
+    % Plot transaction failures by agent
+    filePath = sprintf("%s%s", outputPathIteration, "Failures_Log_Agent.fig");
+    plotTransactionFailuresByAgent(N, FailNoMoney, FailNoLiquidity, sumLiquidityFailuresCausedByAgent, FailNoInventory, FailNoSeller, filePath);
 
     % Plot transaction failures in time
     filePath = sprintf("%s%s", outputPathIteration, "Transaction_Log_Time.fig");
@@ -654,7 +667,7 @@ end
 %
 % ====== Plotting Functions ======
 %
-function plotTransactionFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoInventory, FailNoSeller, Purchased, filePath)
+function plotTransactionPurchasesAndFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoInventory, FailNoSeller, Purchased, filePath)
 
     sumNoMoney      = sum(FailNoMoney,2);
     sumNoLiquidity  = sum(FailNoLiquidity,2);
@@ -744,6 +757,31 @@ function plotTransactionFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquid
     
     saveas(f, filePath, 'fig');
        
+end
+
+function plotTransactionFailuresByAgent(N, FailNoMoney, FailNoLiquidity, sumLiquidityFailuresCausedByAgent, FailNoInventory, FailNoSeller, filePath)
+
+    sumNoLiquidity  = sum(FailNoLiquidity,2);
+    sumNoSeller     = sum(FailNoSeller,2);
+    sumNoInventory  = sum(FailNoInventory,2);
+    sumNoMoney      = sum(FailNoMoney,2);
+
+    f = figure;
+    x = 1:N;
+    hold on;
+    p1 = plot(x, sumLiquidityFailuresCausedByAgent.', '-b');
+    p2 = plot(x, sumNoLiquidity.', '--x');
+    p3 = plot(x, sumNoSeller.', '-r');
+    p4 = plot(x, sumNoInventory.', '-g');
+    p5 = plot(x, sumNoMoney.', '-o');
+    hold off;
+    xlim([1 N]);
+    legend([p1, p2, p3, p4, p5],{'Caused Liquidity','Suffered Liquidity','No Seller','No Inventory','No Money'});
+    xlabel('Agent');
+    ylabel('Number of Failures');
+    title('Deal Failures By Type By Agent');
+    
+    saveas(f, filePath, 'fig');
 end
 
 function plotTransactionFailuresInTime(time, FailNoMoney, FailNoLiquidity, FailNoInventory, FailNoSeller, filePath)

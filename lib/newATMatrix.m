@@ -1,4 +1,4 @@
-function [newATMatrix] = newAgentTimeMatrix(agents, time, seed)
+function [newATMatrix] = newATMatrix(agents, time, seed)
 %==========================================================================
 %
 % newAgentTimeMatrix

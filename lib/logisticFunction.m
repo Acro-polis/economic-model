@@ -15,6 +15,6 @@ function [fx] = logisticFunction (a, b, c, d, x)
 %  c = 0.75;
 %  d = 4;
   
-  fx = (a / (1 + b*exp(-c*x))) - a / d;
+fx = (a / (1 + b*exp(-c*x))) - a / d;
   
 end

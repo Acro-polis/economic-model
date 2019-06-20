@@ -1,8 +1,7 @@
 function [avgDeg] = averageDegree(AM)
 %=====================================================
 %
-% Calculate the average degree for the given adjacency
-% matrix. 
+% Calculate the average degree for the given adjacency matrix. 
 %
 % Author: Jess
 % Created: 2018.07.16
