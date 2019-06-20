@@ -7,6 +7,11 @@ classdef Polis < handle
 % Created by Jess 10.26.18
 %================================================================
 
+    properties (SetAccess = public)
+        currentTime         % Current Time Step
+        liquidityFailures   % Array of all liquidity failures -- TODO further abstract
+    end
+    
     properties (SetAccess = private)
         AM                  % The system adjacency matrix
         agents              % Array of all agents
@@ -384,6 +389,23 @@ classdef Polis < handle
                 totalLedgerRecordsByAgentNonTransitive(i,1) = obj.agents(i).totalLedgerRecordsForTransactionTypeSeries(TransactionType.BUY_SELL_SERIES, timeStep);
                 totalLedgerRecordsByAgentTransitive(i,1) = obj.agents(i).totalLedgerRecordsForTransactionTypeSeries(TransactionType.BUY_SELL_TRANSITIVE_SERIES, timeStep);
             end
+        end
+        
+        function numberOfFailures = sumLiquidityFailuresForAgent(obj, agentId)
+            % Number of liquidity failures recorded for this agent
+        
+            function result = isAgent(obj)
+                if obj.sourceAgentId == agentId
+                    result = true;
+                else
+                    result = false;
+                end
+            end
+            functionHandle = @isAgent;
+    
+            matchingObjects = findobj(obj.liquidityFailures, '-function', functionHandle);
+            numberOfFailures = numel(matchingObjects);
+    
         end
         
     end

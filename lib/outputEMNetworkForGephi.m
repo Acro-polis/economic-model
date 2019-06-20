@@ -1,4 +1,4 @@
-function outputEMNetworkForGephi(Am, polis, purchases, pathFailures, liquidityFailures, inventoryFailures, noMoneyFailures, noSellerFailures, nodesFilePath, edgesFilePath)
+function outputEMNetworkForGephi(Am, polis, purchases, pathFailures, liquidityFailures, inventoryFailures, sumLiquidityFailuresForAgent, noMoneyFailures, noSellerFailures, nodesFilePath, edgesFilePath)
 %=====================================================
 %
 % Output the netowrk model with statistics
@@ -12,10 +12,10 @@ function outputEMNetworkForGephi(Am, polis, purchases, pathFailures, liquidityFa
     
     fileIdNodes = fopen(nodesFilePath, "w");
     if fileIdNodes > 0
-        fprintf(fileIdNodes,"Id,Label,Purchases,PathFail,LiquidityFail,InventoryFail,NoMoneyFail,NoSellerFail,AgentType\n");
+        fprintf(fileIdNodes,"Id,Label,Purchases,PathFail,LiquidityFail,CauseOfLiquidityFail,InventoryFail,NoMoneyFail,NoSellerFail,AgentType\n");
         for i = 1:N
                 agentType = typeOfAgent(agents(i));
-                fprintf(fileIdNodes, '%d,\"Node %d\", %.2f, %.2f, %.2f, %.2f, %.2f, %2.f, %2.f\n', i, i, purchases(i), pathFailures(i), liquidityFailures(i), inventoryFailures(i), noMoneyFailures(i), noSellerFailures(i), agentType);
+                fprintf(fileIdNodes, '%d,\"Node %d\", %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %2.f, %2.f\n', i, i, purchases(i), pathFailures(i), liquidityFailures(i), sumLiquidityFailuresForAgent(i), inventoryFailures(i), noMoneyFailures(i), noSellerFailures(i), agentType);
         end
         fclose(fileIdNodes);
     end

@@ -454,6 +454,11 @@ classdef Agent < handle
                 if availableBalance <= amount
                     logStatement("Path failed, no balance\n", [], 2, obj.polis.LoggingLevel);
                     pathIsGood = false;
+                    %
+                    % Record Liquidity Failure
+                    %
+                    lf = LiquidityFailure(thisAgentId, thatAgentId, amount, mutualAgentIds, path, "Nada", obj.polis.currentTime);
+                    obj.polis.liquidityFailures = [obj.polis.liquidityFailures; lf];
                     break;
                 end
             end

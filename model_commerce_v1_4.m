@@ -15,7 +15,7 @@
 % Created: 2018.08.30
 %===================================================
 program_name = "Economic Commerce Model / Static Dynamic Network";
-version_number = "ECM_1.4.0";
+version_number = "ECM_1.4.1";
 
 % Read the input parameters (specify "inputFilename" as an environment
 % variable prior to running)
@@ -133,6 +133,8 @@ parfor iteration = 1:numberIterations
 
        logStatement("\n++++++++ Start of time step = %d ++++++++\n", time, 0, polis.LoggingLevel);
 
+       polis.currentTime = time;
+       
        % Apply demurrage
        if intervalDemurrage < timeStepDemurrage
            intervalDemurrage = intervalDemurrage + 1;
@@ -282,10 +284,21 @@ parfor iteration = 1:numberIterations
     
     reportTransactionFailures(expectedPurchased, sumPurchased, sumNoPath, sumNoLiquidity, sumNoInventory, sumNoMoney, sumNoSeller, filePath);
     
+    %
+    % Process Liquidity Failures - These are the number of failures that
+    % occurred caused by an agent on a given transaction path (as opposed 
+    % to the agent that lost a sale due to a liquidity problem). 
+    %
+    sumLiquidityFailuresForAgent = zeros(N,1);
+    for agentId = 1:numel(polis.agents)
+        sumLiquidityFailuresForAgent(agentId,1) = polis.sumLiquidityFailuresForAgent(agentId);
+        %fprintf("Agent %d caused %d failures\n", agentId, sumLiquidityFailuresForAgent(agentId,1));
+    end
+    
     % Output Network
     nodesFilePath = sprintf("%s%s", outputPathIteration, "nodes.csv");
     edgesFilePath = sprintf("%s%s", outputPathIteration, "edges.csv");
-    outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, FailNoSeller, nodesFilePath, edgesFilePath);
+    outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, sumLiquidityFailuresForAgent, FailNoInventory, FailNoMoney, FailNoSeller, nodesFilePath, edgesFilePath);
 
     %
     % ======  Plot some results  ======
@@ -625,7 +638,7 @@ function [wallets, ubi, demurrage, purchased, sold, ids, agentTypes] = sortByAge
             ids = ids(indices);
 end
 
-function outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, FailNoMoney, FailNoSeller, nodesFilePath, edgesFilePath)
+function outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, sumLiquidityFailuresForAgent, FailNoMoney, FailNoSeller, nodesFilePath, edgesFilePath)
     % Output the network with some statistics for external processing
     sumPurchased    = sum(Purchased,2);
     sumNoPath       = sum(FailNoPath,2);
@@ -633,7 +646,9 @@ function outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, FailNo
     sumNoInventory  = sum(FailNoInventory,2);
     sumNoMoney      = sum(FailNoMoney,2);
     sumNoSeller     = sum(FailNoSeller,2);
-    outputEMNetworkForGephi(AM, polis, sumPurchased, sumNoPath, sumNoLiquidity, sumNoInventory, sumNoMoney, sumNoSeller, nodesFilePath, edgesFilePath);
+    % No processing required sumLiquidityFailuresForAgent, already an Nx1
+    % matrix
+    outputEMNetworkForGephi(AM, polis, sumPurchased, sumNoPath, sumNoLiquidity, sumLiquidityFailuresForAgent, sumNoInventory, sumNoMoney, sumNoSeller, nodesFilePath, edgesFilePath);
 end
 
 %
