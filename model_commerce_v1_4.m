@@ -287,18 +287,19 @@ parfor iteration = 1:numberIterations
     %
     % Process Liquidity Failures - These are the number of failures that
     % occurred caused by an agent on a given transaction path (as opposed 
-    % to the agent that lost a sale due to a liquidity problem). 
+    % to the agent that lost a sale due to a liquidity problem among all 
+    % possible paths). 
     %
-    sumLiquidityFailuresForAgent = zeros(N,1);
+    sumLiquidityFailuresCausedByAgent = zeros(N,1);
     for agentId = 1:numel(polis.agents)
-        sumLiquidityFailuresForAgent(agentId,1) = polis.sumLiquidityFailuresForAgent(agentId);
+        sumLiquidityFailuresCausedByAgent(agentId,1) = polis.sumLiquidityFailuresCausedByAgent(agentId);
         %fprintf("Agent %d caused %d failures\n", agentId, sumLiquidityFailuresForAgent(agentId,1));
     end
     
     % Output Network
     nodesFilePath = sprintf("%s%s", outputPathIteration, "nodes.csv");
     edgesFilePath = sprintf("%s%s", outputPathIteration, "edges.csv");
-    outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, sumLiquidityFailuresForAgent, FailNoInventory, FailNoMoney, FailNoSeller, nodesFilePath, edgesFilePath);
+    outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, sumLiquidityFailuresCausedByAgent, FailNoInventory, FailNoMoney, FailNoSeller, nodesFilePath, edgesFilePath);
 
     %
     % ======  Plot some results  ======
@@ -638,7 +639,7 @@ function [wallets, ubi, demurrage, purchased, sold, ids, agentTypes] = sortByAge
             ids = ids(indices);
 end
 
-function outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, sumLiquidityFailuresForAgent, FailNoMoney, FailNoSeller, nodesFilePath, edgesFilePath)
+function outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, FailNoInventory, sumLiquidityFailuresCausedByAgent, FailNoMoney, FailNoSeller, nodesFilePath, edgesFilePath)
     % Output the network with some statistics for external processing
     sumPurchased    = sum(Purchased,2);
     sumNoPath       = sum(FailNoPath,2);
@@ -646,9 +647,8 @@ function outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, FailNo
     sumNoInventory  = sum(FailNoInventory,2);
     sumNoMoney      = sum(FailNoMoney,2);
     sumNoSeller     = sum(FailNoSeller,2);
-    % No processing required sumLiquidityFailuresForAgent, already an Nx1
-    % matrix
-    outputEMNetworkForGephi(AM, polis, sumPurchased, sumNoPath, sumNoLiquidity, sumLiquidityFailuresForAgent, sumNoInventory, sumNoMoney, sumNoSeller, nodesFilePath, edgesFilePath);
+    % No processing required sumLiquidityFailuresCausedByAgent, already an Nx1 matrix
+    outputEMNetworkForGephi(AM, polis, sumPurchased, sumNoPath, sumNoLiquidity, sumLiquidityFailuresCausedByAgent, sumNoInventory, sumNoMoney, sumNoSeller, nodesFilePath, edgesFilePath);
 end
 
 %

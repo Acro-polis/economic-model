@@ -23,7 +23,7 @@ classdef Polis < handle
     end
     
     properties (Constant)
-        LoggingLevel = 0;   % Current Levels 0, 1, 2
+        LoggingLevel = 0;   % Current Levels 0, 1, 2 (0 least, 2 most)
         PolisId = 0 
         PercentDemurage = 0.05
     end
@@ -391,9 +391,9 @@ classdef Polis < handle
             end
         end
         
-        function numberOfFailures = sumLiquidityFailuresForAgent(obj, agentId)
-            % Number of liquidity failures recorded for this agent
-        
+        function numberOfFailures = sumLiquidityFailuresCausedByAgent(obj, agentId)
+            % Return number of liquidity failures due to this agent,
+            % independent of time
             function result = isAgent(obj)
                 if obj.sourceAgentId == agentId
                     result = true;
@@ -402,10 +402,8 @@ classdef Polis < handle
                 end
             end
             functionHandle = @isAgent;
-    
             matchingObjects = findobj(obj.liquidityFailures, '-function', functionHandle);
             numberOfFailures = numel(matchingObjects);
-    
         end
         
     end
