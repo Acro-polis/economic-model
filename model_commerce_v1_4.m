@@ -788,13 +788,13 @@ function plotTransactionFailuresInTime(time, FailNoMoney, FailNoLiquidity, FailN
     f = figure;
     x = 1:time;
     hold on;
-    p1 = plot(x, sum(FailNoSeller(:,x)), '-r');
-    p2 = plot(x, sum(FailNoLiquidity(:,x)), '--x');
+    p1 = plot(x, sum(FailNoLiquidity(:,x)), '--x');
+    p2 = plot(x, sum(FailNoSeller(:,x)), '-r');
     p3 = plot(x, sum(FailNoInventory(:,x)), '-g');
     p4 = plot(x, sum(FailNoMoney(:,x)), '-o');
     hold off;
     xlim([1 time]);
-    legend([p1, p2, p3, p4],{'Seller','Liquidity','Inventory','Money'});
+    legend([p1, p2, p3, p4],{'Suffered Liquidity','No Seller','No Inventory','No Money'});
     xlabel('Time');
     ylabel('Number of Failures');
     title('Deal Failures By Type In Time');
