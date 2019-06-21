@@ -457,6 +457,7 @@ classdef Agent < handle
                     % Record Agent that caused the liquidity failure
                     lf = LiquidityFailure(thisAgentId, thatAgentId, amount, mutualAgentIds, path, "", obj.polis.currentTime);
                     obj.polis.liquidityFailures = [obj.polis.liquidityFailures; lf];
+                    lf.dump;
                     break;
                 end
             end

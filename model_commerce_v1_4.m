@@ -302,7 +302,7 @@ parfor iteration = 1:numberIterations
     sumLiquidityFailuresCausedByAgent = zeros(N,1);
     for agentId = 1:numel(polis.agents)
         sumLiquidityFailuresCausedByAgent(agentId,1) = polis.sumLiquidityFailuresCausedByAgent(agentId);
-        logStatement('Agent %d caused %d failures\n', [agentId, sumLiquidityFailuresCausedByAgent(agentId,1)], 2, polis.LoggingLevel);
+        logStatement('Agent %d caused %d failures\n', [agentId, sumLiquidityFailuresCausedByAgent(agentId,1)], 0, polis.LoggingLevel);
     end
     
     % Output Network
