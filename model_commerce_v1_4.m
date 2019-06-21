@@ -2,19 +2,19 @@
 %
 % Economic Commerce Model: 
 %
-% Model v1.3 for a buyer, a random seller was selected on the network and
-% if the seller was located beyond the transaction-distance the deal was
-% terminated and a "path" failure was recored.
+% In Model v1.4.1 we now track and report which agents prevented a sale 
+% due to not having enough liquidity to propagate the deal along the path.
+% We have a new plot that shows this (Failures By Type By Agent) and we
+% export this data in the nodes file that can be read by Gephi.
 %
 % In this Model, model v1.4, the pool of sellers is limited to those that
 % reside within the transaction-distance of the buyer, effectively
 % converting "path" failures from "the selected seller is too far away" to 
 % "there is no available seller available within the transaction-distance".
 %
-% In Model v1.4.1 we now track and report which agents prevented a sale 
-% due to not having enough liquidity to propagate the deal along the path.
-% We have a new plot that shows this (Failures By Type By Agent) and we
-% export this data in the nodes file that can be read by Gephi.
+% Model v1.3 for a buyer, a random seller was selected on the network and
+% if the seller was located beyond the transaction-distance the deal was
+% terminated and a "path" failure was recored.
 %
 % Author: Jess
 % Created: 2018.08.30
@@ -788,10 +788,10 @@ function plotTransactionFailuresInTime(time, FailNoMoney, FailNoLiquidity, FailN
     f = figure;
     x = 1:time;
     hold on;
-    p1 = plot(x, sum(FailNoSeller(:,x)), '--x');
-    p2 = plot(x, sum(FailNoLiquidity(:,x)), '-b');
-    p3 = plot(x, sum(FailNoInventory(:,x)), '-r');
-    p4 = plot(x, sum(FailNoMoney(:,x)), '-g');
+    p1 = plot(x, sum(FailNoSeller(:,x)), '-r');
+    p2 = plot(x, sum(FailNoLiquidity(:,x)), '--x');
+    p3 = plot(x, sum(FailNoInventory(:,x)), '-g');
+    p4 = plot(x, sum(FailNoMoney(:,x)), '-o');
     hold off;
     xlim([1 time]);
     legend([p1, p2, p3, p4],{'Seller','Liquidity','Inventory','Money'});
