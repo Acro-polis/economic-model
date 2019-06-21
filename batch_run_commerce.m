@@ -8,7 +8,7 @@
 
 clear;
 
-numberRuns = 3;
+numberRuns = 1;
 
 fileNames = ["" ; "" ; ""];
 fileNames(1) = "InputCommerce_1.txt";
