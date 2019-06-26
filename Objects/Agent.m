@@ -322,6 +322,12 @@ classdef Agent < handle
             balance = obj.wallet.balanceForTransactionTypeAtTimestep(transactionType, timeStep);
         end
         
+        function [agentIds, balances] = currenciesInWalletByAgent(obj, timeStep)
+            % Return the balance for all currencies in the wallet at the
+            % time = timeStep
+            [agentIds, balances] = obj.wallet.currenciesInWalletByAgent(timeStep);
+        end
+
         %        
         % Methods supporting data logging
         %
@@ -457,7 +463,7 @@ classdef Agent < handle
                     % Record Agent that caused the liquidity failure
                     lf = LiquidityFailure(thisAgentId, thatAgentId, amount, mutualAgentIds, path, "", obj.polis.currentTime);
                     obj.polis.liquidityFailures = [obj.polis.liquidityFailures; lf];
-                    lf.dump;
+                    %lf.dump;
                     break;
                 end
             end

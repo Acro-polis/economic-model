@@ -9,8 +9,8 @@ classdef LiquidityFailure < matlab.mixin.SetGet
 
     properties (SetAccess=private)
         id                   uint32 % Liquidity Failure Id      - unique id for this wallet
-        sourceAgentId        uint32 % Source Agent Id           - the agent that could not contract
-        destinationAgentId   uint32 % Destination Agent Id      - the agent the source attempted to contract with
+        sourceAgentId        uint32 % Source Agent Id           - the agent that could not continue the transaction
+        destinationAgentId   uint32 % Destination Agent Id      - the agent the source attempted to transact with
         amount               double % Transaction Amount        - transaction amount
         mutualIds                   % Mutual Ids                - the agents mutually shared between the transacting agents
         path                        % Transaction Path          - the entire transaction path

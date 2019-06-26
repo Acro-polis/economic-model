@@ -89,8 +89,8 @@ fprintf("===========================================================\n");
 
 % Loop over the number of iterations
 %parpool('local', 2);
-%for iteration = 1:numberIterations
-parfor iteration = 1:numberIterations
+for iteration = 1:numberIterations
+%parfor iteration = 1:numberIterations
         
     polis = Polis(AM, maxSearchLevels); 
     polis.createAgents(1, numSteps);
@@ -302,7 +302,7 @@ parfor iteration = 1:numberIterations
     sumLiquidityFailuresCausedByAgent = zeros(N,1);
     for agentId = 1:numel(polis.agents)
         sumLiquidityFailuresCausedByAgent(agentId,1) = polis.sumLiquidityFailuresCausedByAgent(agentId);
-        logStatement('Agent %d caused %d failures\n', [agentId, sumLiquidityFailuresCausedByAgent(agentId,1)], 0, polis.LoggingLevel);
+        logStatement('Agent %d caused %d failures\n', [agentId, sumLiquidityFailuresCausedByAgent(agentId,1)], 2, polis.LoggingLevel);
     end
     
     % Output Network
@@ -311,12 +311,35 @@ parfor iteration = 1:numberIterations
     outputNetwork(AM, polis, Purchased, FailNoPath, FailNoLiquidity, sumLiquidityFailuresCausedByAgent, FailNoInventory, FailNoMoney, FailNoSeller, nodesFilePath, edgesFilePath);
 
     %
+    % Find the distribution of currencies in each agents wallet, convert
+    % the balances to percentages and build an NxN matrix with (1,1) being
+    % in the lower left corner
+    %
+    currencyDistribution = zeros(N,N);
+    for agentId = 1:numel(polis.agents)
+        [agentIds, balances] = polis.agents(agentId).currenciesInWalletByAgent(time);
+        percentBalances = balances ./ sum(balances);
+        for index = 1:numel(agentIds)
+            aid = agentIds(index);
+            currencyDistribution(aid,agentId) = percentBalances(index);
+        end
+    end
+    
+    %
     % ======  Plot some results  ======
     %
     logStatement("\n----- Begin Plotting -----\n", [], 0, polis.LoggingLevel);
     close all
     yScale = 1.5;
     colors = Colors();
+
+    % Plot the currency distribution (Stacked Bars)
+    filePath = sprintf("%s%s", outputPathIteration, "Currency_Distribution_Bar.fig");
+    plotCurrencyDistributionBar(currencyDistribution, filePath);
+
+    % Plot the currency distribution (Scatter)
+    filePath = sprintf("%s%s", outputPathIteration, "Currency_Distribution_Scatter.fig");
+    plotCurrencyDistributionStacked(currencyDistribution, filePath);
 
     % Plot the 4 panal summary plot
     filePath = sprintf("%s%s", outputPathIteration, "Summary.fig");
@@ -667,6 +690,76 @@ end
 %
 % ====== Plotting Functions ======
 %
+function plotCurrencyDistributionBar(currencyDistribution, filePath)
+
+    N = numel(currencyDistribution(:,1));
+    
+    currencyDistribution = currencyDistribution .* 100;
+    currencyDistribution = flip(currencyDistribution,1);
+    currencyDistribution = currencyDistribution.';
+    currencyDistribution = flip(currencyDistribution,2);
+    
+    f = figure;
+    hold on;
+    p = bar(currencyDistribution,'stacked');
+    for i = 1:length(p)
+%        p(i).FaceColor = 'blue';
+    end
+    hold off;
+    
+    xlim([0.4 N+.6]);
+    ylim([0 100]);
+    xlabel('Agent');
+    ylabel('Currency Distribution');
+    title("Currency Distribution By Agent Though Transaction");
+    
+    saveas(f, filePath, 'fig');
+
+end
+
+
+function plotCurrencyDistributionStacked(currencyDistribution, filePath)
+
+    N = numel(currencyDistribution(:,1));
+    
+    x = [];
+    y = [];
+    z = [];
+    
+    currencyDistribution = currencyDistribution.';
+    for i = 1:N
+        for j = 1:N
+            k = currencyDistribution(i,j);
+            if k > 0
+                x = [x, i];
+                y = [y, j];
+                z = [z, k];
+            end
+        end
+    end
+    
+    
+    f = figure;
+    hold on;
+    grid on;
+    p = scatter3(x,y,z,z*200,z,'filled');
+    p.MarkerEdgeColor = 'black';
+    p.LineWidth = 0.25;
+    cmap = [1.00 0.53 0.00 
+            0.60 0.93 0.00 
+            0.83 0.00 0.44 
+            0.00 0.46 0.66];
+    colormap(cmap);
+    hold off;
+    
+    xlabel('Agent Wallet');
+    ylabel('Currency Present In Wallet (By Agent)');
+    title("Currency Distribution By Agent Though Transaction");
+
+    saveas(f, filePath, 'fig');
+    
+end
+
 function plotTransactionPurchasesAndFailuresByAgent(yScale, polis, FailNoMoney, FailNoLiquidity, FailNoInventory, FailNoSeller, Purchased, filePath)
 
     sumNoMoney      = sum(FailNoMoney,2);

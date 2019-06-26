@@ -269,6 +269,46 @@ Buying - subtracting currency
             balance = sum([matchingTransactions.amount]);
         end
         
+        function [agentIds, balances] = currenciesInWalletByAgent(obj, timeStep)
+            % Return the distribution of currencies in this wallet at the
+            % time = timeStep excluding transitive transactions
+            
+            % Get all the non-transtivie records <= timeStep
+            function result = withinTimePeriodNoTransitive(obj)
+                % obj is a Transaction
+                if obj.dateCreated <= timeStep && ...
+                   (obj.type ~= TransactionType.BUY_TRANSITIVE || ...
+                   obj.type ~= TransactionType.SELL_TRANSITIVE)
+                    result = true;
+                else
+                    result = false;
+                end
+            end            
+            functionHandle = @withinTimePeriodNoTransitive;
+            matchingTransactions = findobj(obj.transactions,'-function', functionHandle);            
+
+            %
+            % Find the unique set of agent currency types
+            %
+            agentIds = get(matchingTransactions,'currencyAgentId');
+            if iscell(agentIds)
+                agentIds = unique(cell2mat(agentIds));
+            else
+                % Edge case of one transaction only
+                agentIds = unique(agentIds);
+            end
+            
+            %
+            % Loop over each agent, calculate & record the balance
+            %
+            agents = numel(agentIds);
+            balances = zeros(agents,1);
+            for a = 1:agents
+                balances(a) = obj.balanceForAgentsCurrency(agentIds(a));
+            end
+            
+        end
+        
         %
         % Output / Logging
         %
