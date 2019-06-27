@@ -5,7 +5,9 @@
 % In Model v1.4.1 we now track and report which agents prevented a sale 
 % due to not having enough liquidity to propagate the deal along the path.
 % We have a new plot that shows this (Failures By Type By Agent) and we
-% export this data in the nodes file that can be read by Gephi.
+% export this data in the nodes file that can be read by Gephi. We also
+% added a bar and scatter plot that shows the distribution of currency in
+% an agents wallet at the end of a simulation.
 %
 % In this Model, model v1.4, the pool of sellers is limited to those that
 % reside within the transaction-distance of the buyer, effectively
@@ -89,8 +91,8 @@ fprintf("===========================================================\n");
 
 % Loop over the number of iterations
 %parpool('local', 2);
-for iteration = 1:numberIterations
-%parfor iteration = 1:numberIterations
+%for iteration = 1:numberIterations
+parfor iteration = 1:numberIterations
         
     polis = Polis(AM, maxSearchLevels); 
     polis.createAgents(1, numSteps);
@@ -339,7 +341,7 @@ for iteration = 1:numberIterations
 
     % Plot the currency distribution (Scatter)
     filePath = sprintf("%s%s", outputPathIteration, "Currency_Distribution_Scatter.fig");
-    plotCurrencyDistributionStacked(currencyDistribution, filePath);
+    plotCurrencyDistributionAgents(currencyDistribution, filePath);
 
     % Plot the 4 panal summary plot
     filePath = sprintf("%s%s", outputPathIteration, "Summary.fig");
@@ -695,67 +697,228 @@ function plotCurrencyDistributionBar(currencyDistribution, filePath)
     N = numel(currencyDistribution(:,1));
     
     currencyDistribution = currencyDistribution .* 100;
-    currencyDistribution = flip(currencyDistribution,1);
-    currencyDistribution = currencyDistribution.';
-    currencyDistribution = flip(currencyDistribution,2);
     
+    % Bar plotting function expects data in rows, not columns
+    currencyDistribution = currencyDistribution.';
+
+    % Shift the data so the agent on the diagonal is always in the first
+    % element, keeping the order unchanged otherwise
+    shifted = zeros(N:N);
+    shifted(1,:) = currencyDistribution(1,:);
+    for i = 2:N
+        shifted(i,:) = circshift(currencyDistribution(i,:),-(i-1));
+    end
+
     f = figure;
     hold on;
-    p = bar(currencyDistribution,'stacked');
-    for i = 1:length(p)
-%        p(i).FaceColor = 'blue';
+    p = bar(shifted,'stacked');
+    % Use the lines pallet to color the first level
+    cmap = colormap('lines');
+    p(1).FaceColor = cmap(1,:);
+    % Now switch to the summer pallet for the rest of the levels
+    cmap = colormap('summer');
+    numColors = length(cmap);
+    color = 0;
+    for i = 2:length(p)
+        color = color + 1;
+        if color > numColors
+            color = 1;
+        end
+        p(i).FaceColor = cmap(color,:);
     end
+    set(gca,'Color','k')
     hold off;
     
     xlim([0.4 N+.6]);
     ylim([0 100]);
-    xlabel('Agent');
-    ylabel('Currency Distribution');
-    title("Currency Distribution By Agent Though Transaction");
+    xlabel('Agent','FontSize',18,'FontWeight','bold');
+    ylabel('Distribution Of Currency In Agents Wallet (%)','FontSize',18,'FontWeight','bold');
+    title("Currency Distribution By Agent From Buy/Sell Transaction",'FontSize',18,'FontWeight','bold');
     
     saveas(f, filePath, 'fig');
 
 end
 
 
-function plotCurrencyDistributionStacked(currencyDistribution, filePath)
+function plotCurrencyDistributionAgents(currencyDistribution, filePath)
 
     N = numel(currencyDistribution(:,1));
+
+    currencyDistribution = currencyDistribution .* 100;
+        
+    % Separate the data into groups and transpose into vectors
     
-    x = [];
-    y = [];
-    z = [];
-    
+    groupings = [20.0, 40.0, 60.0, 80.0, 99.99, 100];
+
+    numElements = N*N;
+    x1 = zeros(numElements,1);
+    y1 = zeros(numElements,1);
+    z1 = zeros(numElements,1);
+
+    x2 = zeros(numElements,1);
+    y2 = zeros(numElements,1);
+    z2 = zeros(numElements,1);
+
+    x3 = zeros(numElements,1);
+    y3 = zeros(numElements,1);
+    z3 = zeros(numElements,1);
+ 
+    x4 = zeros(numElements,1);
+    y4 = zeros(numElements,1);
+    z4 = zeros(numElements,1);
+
+    x5 = zeros(numElements,1);
+    y5 = zeros(numElements,1);
+    z5 = zeros(numElements,1);
+
+    x6 = zeros(numElements,1);
+    y6 = zeros(numElements,1);
+    z6 = zeros(numElements,1);
+     
     currencyDistribution = currencyDistribution.';
+    count = 0;
     for i = 1:N
         for j = 1:N
+            
+            count = count + 1;
+            x1(count,1) = i;
+            y1(count,1) = j;
+            x2(count,1) = i;
+            y2(count,1) = j;
+            x3(count,1) = i;
+            y3(count,1) = j;
+            x4(count,1) = i;
+            y4(count,1) = j;
+            x5(count,1) = i;
+            y5(count,1) = j;
+            x6(count,1) = i;
+            y6(count,1) = j;
+            
+            z1(count,1) = 0.0;
+            z2(count,1) = 0.0;
+            z3(count,1) = 0.0;
+            z4(count,1) = 0.0;
+            z5(count,1) = 0.0;
+            z6(count,1) = 0.0;
+            
             k = currencyDistribution(i,j);
-            if k > 0
-                x = [x, i];
-                y = [y, j];
-                z = [z, k];
+
+            if k > 0 && k <= groupings(1)
+                z1(count,1) = k;
+            elseif k > groupings(1) && k <= groupings(2)
+                z2(count,1) = k;
+            elseif k > groupings(2) && k <= groupings(3)
+                z3(count,1) = k;
+            elseif k > groupings(3) && k <= groupings(4)
+                z4(count,1) = k;
+            elseif k > groupings(4) && k <= groupings(5)
+                z5(count,1) = k;
+            elseif k > groupings(5) && k <= groupings(6)
+                z6(count,1) = k;
             end
         end
     end
-    
+
+    % Remove zero elements, we don't want to see 'em
+    for i = numElements:-1:1
+        if z1(i) <= 0
+            z1(i) = [];
+            y1(i) = [];
+            x1(i) = [];
+        end
+        if z2(i) <= 0
+            z2(i) = [];
+            y2(i) = [];
+            x2(i) = [];
+        end
+        if z3(i) <= 0
+            z3(i) = [];
+            y3(i) = [];
+            x3(i) = [];
+        end
+        if z4(i) <= 0
+            z4(i) = [];
+            y4(i) = [];
+            x4(i) = [];
+        end
+        if z5(i) <= 0
+            z5(i) = [];
+            y5(i) = [];
+            x5(i) = [];
+       end
+       if z6(i) <= 0
+            z6(i) = [];
+            y6(i) = [];
+            x6(i) = [];
+        end
+    end
     
     f = figure;
     hold on;
     grid on;
-    p = scatter3(x,y,z,z*200,z,'filled');
-    p.MarkerEdgeColor = 'black';
-    p.LineWidth = 0.25;
-    cmap = [1.00 0.53 0.00 
-            0.60 0.93 0.00 
-            0.83 0.00 0.44 
-            0.00 0.46 0.66];
-    colormap(cmap);
+    cm = colormap('summer');
+    cmmap = [cm(60,:); cm(50,:); cm(40,:); cm(30,:); cm(20,:); cm(10,:)];
+    
+    z1s = z1;
+    z1s(:) = groupings(1)*10;
+    z1c = z1;
+    z1c(:) = cmmap(1);
+    p1 = scatter3(x1,y1,z1,z1s,z1c,'filled');
+    p1.MarkerEdgeColor = 'black';
+    p1.LineWidth = 0.25;
+    
+    z2s = z2;
+    z2s(:) = groupings(2)*10;
+    z2c = z2;
+    z2c(:) = cmmap(2);
+    p2 = scatter3(x2,y2,z2,z2s,z2c,'filled');
+    p2.MarkerEdgeColor = 'black';
+    p2.LineWidth = 0.25;
+
+    z3s = z3;
+    z3s(:) = groupings(3)*10;
+    z3c = z3;
+    z3c(:) = cmmap(3);
+    p3 = scatter3(x3,y3,z3,z3s,z3c,'filled');
+    p3.MarkerEdgeColor = 'black';
+    p3.LineWidth = 0.25;
+    
+    z4s = z4;
+    z4s(:) = groupings(4)*10;
+    z4c = z4;
+    z4c(:) = cmmap(4);
+    p4 = scatter3(x4,y4,z4,z4s,z4c,'filled');
+    p4.MarkerEdgeColor = 'black';
+    p4.LineWidth = 0.25;
+
+    z5s = z5;
+    z5s(:) = groupings(5)*10;
+    z5c = z5;
+    z5c(:) = cmmap(5);
+    p5 = scatter3(x5,y5,z5,z5s,z5c,'filled');
+    p5.MarkerEdgeColor = 'black';
+    p5.LineWidth = 0.25;
+
+    z6s = z6;
+    z6s(:) = groupings(6)*10;
+    z6c = z6;
+    z6c(:) = cmmap(6);
+    p6 = scatter3(x6,y6,z6,z6s,z6c);
+    p6.MarkerEdgeColor = 'black';
+    p6.LineWidth = 0.25;
+    
+    % Background Black
+    %    set(gca,'Color','k')
+
+    xlabel('Agent Wallet','FontSize',18,'FontWeight','bold');
+    ylabel('Agent''s Proportionate Currency','FontSize',18,'FontWeight','bold');
+    title("Currency Distribution By Agent From Buy / Sell Transactions",'FontSize',18,'FontWeight','bold');
+    s = sprintf("{'' 0%% <= amt < %d%%'',''%d%% <= amt < %d%%'',''%d%% <= amt < %d%%'',''%d%% <= amt < %d%%'',''%d%% <= amt < %d%%'',''amt < %d%%''}", ...
+        groupings(1), groupings(1), groupings(2), groupings(2), groupings(3), groupings(3), groupings(4), groupings(4), round(groupings(5)), groupings(6));
+    l = legend([p1, p2, p3, p4, p5, p6], {' 0% <= amt < 20%','20% <= amt < 40%','40% <= amt < 60%','60% <= amt < 80%','80% <= amt < 100%','100% = amt = 100%'}, 'FontSize',14);
+    
     hold off;
     
-    xlabel('Agent Wallet');
-    ylabel('Currency Present In Wallet (By Agent)');
-    title("Currency Distribution By Agent Though Transaction");
-
     saveas(f, filePath, 'fig');
     
 end

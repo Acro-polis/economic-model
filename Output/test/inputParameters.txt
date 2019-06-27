@@ -7,7 +7,7 @@
 
  Modeling 100 Agents for Network: Edges Hybrid SN=2 FN=100 T=49 a=0.00 V1.1.0.csv 
 
- Executing 1 Iterations of 52 time steps each
+ Executing 10 Iterations of 52 time steps each
 
  Transaction-Distance = 3
 
@@ -15,7 +15,7 @@
 
  Demurrage = 5.00 Percent, Demurrage Applied Every = 4.00 Time Steps
 
- Passive Agents = 5.00 Percent, Sellers = 25.00 Percent
+ Passive Agents = 5.00 Percent, Sellers = 5.00 Percent
 
  Seller Unit Price = 300.00, Seller Initial Inventory Units = 300.00
 
