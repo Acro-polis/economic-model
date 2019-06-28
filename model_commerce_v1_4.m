@@ -2,21 +2,21 @@
 %
 % Economic Commerce Model: 
 %
-% In Model v1.4.1 we now track and report which agents prevented a sale 
+% Model v1.4.1: We now track and report which agents prevented a sale 
 % due to not having enough liquidity to propagate the deal along the path.
 % We have a new plot that shows this (Failures By Type By Agent) and we
 % export this data in the nodes file that can be read by Gephi. We also
 % added a bar and scatter plot that shows the distribution of currency in
 % an agents wallet at the end of a simulation.
 %
-% In this Model, model v1.4, the pool of sellers is limited to those that
-% reside within the transaction-distance of the buyer, effectively
-% converting "path" failures from "the selected seller is too far away" to 
+% Model v1.4: The pool of sellers is limited to those that reside within the
+% transaction-distance of the buyer, effectively converting "Path" failures
+% ("the selected seller is too far away") to "No Seller" failures or 
 % "there is no available seller available within the transaction-distance".
 %
-% Model v1.3 for a buyer, a random seller was selected on the network and
+% Model v1.3: For a buyer, a random seller was selected on the network and
 % if the seller was located beyond the transaction-distance the deal was
-% terminated and a "path" failure was recored.
+% terminated and a "Path" failure was recorded.
 %
 % Author: Jess
 % Created: 2018.08.30
@@ -341,7 +341,7 @@ parfor iteration = 1:numberIterations
 
     % Plot the currency distribution (Scatter)
     filePath = sprintf("%s%s", outputPathIteration, "Currency_Distribution_Scatter.fig");
-    plotCurrencyDistributionAgents(currencyDistribution, filePath);
+    plotCurrencyDistributionScatter(currencyDistribution, filePath);
 
     % Plot the 4 panal summary plot
     filePath = sprintf("%s%s", outputPathIteration, "Summary.fig");
@@ -732,7 +732,7 @@ function plotCurrencyDistributionBar(currencyDistribution, filePath)
     xlim([0.4 N+.6]);
     ylim([0 100]);
     xlabel('Agent','FontSize',18,'FontWeight','bold');
-    ylabel('Distribution Of Currency In Agents Wallet (%)','FontSize',18,'FontWeight','bold');
+    ylabel('Proportion Of Agent Currency In Wallet (%)','FontSize',18,'FontWeight','bold');
     title("Currency Distribution By Agent From Buy/Sell Transaction",'FontSize',18,'FontWeight','bold');
     
     saveas(f, filePath, 'fig');
@@ -740,7 +740,7 @@ function plotCurrencyDistributionBar(currencyDistribution, filePath)
 end
 
 
-function plotCurrencyDistributionAgents(currencyDistribution, filePath)
+function plotCurrencyDistributionScatter(currencyDistribution, filePath)
 
     N = numel(currencyDistribution(:,1));
 
@@ -750,6 +750,8 @@ function plotCurrencyDistributionAgents(currencyDistribution, filePath)
     
     groupings = [20.0, 40.0, 60.0, 80.0, 99.99, 100];
 
+    %TODO - Use cells and can make entire plotting function dynamic based
+    %on the number of groupings ...
     numElements = N*N;
     x1 = zeros(numElements,1);
     y1 = zeros(numElements,1);
@@ -911,7 +913,7 @@ function plotCurrencyDistributionAgents(currencyDistribution, filePath)
     %    set(gca,'Color','k')
 
     xlabel('Agent Wallet','FontSize',18,'FontWeight','bold');
-    ylabel('Agent''s Proportionate Currency','FontSize',18,'FontWeight','bold');
+    ylabel('Proportion Of Agent Currency In Wallet','FontSize',18,'FontWeight','bold');
     title("Currency Distribution By Agent From Buy / Sell Transactions",'FontSize',18,'FontWeight','bold');
     s = sprintf("{'' 0%% <= amt < %d%%'',''%d%% <= amt < %d%%'',''%d%% <= amt < %d%%'',''%d%% <= amt < %d%%'',''%d%% <= amt < %d%%'',''amt < %d%%''}", ...
         groupings(1), groupings(1), groupings(2), groupings(2), groupings(3), groupings(3), groupings(4), groupings(4), round(groupings(5)), groupings(6));

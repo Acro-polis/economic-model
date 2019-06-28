@@ -17,5 +17,5 @@
 
  Passive Agents = 5.00 Percent, Sellers = 25.00 Percent
 
- Seller Unit Price = 300.00, Seller Initial Inventory Units = 3000.00
+ Seller Unit Price = 300.00, Seller Initial Inventory Units = 300.00
 

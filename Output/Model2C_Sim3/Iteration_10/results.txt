@@ -23,13 +23,13 @@
 
 ----- Summarized Results, End Of Time Step = 52 -----
 
-* Simulation Time = 141.13 + Results Generation Time = 2.58 = 143.71 Minutes
+* Simulation Time = 53.42 + Results Generation Time = 0.47 = 53.88 Minutes
 
 * Total Money Supply = 1349015.75 drachma, Total Demurrage = -522984.25 drachma, Total UBI = 1872000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = 0.00)
 
-* Remaining Inventory Supply = 16713.00, Remaining Inventory Value = $5013900.00, Total Inventory Exchanged = 4587 (check: Purchased - Sold = 0.00)
+* Remaining Inventory Supply = 16806.00, Remaining Inventory Value = $5041800.00, Total Inventory Exchanged = 4494 (check: Purchased - Sold = 0.00)
 
-* Items Purchased = 4587.00, Failed No Money = 0.00, Failed No Liquidity = 353.00, Failed No Paths = 0.00, Failed No Inventory = 0.00, Failed No Seller = 0.00
+* Items Purchased = 4494.00, Failed No Money = 0.00, Failed No Liquidity = 446.00, Failed No Paths = 0.00, Failed No Inventory = 0.00, Failed No Seller = 0.00
 * Expected Purchases = Items Purchased + Sum Of Failures = 4940
-* Selling Efficiency = 92.85 percent
+* Selling Efficiency = 90.97 percent
 
