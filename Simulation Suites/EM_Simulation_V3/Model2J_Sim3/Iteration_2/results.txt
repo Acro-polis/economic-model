@@ -1,9 +1,9 @@
 
------ Summarized Simulation Inputs For Economic Commerce Model / Static Dynamic Network, Version ECM_1.4.0 -----
+----- Summarized Simulation Inputs For Economic Commerce Model / Static Dynamic Network, Version ECM_1.4.1 -----
 
 - Network Input Filename = Edges Hybrid SN=2 FN=100 T=49 a=0.00 V1.1.0.csv
 
-- Number Agents = 100, Time Steps (Duration) = 52, Maximum Search Path Level = 4
+- Number Agents = 100, Time Steps (Duration) = 52, Maximum Search Path Level = 3
 
 - UBI = 360.00 drachmas/agent, applied every 1 time steps
 
@@ -11,25 +11,25 @@
 
 - Starting wallet size/agent = 0.00 drachma
 
-- Price of goods = 325.00 drachmas
+- Price of goods = 300.00 drachmas
 
 - Initial Inventory = 300.00 Units
 
 - Num buyers   = 95 <= 100 agents
 
-- Num sellers  = 48 <= 100 agents
+- Num sellers  = 95 <= 100 agents
 
-- Num Buyers & Sellers = 48, Buyers Only = 47, Passive Agents = 5, Sellers Only = 0
+- Num Buyers & Sellers = 95, Buyers Only = 0, Passive Agents = 5, Sellers Only = 0
 
 ----- Summarized Results, End Of Time Step = 52 -----
 
-* Simulation Time = 3.93 + Results Generation Time = 0.53 = 4.45 Minutes
+* Simulation Time = 1.57 + Results Generation Time = 0.65 = 2.21 Minutes
 
-* Total Money Supply = 1349015.75 drachma, Total Demurrage = -522984.25 drachma, Total UBI = 1872000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = 0.00)
+* Total Money Supply = 1349015.75 drachma, Total Demurrage = -522984.25 drachma, Total UBI = 1872000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = -0.00)
 
-* Remaining Inventory Supply = 11560.00, Remaining Inventory Value = $3757000.00, Total Inventory Exchanged = 2840 (check: Purchased - Sold = 0.00)
+* Remaining Inventory Supply = 23889.00, Remaining Inventory Value = $7166700.00, Total Inventory Exchanged = 4611 (check: Purchased - Sold = 0.00)
 
-* Items Purchased = 2840.00, Failed No Money = 0.00, Failed No Liquidity = 2100.00, Failed No Paths = 0.00, Failed No Inventory = 0.00, Failed No Seller = 0.00
+* Items Purchased = 4611.00, Failed No Money = 0.00, Failed No Liquidity = 329.00, Failed No Paths = 0.00, Failed No Inventory = 0.00, Failed No Seller = 0.00
 * Expected Purchases = Items Purchased + Sum Of Failures = 4940
-* Selling Efficiency = 57.49 percent
+* Selling Efficiency = 93.34 percent
 

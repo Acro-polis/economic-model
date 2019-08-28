@@ -1,5 +1,5 @@
 
------ Summarized Simulation Inputs For Economic Commerce Model / Static Dynamic Network, Version ECM_1.4.0 -----
+----- Summarized Simulation Inputs For Economic Commerce Model / Static Dynamic Network, Version ECM_1.4.1 -----
 
 - Network Input Filename = Edges Hybrid SN=2 FN=100 T=49 a=0.00 V1.1.0.csv
 
@@ -11,7 +11,7 @@
 
 - Starting wallet size/agent = 0.00 drachma
 
-- Price of goods = 325.00 drachmas
+- Price of goods = 300.00 drachmas
 
 - Initial Inventory = 300.00 Units
 
@@ -23,13 +23,13 @@
 
 ----- Summarized Results, End Of Time Step = 52 -----
 
-* Simulation Time = 1.46 + Results Generation Time = 0.53 = 1.99 Minutes
+* Simulation Time = 1.22 + Results Generation Time = 0.52 = 1.75 Minutes
 
 * Total Money Supply = 1349015.75 drachma, Total Demurrage = -522984.25 drachma, Total UBI = 1872000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = 0.00)
 
-* Remaining Inventory Supply = 17716.00, Remaining Inventory Value = $5757700.00, Total Inventory Exchanged = 3584 (check: Purchased - Sold = 0.00)
+* Remaining Inventory Supply = 17373.00, Remaining Inventory Value = $5211900.00, Total Inventory Exchanged = 3927 (check: Purchased - Sold = 0.00)
 
-* Items Purchased = 3584.00, Failed No Money = 0.00, Failed No Liquidity = 1356.00, Failed No Paths = 0.00, Failed No Inventory = 0.00, Failed No Seller = 0.00
+* Items Purchased = 3927.00, Failed No Money = 0.00, Failed No Liquidity = 1013.00, Failed No Paths = 0.00, Failed No Inventory = 0.00, Failed No Seller = 0.00
 * Expected Purchases = Items Purchased + Sum Of Failures = 4940
-* Selling Efficiency = 72.55 percent
+* Selling Efficiency = 79.49 percent
 

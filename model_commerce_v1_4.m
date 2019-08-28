@@ -11,8 +11,8 @@
 %
 % Model v1.4: The pool of sellers is limited to those that reside within the
 % transaction-distance of the buyer, effectively converting "Path" failures
-% ("the selected seller is too far away") to "No Seller" failures or 
-% "there is no available seller available within the transaction-distance".
+% ("the selected seller is too far away") to "No Seller Availalbe" failures 
+% or "there is no available seller located within the transaction-distance".
 %
 % Model v1.3: For a buyer, a random seller was selected on the network and
 % if the seller was located beyond the transaction-distance the deal was
