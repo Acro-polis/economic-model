@@ -13,7 +13,7 @@
 
 - Price of goods = 300.00 drachmas
 
-- Initial Inventory = 300.00 Units
+- Initial Inventory = 3000.00 Units
 
 - Num buyers   = 95 <= 100 agents
 
@@ -23,13 +23,13 @@
 
 ----- Summarized Results, End Of Time Step = 52 -----
 
-* Simulation Time = 1.21 + Results Generation Time = 0.30 = 1.50 Minutes
+* Simulation Time = 1.68 + Results Generation Time = 0.39 = 2.07 Minutes
 
 * Total Money Supply = 1349015.75 drachma, Total Demurrage = -522984.25 drachma, Total UBI = 1872000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = -0.00)
 
-* Remaining Inventory Supply = 2575.00, Remaining Inventory Value = $772500.00, Total Inventory Exchanged = 1625 (check: Purchased - Sold = 0.00)
+* Remaining Inventory Supply = 40396.00, Remaining Inventory Value = $12118800.00, Total Inventory Exchanged = 1604 (check: Purchased - Sold = 0.00)
 
-* Items Purchased = 1625.00, Failed No Money = 0.00, Failed No Liquidity = 3221.00, Failed No Paths = 0.00, Failed No Inventory = 94.00, Failed No Seller = 0.00
+* Items Purchased = 1604.00, Failed No Money = 0.00, Failed No Liquidity = 3336.00, Failed No Paths = 0.00, Failed No Inventory = 0.00, Failed No Seller = 0.00
 * Expected Purchases = Items Purchased + Sum Of Failures = 4940
-* Selling Efficiency = 32.89 percent
+* Selling Efficiency = 32.47 percent
 
