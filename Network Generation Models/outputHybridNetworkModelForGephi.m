@@ -1,44 +1,44 @@
-function outputNetworkModelForGephi(title, Am, SN, T, alpha, version_number)
-%=====================================================
+function outputHybridNetworkModelForGephi(Am, outputNodes, outputSubfolderPath)
+%==========================================================================
 %
-% Write nodes and edges output files for external 
-% processing (semicolon delimited files)
+% Write nodes and edges output files for external processing
 %
 % Author: Jess
 % Created: 2018.07.8
-%=====================================================
-fprintf("Begin Ouput\n");
+%==========================================================================
+fprintf("\nBegin Ouput\n");
 
-FN = size(Am,1);
+numNodes = size(Am,1);
 
-outputNodes = 0;
 if outputNodes
-    fileNodes   = sprintf('Nodes %s SN=%u FN=%u T=%u a=%.2f V%s.csv', title, SN, FN, T, alpha, version_number);
-    fIdNodes 	= fopen(fullfile([pwd '/Output'],fileNodes),"w");
-    fprintf("Outputting Nodes\n");
+    fprintf("\nOutputting Nodes\n");
+    outputFilePathAndName = sprintf("%s%s", outputSubfolderPath, "nodes.csv");
+    fIdNodes = fopen(outputFilePathAndName, "wt");
     fprintf(fIdNodes,"Id;Label\n");
-    for i = 1:FN
+    for i = 1:numNodes
             fprintf(fIdNodes, '%d,\"Node %d\"\n', i, i);
     end
     fclose(fIdNodes);
 else
-    fprintf("Skipping Node Output\n");
+    fprintf("\nSkipping Node Output\n");
 end
 
-fileEdges   = sprintf('Edges %s SN=%u FN=%u T=%u a=%.2f V%s.csv', title, SN, FN, T, alpha, version_number);
-fIdEdges	= fopen(fullfile([pwd '/Output'],fileEdges),"w");
+fprintf("\nOutputting Edges\n");
 
-fprintf("Outputting Edges\n");
+outputFilePathAndName = sprintf("%s%s", outputSubfolderPath, "edges.csv");
+fIdEdges = fopen(outputFilePathAndName, "wt");
 fprintf(fIdEdges,"Source,Target,Label,Type\n");
-for i = 1:FN
-        for j = 1:FN
+
+for i = 1:numNodes
+        for j = 1:numNodes
                 if (i ~= j && Am(i,j) > 0)
-                        fprintf(fIdEdges, '%d,%d,\"Edge %d to %d\",\"Mixed\"\n', i, j, i, j);
+                        fprintf(fIdEdges, '%d,%d,\"Edge %d to %d\",\"Undirected\"\n', i, j, i, j);
                 end
         end
 end
+
 fclose(fIdEdges);
 
-fprintf("Output Complete\n");
+fprintf("\nEnd Output\n");
 
 end

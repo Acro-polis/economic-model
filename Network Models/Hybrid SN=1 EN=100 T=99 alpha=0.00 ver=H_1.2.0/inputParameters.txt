@@ -1,0 +1,14 @@
+
+
+ Summary of network generation input parameters
+
+
+ Program:        Hybrid Random Growth Network Model,
+ Version:        H_1.2.0,
+ Ouput Location: Hybrid: SN=1 EN=100 T=99 alpha=0.00 ver=H_1.2.0 
+
+ Start with 1 nodes, add 1 nodes / time step for 99 time steps
+
+ Creating a total of 100 nodes and 99 connections
+
+ For alpha = 0.00, per time step, 0 connections are random and 1 are preferrential attachment

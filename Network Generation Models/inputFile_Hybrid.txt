@@ -1,7 +1,7 @@
 
-Random Network Generation Input Parameters
+Hybrid Random Network Generation Input Parameters
 
-1)  Number Of Inital Nodes: 1
-2)  Number Of Generation Steps: 100
-3)  Number Of New Nodes Per Step: 1
+1)  Number Of Inital Nodes: 10
+2)  Number Of Generation Steps: 9
+3)  Number Of New Nodes Per Step: 10
 4)  Alpha (0 = Preferred, 1 = Random): 0

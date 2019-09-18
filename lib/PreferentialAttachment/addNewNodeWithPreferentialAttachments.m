@@ -16,6 +16,7 @@ nodeDimensions = sum(AM);
 
 % Find the preferred nodes
 preferredNodes = findPreferredNodes(nodeDimensions, numNewAttachments);
+fprintf('Found %d preferred attachments\n',preferredNodes);
 
 % Add the new node to the AM and attach it to the preferred nodes 
 % (undirected attachment)
