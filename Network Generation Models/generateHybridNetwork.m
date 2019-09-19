@@ -61,7 +61,7 @@ expectedConnections = numberOfConnections(Cm, modeUndirected) + T*N*numNewNodesP
 %
 % Output Directory
 %
-outputSubFolderName = sprintf('Hybrid: SN=%d EN=%d T=%d alpha=%.2f ver=%s', N, expectedNodes, numT, alpha, version_number);
+outputSubFolderName = sprintf('Hybrid SN=%d EN=%d T=%d alpha=%.2f ver=%s', N, expectedNodes, numT, alpha, version_number);
 outputFolderPath = "Output";
 outputSubfolderPath = sprintf("%s/%s/", outputFolderPath, outputSubFolderName);
 [status, msg, msgID] = mkdir(outputSubfolderPath);

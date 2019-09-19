@@ -1,8 +1,8 @@
 function AM = importNetworkModelFromCSV(N, fileName)
 %========================================
 %
-% Read a csv file containing network edges
-% produced by the Random Hybrid Model.
+% Read a csv file containing network edges produced by the 
+% Random Hybrid Model
 %
 % Author: Jess
 % Created: 2018.11.11

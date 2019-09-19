@@ -1,6 +1,6 @@
 function [numSteps,                 ...
           N,                        ...
-          networkFilename,          ...
+          networkPathname,          ...
           AM,                       ...
           maxSearchLevels,          ...
           seedWalletSize,           ...
@@ -38,13 +38,17 @@ function [numSteps,                 ...
         N =  round(parseInputString(fgetl(fileId), inputTypeDouble));           % Number of Agents (nodes) (Input 2)
         assert(N >= 2,'Assert: Number of agents must be >= 2!');
 
-        networkFilename = parseInputString(fgetl(fileId), inputTypeString);     % Network FileName (Input 3)
+        networkPathname = parseInputString(fgetl(fileId), inputTypeString);     % Network FileName (Input 3)
 
         AM = [];
-        if networkFilename == ""
+        if networkPathname == ""
             AM = connectedGraph(N);                                                
         else
-            AM = importNetworkModelFromCSV(N, networkFilename);
+            % TODO - this is a bit brittle ... fix it
+            cd('Network Models');
+            cd(networkPathname);
+            AM = importNetworkModelFromCSV(N, 'edges.csv');
+            cd('../..');
         end
 
         % Transaction Distance
