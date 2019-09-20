@@ -1,0 +1,35 @@
+
+----- Summarized Simulation Inputs For Economic Commerce Model / Static Dynamic Network, Version ECM_1.4.1 -----
+
+- Network Input Filename = Hybrid SN=1 EN=100 T=99 alpha=0.00 ver=H_1.2.0
+
+- Number Agents = 100, Time Steps (Duration) = 52, Maximum Search Path Level = 3
+
+- UBI = 360.00 drachmas/agent, applied every 1 time steps
+
+- Demurrage = 5.00 percent/agent, applied every 4 time steps
+
+- Starting wallet size/agent = 0.00 drachma
+
+- Price of goods = 300.00 drachmas
+
+- Initial Inventory = 3000.00 Units
+
+- Num buyers   = 95 <= 100 agents
+
+- Num sellers  = 19 <= 100 agents
+
+- Num Buyers & Sellers = 19, Buyers Only = 76, Passive Agents = 5, Sellers Only = 0
+
+----- Summarized Results, End Of Time Step = 52 -----
+
+* Simulation Time = 0.67 + Results Generation Time = 0.45 = 1.12 Minutes
+
+* Total Money Supply = 1349015.75 drachma, Total Demurrage = -522984.25 drachma, Total UBI = 1872000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = -0.00)
+
+* Remaining Inventory Supply = 54749.00, Remaining Inventory Value = $16424700.00, Total Inventory Exchanged = 2251 (check: Purchased - Sold = 0.00)
+
+* Items Purchased = 2251.00, Failed No Money = 0.00, Failed No Liquidity = 2689.00, Failed No Paths = 0.00, Failed No Inventory = 0.00, Failed No Seller = 0.00
+* Expected Purchases = Items Purchased + Sum Of Failures = 4940
+* Selling Efficiency = 45.57 percent
+
