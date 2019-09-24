@@ -336,12 +336,16 @@ parfor iteration = 1:numberIterations
     colors = Colors();
 
     % Plot the currency distribution (Stacked Bars)
-    filePath = sprintf("%s%s", outputPathIteration, "Currency_Distribution_Bar.fig");
-    plotCurrencyDistributionBar(currencyDistribution, filePath);
+    if (N <= 100)
+        filePath = sprintf("%s%s", outputPathIteration, "Currency_Distribution_Bar.fig");
+        plotCurrencyDistributionBar(currencyDistribution, filePath);
+    end
 
     % Plot the currency distribution (Scatter)
-    filePath = sprintf("%s%s", outputPathIteration, "Currency_Distribution_Scatter.fig");
-    plotCurrencyDistributionScatter(currencyDistribution, filePath);
+    if (N <= 100)
+        filePath = sprintf("%s%s", outputPathIteration, "Currency_Distribution_Scatter.fig");
+        plotCurrencyDistributionScatter(currencyDistribution, filePath);
+    end
 
     % Plot the 4 panal summary plot
     filePath = sprintf("%s%s", outputPathIteration, "Summary.fig");
