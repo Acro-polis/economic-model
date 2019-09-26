@@ -1,14 +1,13 @@
 # Polis Economic Modeling
 
-We implement and test an economic model based on a trusted network and a 
-transitive-transaction process for exchanging coins between agents when 
-executing a transaction between a Buyer and Seller.
+Our goal is to model a world consisting of agents connected on a trusted network, earning crypto UBI subject Demurrage and spending their currencies with each other via various economic transactions. Coins are transferred between agents using a transitive-transaction model. Much of our work and findings to date can be found [here](https://blog.polis.global/economic-model) 
 
 ## Getting Started
 
 There are 2 main algorithms
 
-* An algorithm for generating a network named "generateHybridNetwork"
+* An algorithm for generating a random network named "generateHybridNetwork"
+
 * An algorithm for simulating the economic model named 
 "model_commerce_V1_4" 
 
@@ -19,16 +18,16 @@ There are 2 main algorithms
 
 ### Installing and Running
 
-** General
+## Installation
 
 * Clone a branch 
-* Launch Matlab and navigate to /economic-model
+* Launch Matlab and navigate to the project root /economic-model
 * Set your path to /economic-model and include all subfolders 
-* Run a script from the commandline
 
-** Network generation
+## Network generation
 
-** Economic Model generation
+
+## Economic Model generation
 
 
 ## Running the tests
