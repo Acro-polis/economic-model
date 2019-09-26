@@ -1,6 +1,6 @@
 # Polis Economic Modeling
 
-Our goal is to model a new world consisting of agents connected on a trusted network, earning crypto UBI, subject to Demurrage and spending their currencies with each other via mutually agreed upon economic transactions. Coins are transferred between agents using a transitive-transaction model. Much of our work and findings to date can be found [here](//https://blog.polis.global/tag/economic-modeling/).
+Our goal is to model a new world consisting of agents connected on a trusted network, earning crypto UBI, subject to Demurrage and spending their currencies with each other via mutually agreed upon economic transactions. Coins are transferred between agents using a transitive-transaction model. Much of our work and findings to date can be found [here](https://blog.polis.global/tag/economic-modeling/).
 
 ## Getting Started
 
