@@ -10,34 +10,34 @@ There are 2 main algorithms
 
 * An algorithm for simulating the economic model named "model_commerce_V1_4". It's located in the root folder /economic-modelling. It's described in detail [here](https://blog.polis.global/the-economic-model/)
 
-### Prerequisites
+## Prerequisites
 
 * Matlab is required to execute all code
 * Octave is an option, but the code is not converted (smallish job maybe)
 * Output files nodes.csv and edges.csv, where ever you see them, are designed to be inported into [Gephi](https://gephi.org) for further analysis (though being comma delimineted they well may work with other programs)
 
-### Installing and Running
+## Installing and Running
 
-## Installation
+### Installation
 
 * Clone a branch, most usually master 
 * Launch Matlab and navigate to the project root /economic-model
 * Set your path to /economic-model and include all subfolders 
 
-## Running Network generation - generateHybridNetwork.m
+### Running Network generation - generateHybridNetwork.m
 
 * The input file is named inputFile_Hybrid.txt. 
 * You can generate an input file from the script named makeHybridInputFile.m, but you don't have to. 
 * Output is sent to the folder /economic-modeling/output.
 
-## Running Economic Model generation - model_commerce_V1_4.m
+### Running Economic Model generation - model_commerce_V1_4.m
 
 * The input file is named inputCommerce.txt, but it can be any name because the program searches for a parameter named inputFilename to locate the input file. So, type inputFilename = "inputCommerce.txt" from the command line before executing model_commerce_V1_4.m or you will receive an error.
 * You can generate an input file from the script named make_commerce_inputfile.m, but you don't have to. 
 * Output is sent to the folder /economic-modeling/output.
 * Batch: If you want to chain a bunch of simulations together, look at batch_run_commerce.m
 
-## Source Tree Description
+### Source Tree Description
 
 Assume they need to be on the path unless specified (does not hurt if they all are on the path)
 
