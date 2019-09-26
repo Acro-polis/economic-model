@@ -6,13 +6,13 @@ Our goal is to model a new world consisting of agents connected on a trusted net
 
 There are 2 main algorithms
 
-* An algorithm for generating a random network named "generateHybridNetwork". It's located in /economic-modeling/Network Generation Models along with supporting functions. It's preferrential attachment mode is described in [here](https://blog.polis.global/the-networks/), but models spanning the range from purely random to purely preferrential attachment can be generated.
+* An algorithm for generating a random network named "generateHybridNetwork". It's located in /economic-modeling/Network Generation Models along with supporting functions. It's preferrential attachment mode is described [here](https://blog.polis.global/the-networks/), but models spanning the range from purely random to purely preferrential attachment can be generated.
 
 * An algorithm for simulating the economic model named "model_commerce_V1_4". It's located in the root folder /economic-modelling. It's described in detail [here](https://blog.polis.global/the-economic-model/)
 
 ### Prerequisites
 
-* Matlab is required to execute the code
+* Matlab is required to execute all code
 * Octave is an option, but the code is not converted (smallish job maybe)
 * Output files nodes.csv and edges.csv, where ever you see them, are designed to be inported into [Gephi](https://gephi.org) for further analysis (though being comma delimineted they well may work with other programs)
 
@@ -20,7 +20,7 @@ There are 2 main algorithms
 
 ## Installation
 
-* Clone a branch, most likely master 
+* Clone a branch, most usually master 
 * Launch Matlab and navigate to the project root /economic-model
 * Set your path to /economic-model and include all subfolders 
 
@@ -32,20 +32,20 @@ There are 2 main algorithms
 
 ## Running Economic Model generation - model_commerce_V1_4.m
 
-* The input file is named inputCommerce.txt, but it can be any name because the program searches for a parameter named inputFile to locate the input file. For example, type inputFilename = "inputCommerce.txt" from the command line before executing model_commerce_V1_4.m. 
+* The input file is named inputCommerce.txt, but it can be any name because the program searches for a parameter named inputFilename to locate the input file. So, type inputFilename = "inputCommerce.txt" from the command line before executing model_commerce_V1_4.m or you will receive an error.
 * You can generate an input file from the script named make_commerce_inputfile.m, but you don't have to. 
 * Output is sent to the folder /economic-modeling/output.
 * Batch: If you want to chain a bunch of simulations together, look at batch_run_commerce.m
 
 ## Source Tree Description
 
-Assume they need to be on the path unless specified
+Assume they need to be on the path unless specified (does not hurt if they all are on the path)
 
 * /economic-modeling: This is the root folder and contains model commerce script, associated input files and the batch run script
 * /economic-modeling/Classes: All the classes defined for the economic-model algorithm 
 * /economic-modeling/Classes/TestScripts: All the test scripts for economic-model algorithm 
 * /economic-modeling/Historical: Dead wood, forget it. Not required on the path.
-* /economic-modeling/lib: Functions used by all programs (or not). A few test scripts for these functions exist as well.
+* /economic-modeling/lib: Functions used by all programs (or not). A few test scripts for these functions exist here as well.
 * /economic-modeling/Network Generation Model: Contains anything relevant specifcally to the networ generation algorithms. 
 * /economic-modeling/Network Models: Contains mostly network models we are keeping / using as inputs to the economic model.
 * /economic-modeling/Output: The main algorithms output their results in subdirectors here
