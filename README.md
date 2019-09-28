@@ -1,6 +1,6 @@
 # Polis Economic Modeling
 
-Our goal is to model a new world consisting of agents connected on a trusted network, earning crypto UBI, subject to Demurrage and spending their currencies with each other via mutually agreed upon economic transactions. Coins are transferred between agents using a transitive-transaction model. Much of our work and findings to date can be found [here](https://blog.polis.global/tag/economic-modeling/).
+Our overarching aim is to model a new world consisting of agents connected on a growing trusted network, earning UBI, subject to Demurrage and spending their personal currencies with each other via mutually agreed upon economic transactions and where personal coins are transferred between trusted and untrusted agents using a transitive-transaction process. 
 
 ## Getting Started
 
@@ -24,7 +24,7 @@ There are 2 main algorithms
 * Launch Matlab and navigate to the project root /economic-model
 * Set your path to /economic-model and include all subfolders 
 
-### Running Network generation - generateHybridNetwork.m
+### Running Network Generation - generateHybridNetwork.m
 
 * The input file is named inputFile_Hybrid.txt. 
 * You can generate an input file from the script named makeHybridInputFile.m, but you don't have to. 
