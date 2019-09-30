@@ -8,14 +8,14 @@
 5)  Initial Wallet Size (drachma / agent): 0.00
 6)  UBI Amount (drachma / ubi interval): 360.00
 7)  UBI Interval: 1
-8)  Percent Demurrage: 0.05
+8)  Percent Demurrage: 0.10
 9)  Demurrage Interval: 4
 10) Percentage of Passive Agents: 0.05
 11) Percentage of Selling Agents: 0.15
 12) Price of Goods (drachma / unit): 324.0
 13) Initial Inventory (# units / agent): 3000.00
 14) Number of Iterations: 1
-15) Output folder name:4Years-5percentDemurrage
+15) Output folder name:4Years-10percentDemurrage
 
 Note for 3): Specify the uniquely named subfolder in the 
 economic-model/Network Models folder where the corresponding edges.csv 
