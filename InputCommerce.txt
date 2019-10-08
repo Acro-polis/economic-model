@@ -1,21 +1,21 @@
 //
 // Commerce Model Input Parameters
 //
-1)  Number of Time Steps (dt): 2
+1)  Number of Time Steps (dt): 208
 2)  Number of Agents: 100
 3)  Network Pathname (blank for connected):Hybrid SN=10 EN=100 T=9 alpha=0.00 ver=H_1.2.0
 4)  Transaction-Distance (max. steps, >= 2): 3
 5)  Initial Wallet Size (drachma / agent): 0.00
 6)  UBI Amount (drachma / ubi interval): 360.00
 7)  UBI Interval: 1
-8)  Percent Demurrage: 0.50
+8)  Percent Demurrage: 0.10
 9)  Demurrage Interval: 4
 10) Percentage of Passive Agents: 0.05
 11) Percentage of Selling Agents: 0.15
-12) Price of Goods (drachma / unit): 324.0
+12) Price of Goods (drachma / unit): 180.0
 13) Initial Inventory (# units / agent): 3000.00
 14) Number of Iterations: 1
-15) Output folder name:test
+15) Output folder name:test-no-money
 
 Note for 3): Specify the uniquely named subfolder in the 
 economic-model/Network Models folder where the corresponding edges.csv 
