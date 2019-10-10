@@ -15,7 +15,7 @@
 
  Demurrage = 5.00 Percent, Demurrage Applied Every = 4.00 Time Steps
 
- Passive Agents = 50.00 Percent, Sellers = 21.50 Percent
+ Passive Agents = 5.00 Percent, Sellers = 15.00 Percent
 
  Seller Unit Price = 300.00, Seller Initial Inventory Units = 3000.00
 
