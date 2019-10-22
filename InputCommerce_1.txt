@@ -11,7 +11,7 @@
 8)  Percent Demurrage: 0.05
 9)  Demurrage Interval: 4
 10) Percentage of Passive Agents: 0.05
-11) Percentage of Selling Agents: 0.215
+11) Percentage of Selling Agents: 0.15
 12) Price of Goods (drachma / unit): 300.0
 13) Initial Inventory (# units / agent): 3000.00
 14) Number of Iterations: 16
