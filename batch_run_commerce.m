@@ -11,7 +11,7 @@ clear;
 numberRuns = 1;
 
 fileNames = ["" ; "" ; ""; ""];
-fileNames(1) = "InputCommerce_4.txt";
+fileNames(1) = "InputCommerce.txt";
 fileNames(2) = "InputCommerce_2.txt";
 fileNames(3) = "InputCommerce_3.txt";
 fileNames(4) = "InputCommerce_4.txt";
