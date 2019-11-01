@@ -20,6 +20,7 @@ classdef Polis < handle
 
     properties (SetAccess = private, GetAccess = private)
         lastTransactionId
+        transactionMgr      TransactionManager
     end
     
     properties (Constant)
@@ -39,6 +40,15 @@ classdef Polis < handle
     end
     
     methods (Access = public)
+        
+        function obj = Polis(AM, maximumSearchLevels)
+            %TRANSACTIONMANAGER Polis constructor
+            %   TODO
+            obj.AM = AM;
+            obj.maximumSearchLevels = maximumSearchLevels;
+            obj.transactionMgr = TransactionManager(obj);
+            obj.lastTransactionId = 0; % Reset the sequence
+        end
         
         function result = submitPurchase(obj, agentBuying, agentSelling, numberItems, price, time)
             % Submit a purachase between buying agent and the selling 
@@ -63,7 +73,7 @@ classdef Polis < handle
                 return;
             end
 
-            % Find a transitive-transaction path
+            % Find a liquid transitive-transaction path
             path = agentBuying.findALiquidPathForTheTransactionAmount(obj.AM, paths, amount);
             logIntegerArray("Ths selected path is", path, 2, obj.LoggingLevel);
             if isempty(path) 
@@ -93,14 +103,6 @@ classdef Polis < handle
         function agent = getAgentById(obj, agentId)
             % Given an agent id, return the corresponding agent object
             agent = obj.agents(agentId);
-        end
-        
-        function obj = Polis(AM, maximumSearchLevels)
-            % Assign the adjacency matrix maximum search levels
-            obj.AM = AM;
-            obj.maximumSearchLevels = maximumSearchLevels;
-            % Reset the sequence
-            obj.lastTransactionId = 0;
         end
     
         function createAgents(obj, birthday, totalTimeSteps)
@@ -264,7 +266,38 @@ classdef Polis < handle
             end
 
         end
-                
+        
+% Part of refactor, use or delete                
+%         %
+%         % Network exploration methods
+%         %
+%         
+%         function allPaths = findAllNetworkPathsToTargetAgent(obj, thisAgent, targetAgentId)
+%             % For this agent, find all possible network paths to the 
+%             % target agent, avoiding circular loops and limited by the 
+%             % maximum of search levels. Sort results from shortest path to
+%             % the longest path
+%             assert(targetAgentId ~= 0 && targetAgentId ~= thisAgent.id,"Error, Invalid targetAgentId");
+%             
+%             % Use cells since we expect paths to be of unequal length
+%             allPaths = {};
+%             
+%             % Start with my connections (obj.id) and recursively discover 
+%             % each neighbors uncommon connections thereby building the 
+%             % paths to the target agent, if there is a path.
+%             myConnections = thisAgent.findMyConnections(obj.AM);
+%             [~, indices] = size(myConnections);
+%             
+%             for index = 1:indices
+%                 connection = myConnections(index);
+%                 % Concatenate the return paths
+%                 allPaths = [allPaths ; thisAgent.findNextNetworkConnection(obj.AM, 0, [thisAgent.id, connection], thisAgent.id, connection, targetAgentId, {})];
+%             end
+%             
+%             allPaths = Agent.sortPaths(allPaths);
+%                                    
+%         end
+        
         %
         % Tabulation Methods
         %
