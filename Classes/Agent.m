@@ -23,7 +23,7 @@ classdef Agent < handle
     end
     
     properties (GetAccess = private, SetAccess = private)
-        wallet      CryptoWallet    % This agents wallet
+        wallet              Wallet    % This agents wallet
     end
     
     properties (Constant)
@@ -71,7 +71,7 @@ classdef Agent < handle
             obj.id = id;
             obj.birthdate = birthdate;
             obj.polis = polis;
-            obj.wallet = CryptoWallet(obj);
+            obj.wallet = Wallet(obj);
             obj.isBuyer = false;
             obj.isSeller = false;
             obj.numberItemsSold = zeros(1,totalTimeSteps);
@@ -201,59 +201,6 @@ classdef Agent < handle
         end
         
         %
-        % Transaction methods
-        %
-
-% Moved to Polis - REMOVE
-%         function result = submitPurchase(obj, AM, numberItems, amount, targetAgent, timeStep)
-%             % Submit a purachase between this agent (obj.id) and the 
-%             % targetAgent. The transaction may require intermediary agents
-%             % to complete the transaction. Validate the transaction and if
-%             % it passes complete the transaction.
-% 
-%             result = TransactionType.FAILED_UNKNOWN;
-%             
-%             % Insure seller has enough inventory
-%             if targetAgent.availabeInventory < numberItems
-%                 result = TransactionType.FAILED_NO_INVENTORY;
-%                 return;
-%             end
-%             
-%             % Find all possible paths
-%             paths = obj.findAllNetworkPathsToAgent(AM, targetAgent.id);
-%             obj.logPaths(paths);
-%             if isempty(paths)
-%                 result = TransactionType.FAILED_NO_PATH_FOUND;
-%                 return;
-%             end
-%             
-%             % Find a path that satisfies the transaction criteria (e.g. all
-%             % agents have enough balance)
-%             path = obj.findALiquidPathForTheTransactionAmount(AM, paths, amount);
-%             logIntegerArray("Ths selected path is", path, 2, obj.polis.LoggingLevel);
-%             if isempty(path) 
-%                 result = TransactionType.FAILED_NO_LIQUIDITY;
-%                 return;
-%             end
-% 
-%             % Okay, we are good to go.
-%             [~, numberAgents] = size(path);
-%             if numberAgents == 2
-%                 targetAgent = obj.polis.agents(path(1,2));
-%                 mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, obj.id, targetAgent.id);
-%                 obj.wallet.commitPurchaseWithDirectConnection(amount, targetAgent, mutualAgentIds, timeStep);
-%             else
-%                 % Create an array of Agents from the paths array
-%                 agents = Agent.empty; % Need to instantiate empty Agent objects to be able to preallocate
-%                 for i = 2:numberAgents
-%                     agents = [agents , obj.polis.agents(path(1,i))];
-%                 end
-%                 obj.wallet.commitPurchaseWithIndirectConnection(AM, amount, agents, timeStep);
-%             end
-%             result = TransactionType.TRANSACTION_SUCCEEDED;
-%         end
-        
-        %
         % Wallet: Wrappers 
         %        
 
@@ -357,21 +304,6 @@ classdef Agent < handle
             % Write the contents of the wallet's ledger to the console
             obj.wallet.dump;
         end
-
-% Moved to Polis object - REMOVE
-%         function logPaths(obj, paths)
-%             % Output all paths to the console (format is a cell array with
-%             % each element being an integer array signifying a path through
-%             % the network from one agent to another and the path lentghs
-%             % are expected to be different).
-%             [totPaths, ~] = size(paths);
-%             logStatement("\nThere are %d total paths\n", totPaths, 2, obj.polis.LoggingLevel)
-%             for i = 1:totPaths
-%                 logStatement("\nPath = %d\n", i, 2, obj.polis.LoggingLevel);
-%                 aPath = cell2mat(paths(i,1));
-%                 logIntegerArray("Path", aPath, 2, obj.polis.LoggingLevel);
-%             end
-%         end
 
         %
         % Intended for testing or debugging

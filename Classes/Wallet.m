@@ -1,6 +1,6 @@
-classdef CryptoWallet < handle
+classdef Wallet < handle
 %================================================================
-% Class CryptoWallet
+% Class Wallet
 %
 % This is a wallet. Each Agent has one. It's designed to be a 
 % private attribute of each Agent
@@ -46,7 +46,7 @@ Buying - subtracting currency
     
     methods
         
-        function obj = CryptoWallet(agent)
+        function obj = Wallet(agent)
             % This wallet belongs to this agent
             obj.agent = agent;
             obj.transactions = Transaction.empty;
@@ -148,7 +148,7 @@ Buying - subtracting currency
             obj.transactions = [obj.transactions ; newTransaction];
             
             % Update the running balance - this denormalization is done purely for performance,
-            % See CryptoWallet.balanceForAgentsCurrency
+            % See Wallet.balanceForAgentsCurrency
             currencyAgentId = newTransaction.currencyAgentId;
             newBalance = obj.currencyAgentBalances(currencyAgentId,2) + newTransaction.amount;
             obj.currencyAgentBalances(currencyAgentId, 2) = newBalance;
@@ -364,7 +364,7 @@ Buying - subtracting currency
             % balance = sum([results.amount]);
 
             % Use the lookup for a large performance improvement, see
-            % CryptoWallet.addTransaction
+            % Wallet.addTransaction
             balance = obj.currencyAgentBalances(agentId,2);
         end
         
