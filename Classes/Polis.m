@@ -40,6 +40,56 @@ classdef Polis < handle
     
     methods (Access = public)
         
+        function result = submitPurchase(obj, agentBuying, agentSelling, numberItems, price, time)
+            % Submit a purachase between buying agent and the selling 
+            % agent. The transaction may require intermediary agents
+            % to complete the transaction. Validate the proposed 
+            % transaction, and if it passes, complete the transaction.
+            
+            amount = numberItems*price;
+            %result = TransactionType.FAILED_UNKNOWN;
+            
+            % Insure seller has enough inventory
+            if agentSelling.availabeInventory < numberItems
+                result = TransactionType.FAILED_NO_INVENTORY;
+                return;
+            end
+
+            % Find all possible paths from the buyer to the seller
+            paths = agentBuying.findAllNetworkPathsToAgent(obj.AM, agentSelling.id);
+            obj.logPaths(paths);
+            if isempty(paths)
+                result = TransactionType.FAILED_NO_PATH_FOUND;
+                return;
+            end
+
+            % Find a transitive-transaction path
+            path = agentBuying.findALiquidPathForTheTransactionAmount(obj.AM, paths, amount);
+            logIntegerArray("Ths selected path is", path, 2, obj.LoggingLevel);
+            if isempty(path) 
+                result = TransactionType.FAILED_NO_LIQUIDITY;
+                return;
+            end
+
+            % Okay, we free to complete the transaction
+            [~, numberAgents] = size(path);
+            if numberAgents == 2
+                targetAgent = obj.agents(path(1,2));
+                mutualAgentIds = Agent.findMutualConnectionsWithAgent(obj.AM, agentBuying.id, targetAgent.id);
+                agentBuying.commitPurchaseWithDirectConnection(amount, targetAgent, mutualAgentIds, time);
+            else
+                % Create an array of Agents from the paths array
+                agentsOnPath = Agent.empty; % Need to instantiate empty Agent objects to be able to preallocate
+                for i = 2:numberAgents
+                    agentsOnPath = [agentsOnPath , obj.agents(path(1,i))];
+                end
+                agentBuying.commitPurchaseWithIndirectConnection(amount, agentsOnPath, time);
+            end
+            
+            result = TransactionType.TRANSACTION_SUCCEEDED;
+            
+        end
+
         function agent = getAgentById(obj, agentId)
             % Given an agent id, return the corresponding agent object
             agent = obj.agents(agentId);
@@ -406,8 +456,26 @@ classdef Polis < handle
             numberOfFailures = numel(matchingObjects);
         end
         
-    end
+        %
+        % Logging Methods
+        %
+
+        function logPaths(obj, paths)
+        % Output all paths to the console (format is a cell array with
+        % each element being an integer array signifying a path through
+        % the network from one agent to another and the path lentghs
+        % are expected to be different).
+        [totPaths, ~] = size(paths);
+        logStatement("\nThere are %d total paths\n", totPaths, 2, obj.LoggingLevel)
+            for i = 1:totPaths
+                logStatement("\nPath = %d\n", i, 2, obj.LoggingLevel);
+                aPath = cell2mat(paths(i,1));
+                logIntegerArray("Path", aPath, 2, obj.LoggingLevel);
+            end
+        end
     
+    end
+
     methods (Static)
     end
     
