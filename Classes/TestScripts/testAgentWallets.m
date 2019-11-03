@@ -151,14 +151,20 @@ agent6 = polis.agents(6);
 
 time = time + 1;
 result = polis.submitPurchase(agent1, agent6, numItems, 400, time);
+agent1.dumpLedger();
+agent6.dumpLedger();
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 time = time + 1;
 result = polis.submitPurchase(agent3, agent1, numItems, 250, time);
+agent1.dumpLedger();
+agent3.dumpLedger();
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 time = time + 1;
 result = polis.submitPurchase(agent1, agent2, numItems, 249, time);
+agent1.dumpLedger();
+agent2.dumpLedger();
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 agents = [agent1, agent2, agent3, agent4, agent6];

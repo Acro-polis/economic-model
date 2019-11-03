@@ -13,20 +13,21 @@ classdef Polis < handle
     end
     
     properties (SetAccess = private)
-        AM                  % The system adjacency matrix
-        agents              % Array of all agents
-        maximumSearchLevels % Maximum search steps allowed for finding valid paths, 6 is a good number
+        AM                              % The system adjacency matrix
+        agents                          % Array of all agents
+        maximumSearchLevels             % Maximum search steps allowed for finding valid paths, 6 is a good number
+        pathFinder          PathFinder  % Singleton, encapsulates path logic
     end
 
     properties (SetAccess = private, GetAccess = private)
-        lastTransactionId
-        transactionMgr      TransactionManager
+        lastTransactionId   uint32              % Last transaction id created
+        transactionMgr      TransactionManager  % Singleton, encapsulates transactional logic
     end
     
     properties (Constant)
-        LoggingLevel = 0;   % Current Levels 0, 1, 2 (0 least, 2 most)
-        PolisId = 0 
-        PercentDemurage = 0.05
+        LoggingLevel = 2;       % Current Levels 0, 1, 2 (0 least, 2 most)
+        PolisId = 0             % Object Id, not used right now
+        PercentDemurage = 0.05  % Used for some tests, should not use for simulations
     end
     
     properties (Dependent)
@@ -47,6 +48,7 @@ classdef Polis < handle
             obj.AM = AM;
             obj.maximumSearchLevels = maximumSearchLevels;
             obj.transactionMgr = TransactionManager(obj);
+            obj.pathFinder = PathFinder(obj);
             obj.lastTransactionId = 0; % Reset the sequence
         end
         
@@ -66,7 +68,8 @@ classdef Polis < handle
             end
 
             % Find all possible paths from the buyer to the seller
-            paths = agentBuying.findAllNetworkPathsToAgent(obj.AM, agentSelling.id);
+            paths = obj.pathFinder.findAllNetworkPathsFromThisAgentToThatAgent(agentBuying, agentSelling);
+%RF            paths = agentBuying.findAllNetworkPathsToAgent(obj.AM, agentSelling.id);
             obj.logPaths(paths);
             if isempty(paths)
                 result = TransactionType.FAILED_NO_PATH_FOUND;
@@ -204,7 +207,8 @@ classdef Polis < handle
             uncommonConnectionAgentIds = [];
             initialSearchLevel = 0;
             buyingAgent = obj.agents(buyingAgentId);
-            buyingAgentDirectConnectionIds = buyingAgent.findMyConnections(obj.AM);
+            buyingAgentDirectConnectionIds = obj.pathFinder.findAgentsConnections(buyingAgent);
+%RF            buyingAgentDirectConnectionIds = buyingAgent.findMyConnections(obj.AM);
                         
             % Recursively find all indirect connections within the
             % allowed transaction distance
@@ -266,38 +270,7 @@ classdef Polis < handle
             end
 
         end
-        
-% Part of refactor, use or delete                
-%         %
-%         % Network exploration methods
-%         %
-%         
-%         function allPaths = findAllNetworkPathsToTargetAgent(obj, thisAgent, targetAgentId)
-%             % For this agent, find all possible network paths to the 
-%             % target agent, avoiding circular loops and limited by the 
-%             % maximum of search levels. Sort results from shortest path to
-%             % the longest path
-%             assert(targetAgentId ~= 0 && targetAgentId ~= thisAgent.id,"Error, Invalid targetAgentId");
-%             
-%             % Use cells since we expect paths to be of unequal length
-%             allPaths = {};
-%             
-%             % Start with my connections (obj.id) and recursively discover 
-%             % each neighbors uncommon connections thereby building the 
-%             % paths to the target agent, if there is a path.
-%             myConnections = thisAgent.findMyConnections(obj.AM);
-%             [~, indices] = size(myConnections);
-%             
-%             for index = 1:indices
-%                 connection = myConnections(index);
-%                 % Concatenate the return paths
-%                 allPaths = [allPaths ; thisAgent.findNextNetworkConnection(obj.AM, 0, [thisAgent.id, connection], thisAgent.id, connection, targetAgentId, {})];
-%             end
-%             
-%             allPaths = Agent.sortPaths(allPaths);
-%                                    
-%         end
-        
+                
         %
         % Tabulation Methods
         %

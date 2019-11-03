@@ -133,32 +133,32 @@ classdef Agent < handle
         %
         % Network exploration methods
         %
-        
-        function allPaths = findAllNetworkPathsToAgent(obj, AM, targetAgentId)
-            % For this agent, find all possible network paths to the 
-            % target agent, avoiding circular loops and limited by the 
-            % maximum of search levels. Sort results from shortest path to
-            % the longest path
-            assert(targetAgentId ~= 0 && targetAgentId ~= obj.id,"Error, Invalid targetAgentId");
-            
-            % Use cells since we expect paths to be of unequal length
-            allPaths = {};
-            
-            % Start with my connections (obj.id) and recursively discover 
-            % each neighbors uncommon connections thereby building the 
-            % paths to the target agent, if there is a path.
-            myConnections = obj.findMyConnections(AM);
-            [~, indices] = size(myConnections);
-            
-            for index = 1:indices
-                connection = myConnections(index);
-                % Concatenate the return paths
-                allPaths = [allPaths ; obj.findNextNetworkConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId, {})];
-            end
-            
-            allPaths = Agent.sortPaths(allPaths);
-                                   
-        end
+% Refactor - moved to PathFinder        
+%         function allPaths = findAllNetworkPathsToAgent(obj, AM, targetAgentId)
+%             % For this agent, find all possible network paths to the 
+%             % target agent, avoiding circular loops and limited by the 
+%             % maximum of search levels. Sort results from shortest path to
+%             % the longest path
+%             assert(targetAgentId ~= 0 && targetAgentId ~= obj.id,"Error, Invalid targetAgentId");
+%             
+%             % Use cells since we expect paths to be of unequal length
+%             allPaths = {};
+%             
+%             % Start with my connections (obj.id) and recursively discover 
+%             % each neighbors uncommon connections thereby building the 
+%             % paths to the target agent, if there is a path.
+%             myConnections = obj.findMyConnections(AM);
+%             [~, indices] = size(myConnections);
+%             
+%             for index = 1:indices
+%                 connection = myConnections(index);
+%                 % Concatenate the return paths
+%                 allPaths = [allPaths ; obj.findNextNetworkConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId, {})];
+%             end
+%             
+%             allPaths = Agent.sortPaths(allPaths);
+%                                    
+%         end
                
         function selectedPath = findALiquidPathForTheTransactionAmount(obj, AM, paths, amount)
             % Return the first path that supports the transaction. Paths
@@ -193,12 +193,13 @@ classdef Agent < handle
                 result = true;
             end
         end
-
-        function connections = findMyConnections(obj, AM)
-            % Return the index number of my connections using the 
-            % Adjacency Matrix
-            connections = find(AM(obj.id,:) ~= 0);
-        end
+        
+% Refactor - Moved to Path Finder        
+%         function connections = findMyConnections(obj, AM)
+%             % Return the index number of my connections using the 
+%             % Adjacency Matrix
+%             connections = find(AM(obj.id,:) ~= 0);
+%         end
         
         %
         % Wallet: Wrappers 
@@ -411,70 +412,72 @@ classdef Agent < handle
             end
         end
         
-       function paths = findNextNetworkConnection(obj, AM, searchLevel, currentPath, thisAgentId, thatAgentId, targetAgentId, paths)
-            % Recursively explore any uncommon connections between
-            % thisAgentId and thatAgentId until the targetAgentId is found
-            % or we run out of uncommon connections (and ensureing we do
-            % not traverse the object agent (obj.id))
-            
-            logIntegerArray("Starting Path", currentPath, 2, obj.polis.LoggingLevel)
-            logStatement("Agents: This = %d, That = %d, Target = %d, Search Level = %d\n\n", [thisAgentId, thatAgentId, targetAgentId, searchLevel], 4, obj.polis.LoggingLevel);
-            
-            if thatAgentId == targetAgentId
-                % Found it, we are done!
-                paths = [paths ; {currentPath}];
-                logStatement("!!!! Done: Found Target Agent = %d !!!!\n\n", targetAgentId, 2, obj.polis.LoggingLevel);
-                return;
-            end
-            
-            % If we run out of uncommon connections before we find the
-            % target then we are out of luck, they are not connected and we
-            % return (see below). Same if we run out of search levels
-            % Must exceed search level to return
-            if searchLevel > obj.polis.maximumSearchLevels 
-                % No luck, go home empty handed
-                logStatement("**** Abandon Ship - Max Level Reached ****\n\n", [], 2, obj.polis.LoggingLevel);
-                return;
-            else
-                searchLevel = searchLevel + 1;
-            end
-            
-            % Find the uncommon connections (remove this agent (obj.id), if it exists)
-            uncommonConnections = obj.removeMeIfIAmPresent(findUncommonConnectionsBetweenTwoAgents(AM, thisAgentId, thatAgentId));
-            [~, indices] = size(uncommonConnections);
-            if indices > 0 
-                logIntegerArray("---- Uncommon Connections", uncommonConnections, 2, obj.polis.LoggingLevel)
-                for index = 1:indices
-                    nextAgent = uncommonConnections(index);
-                    logStatement("---- Searching Uncommon Connection = %d\n", nextAgent, 2, obj.polis.LoggingLevel);
-                    nextPathSegment = [currentPath , nextAgent];
-                    paths = obj.findNextNetworkConnection(AM, searchLevel, nextPathSegment, thatAgentId, nextAgent, targetAgentId, paths);
-                end
-            else
-                % No luck, go home empty handed
-                logStatement("**** Abandon Ship - No More Uncommon Connections ****\n\n", [], 2, obj.polis.LoggingLevel);
-                return;
-            end
-        end
+% Refactor - moved to PathFinder        
+%        function paths = findNextNetworkConnection(obj, AM, searchLevel, currentPath, thisAgentId, thatAgentId, targetAgentId, paths)
+%             % Recursively explore any uncommon connections between
+%             % thisAgentId and thatAgentId until the targetAgentId is found
+%             % or we run out of uncommon connections (and ensureing we do
+%             % not traverse the object agent (obj.id))
+%             
+%             logIntegerArray("Starting Path", currentPath, 2, obj.polis.LoggingLevel)
+%             logStatement("Agents: This = %d, That = %d, Target = %d, Search Level = %d\n\n", [thisAgentId, thatAgentId, targetAgentId, searchLevel], 4, obj.polis.LoggingLevel);
+%             
+%             if thatAgentId == targetAgentId
+%                 % Found it, we are done!
+%                 paths = [paths ; {currentPath}];
+%                 logStatement("!!!! Done: Found Target Agent = %d !!!!\n\n", targetAgentId, 2, obj.polis.LoggingLevel);
+%                 return;
+%             end
+%             
+%             % If we run out of uncommon connections before we find the
+%             % target then we are out of luck, they are not connected and we
+%             % return (see below). Same if we run out of search levels
+%             % Must exceed search level to return
+%             if searchLevel > obj.polis.maximumSearchLevels 
+%                 % No luck, go home empty handed
+%                 logStatement("**** Abandon Ship - Max Level Reached ****\n\n", [], 2, obj.polis.LoggingLevel);
+%                 return;
+%             else
+%                 searchLevel = searchLevel + 1;
+%             end
+%             
+%             % Find the uncommon connections (remove this agent (obj.id), if it exists)
+%             uncommonConnections = obj.removeMeIfIAmPresent(findUncommonConnectionsBetweenTwoAgents(AM, thisAgentId, thatAgentId));
+%             [~, indices] = size(uncommonConnections);
+%             if indices > 0 
+%                 logIntegerArray("---- Uncommon Connections", uncommonConnections, 2, obj.polis.LoggingLevel)
+%                 for index = 1:indices
+%                     nextAgent = uncommonConnections(index);
+%                     logStatement("---- Searching Uncommon Connection = %d\n", nextAgent, 2, obj.polis.LoggingLevel);
+%                     nextPathSegment = [currentPath , nextAgent];
+%                     paths = obj.findNextNetworkConnection(AM, searchLevel, nextPathSegment, thatAgentId, nextAgent, targetAgentId, paths);
+%                 end
+%             else
+%                 % No luck, go home empty handed
+%                 logStatement("**** Abandon Ship - No More Uncommon Connections ****\n\n", [], 2, obj.polis.LoggingLevel);
+%                 return;
+%             end
+%         end
 
-       function result = removeMeIfIAmPresent(obj, uncommonConnections)
-            % Remove this agent (me, the buyer) from the list, if present.
-            % This prevents infinite looping should a circle of connections
-            % exist (for example: A to B to C to D to A).
-            
-            result = uncommonConnections;
-            
-            [~, indices] = size(uncommonConnections);
-            if indices == 0
-                % Case of no connections at all
-                return;
-            end
-            
-            indexOfMe = find(uncommonConnections(1,:) == obj.id);
-            if indexOfMe > 0
-                result(indexOfMe) = [];
-            end
-       end
+% Refactor - Moved to PathFinder
+%        function result = removeMeIfIAmPresent(obj, uncommonConnections)
+%             % Remove this agent (me, the buyer) from the list, if present.
+%             % This prevents infinite looping should a circle of connections
+%             % exist (for example: A to B to C to D to A).
+%             
+%             result = uncommonConnections;
+%             
+%             [~, indices] = size(uncommonConnections);
+%             if indices == 0
+%                 % Case of no connections at all
+%                 return;
+%             end
+%             
+%             indexOfMe = find(uncommonConnections(1,:) == obj.id);
+%             if indexOfMe > 0
+%                 result(indexOfMe) = [];
+%             end
+%        end
        
     end
     

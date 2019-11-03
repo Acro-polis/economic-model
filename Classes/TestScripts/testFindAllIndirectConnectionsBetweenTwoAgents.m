@@ -42,7 +42,8 @@ function runConnectionsTest(polis, AM, buyingAgentId, testNumber, expectedConnec
     fprintf("\n------------------------------------------\n");
     fprintf("\nTest %d - Testing buyingAgentId = %d\n", testNumber, buyingAgentId);
     buyingAgent = polis.getAgentById(buyingAgentId);
-    buyingAgentsDirectConnections = buyingAgent.findMyConnections(AM);
+    buyingAgentsDirectConnections = polis.pathFinder.findAgentsConnections(buyingAgent);
+%RF    buyingAgentsDirectConnections = buyingAgent.findMyConnections(AM);
     buyingAgentsIndirectConnections = {};
     for i = 1:numel(buyingAgentsDirectConnections)
         targetAgentId = buyingAgentsDirectConnections(i);
