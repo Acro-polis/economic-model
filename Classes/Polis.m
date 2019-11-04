@@ -1,8 +1,6 @@
 classdef Polis < handle
 %================================================================
-% Class Polis
-%
-% Welcome to Mount Olympus
+%POLIS Welcome to Mount Olympus
 %
 % Created by Jess 10.26.18
 %================================================================
@@ -69,7 +67,6 @@ classdef Polis < handle
 
             % Find all possible paths from the buyer to the seller
             paths = obj.pathFinder.findAllNetworkPathsFromThisAgentToThatAgent(agentBuying, agentSelling);
-%RF            paths = agentBuying.findAllNetworkPathsToAgent(obj.AM, agentSelling.id);
             obj.logPaths(paths);
             if isempty(paths)
                 result = TransactionType.FAILED_NO_PATH_FOUND;
@@ -89,14 +86,14 @@ classdef Polis < handle
             if numberAgents == 2
                 targetAgent = obj.agents(path(1,2));
                 mutualAgentIds = PathFinder.findMutualConnectionsWithAgent(obj.AM, agentBuying.id, targetAgent.id);
-                agentBuying.commitPurchaseWithDirectConnection(amount, targetAgent, mutualAgentIds, time);
+                obj.transactionMgr.commitPurchaseWithDirectConnection(amount, agentBuying, targetAgent, mutualAgentIds, time);
             else
                 % Create an array of Agents from the paths array
                 agentsOnPath = Agent.empty; % Need to instantiate empty Agent objects to be able to preallocate
                 for i = 2:numberAgents
                     agentsOnPath = [agentsOnPath , obj.agents(path(1,i))];
                 end
-                agentBuying.commitPurchaseWithIndirectConnection(amount, agentsOnPath, time);
+                obj.transactionMgr.commitPurchaseWithIndirectConnection(amount, agentBuying, agentsOnPath, time);
             end
             
             result = TransactionType.TRANSACTION_SUCCEEDED;
@@ -208,7 +205,6 @@ classdef Polis < handle
             initialSearchLevel = 0;
             buyingAgent = obj.agents(buyingAgentId);
             buyingAgentDirectConnectionIds = obj.pathFinder.findAgentsConnections(buyingAgent);
-%RF            buyingAgentDirectConnectionIds = buyingAgent.findMyConnections(obj.AM);
                         
             % Recursively find all indirect connections within the
             % allowed transaction distance
@@ -231,46 +227,6 @@ classdef Polis < handle
             sellerIds = intersect([sellers.id], buyerConnectionsIds);
             
         end
-
-% Refactor - Moved to PathFinder
-%         function uncommonConnectionAgentIds = findAllIndirectConnectionsBetweenTwoAgents(obj, searchLevel, uncommonConnectionAgentIds, thisAgentId, thatAgentId)
-%             % For two connected agents, thisAgent and thatAgent, find the
-%             % uncommon connections thatAgent has from thisAgent. Recursivly
-%             % repeat the process until the search level is reached or we
-%             % run out of uncommon connections. Remove any duplicates along
-%             % the way.
-%             
-%             logLevel = 2;
-%             
-%             if searchLevel > obj.maximumSearchLevels % Must exceed search level to return
-%               logStatement("\nSearch Maximum Reached for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.LoggingLevel);
-%               return; 
-%             else
-%                 searchLevel = searchLevel + 1;
-%             end
-%             
-%             % Find uncommon connections and remove any already found
-%             logStatement("\nProcessing This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.LoggingLevel);
-%             newUncommonConnections = findUncommonConnectionsBetweenTwoAgents(obj.AM, thisAgentId, thatAgentId);
-%             newUncommonConnections = setdiff(newUncommonConnections, uncommonConnectionAgentIds);
-% 
-%             if numel(newUncommonConnections) == 0
-%                 logStatement("\nNone Found for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.LoggingLevel);
-%                 return;
-%             else
-%                 logIntegerArray("Found Uncommon Connections", newUncommonConnections, 2, obj.LoggingLevel);
-%                 
-%                 % Accumulate what we found
-%                 uncommonConnectionAgentIds = [uncommonConnectionAgentIds , newUncommonConnections];
-%                 
-%                 % Recursivley search for more indirect connections
-%                 for i = 1:numel(newUncommonConnections)
-%                     uncommonConnectionAgentId = newUncommonConnections(i);
-%                     uncommonConnectionAgentIds = obj.findAllIndirectConnectionsBetweenTwoAgents(searchLevel, uncommonConnectionAgentIds, thatAgentId, uncommonConnectionAgentId);
-%                 end
-%             end
-% 
-%         end
                 
         %
         % Tabulation Methods
