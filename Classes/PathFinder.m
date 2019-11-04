@@ -16,7 +16,7 @@ classdef PathFinder < handle
 
         function allPaths = findAllNetworkPathsFromThisAgentToThatAgent(obj, thisAgent, thatAgent)
             % For thisAgent, find all possible network paths to the 
-            % target agent (thatAgent), avoiding circular loops and limited 
+            % thatAgent avoiding circular loops and limited 
             % by the maximum of search levels. Sort results from shortest 
             % path to the longest path
             assert(thatAgent.id ~= 0 && thatAgent.id ~= thisAgent.id,"Error, Invalid Target Agent");
@@ -24,9 +24,9 @@ classdef PathFinder < handle
             % Use cells since we expect paths to be of unequal length
             allPaths = {};
             
-            % Start with thisAgent's connections and recursively discover 
+            % Start with thisAgent's connections and recursively explore 
             % each neighbors uncommon connections thereby building all the 
-            % paths to thatAgent that might exist
+            % existing paths to thatAgent
             myConnections = obj.findAgentsConnections(thisAgent);
             [~, indices] = size(myConnections);
             
@@ -37,7 +37,7 @@ classdef PathFinder < handle
 %RF                 allPaths = [allPaths ; obj.findNextNetworkConnection(AM, 0, [obj.id, connection], obj.id, connection, targetAgentId, {})];
             end
             
-            allPaths = Agent.sortPaths(allPaths);
+            allPaths = PathFinder.sortPaths(allPaths);
                                    
         end
         
@@ -45,6 +45,85 @@ classdef PathFinder < handle
             % Return the index number of the agents connections using the 
             % Adjacency Matrix
             connections = find(obj.polis.AM(theAgent.id,:) ~= 0);
+        end
+        
+        function selectedPath = findALiquidPathForTheTransactionAmount(obj, paths, amount)
+            % Return the first path that supports the transaction. Paths
+            % should be ordered from the shortest to the longest.
+            selectedPath = [];
+            [indices, ~] = size(paths);
+            for index = 1:indices
+                path = cell2mat(paths(index, 1));
+                logStatement("\nPath %d of %d\n", [index, indices], 2, obj.polis.LoggingLevel)
+                logIntegerArray("Analyzing Path",path, 2, obj.polis.LoggingLevel);
+                if obj.polis.pathFinder.checkIfPathIsLiquid(path, amount) 
+                    selectedPath = path;
+                    return;
+                end
+            end
+        end
+        
+        function pathIsGood = checkIfPathIsLiquid(obj, path, amount)
+            % Determine if this path carries enough balance to support the
+            % transaction amount
+            pathIsGood = true;
+            logIntegerArray("Working on path", path, 2, obj.polis.LoggingLevel);
+            [~, segments] = size(path);
+            for segment = 2:segments
+                thisAgentId = path(segment - 1);
+                thatAgentId = path(segment);
+                logStatement("Checking segment %d to %d\n", [thisAgentId, thatAgentId], 2, obj.polis.LoggingLevel);
+                mutualAgentIds = PathFinder.findMutualConnectionsWithAgent(obj.polis.AM, thisAgentId, thatAgentId);
+                availableBalance = obj.polis.agents(thisAgentId).availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
+                logStatement("Available Balance = %.2f, Amount = %.2f\n", [availableBalance, amount], 2, obj.polis.LoggingLevel);
+                if availableBalance <= amount
+                    logStatement("Path failed, no balance\n", [], 2, obj.polis.LoggingLevel);
+                    pathIsGood = false;
+                    % Record Agent that caused the liquidity failure
+                    lf = LiquidityFailure(thisAgentId, thatAgentId, amount, mutualAgentIds, path, "", obj.polis.currentTime);
+                    obj.polis.liquidityFailures = [obj.polis.liquidityFailures; lf];
+                    %lf.dump;
+                    break;
+                end
+            end
+        end
+        
+        function uncommonConnectionAgentIds = findAllIndirectConnectionsBetweenTwoAgents(obj, searchLevel, uncommonConnectionAgentIds, thisAgentId, thatAgentId)
+            % For two connected agents, thisAgent and thatAgent, find the
+            % uncommon connections thatAgent has from thisAgent. Recursivly
+            % repeat the process until the search level is reached or we
+            % run out of uncommon connections. Remove any duplicates along
+            % the way.
+            
+            logLevel = 2;
+            
+            if searchLevel > obj.polis.maximumSearchLevels % Must exceed search level to return
+              logStatement("\nSearch Maximum Reached for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.polis.LoggingLevel);
+              return; 
+            else
+                searchLevel = searchLevel + 1;
+            end
+            
+            % Find uncommon connections and remove any already found
+            logStatement("\nProcessing This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.polis.LoggingLevel);
+            newUncommonConnections = findUncommonConnectionsBetweenTwoAgents(obj.polis.AM, thisAgentId, thatAgentId);
+            newUncommonConnections = setdiff(newUncommonConnections, uncommonConnectionAgentIds);
+
+            if numel(newUncommonConnections) == 0
+                logStatement("\nNone Found for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.polis.LoggingLevel);
+                return;
+            else
+                logIntegerArray("Found Uncommon Connections", newUncommonConnections, 2, obj.polis.LoggingLevel);
+                
+                % Accumulate what we found
+                uncommonConnectionAgentIds = [uncommonConnectionAgentIds , newUncommonConnections];
+                
+                % Recursivley search for more indirect connections
+                for i = 1:numel(newUncommonConnections)
+                    uncommonConnectionAgentId = newUncommonConnections(i);
+                    uncommonConnectionAgentIds = obj.findAllIndirectConnectionsBetweenTwoAgents(searchLevel, uncommonConnectionAgentIds, thatAgentId, uncommonConnectionAgentId);
+                end
+            end
         end
         
     end
@@ -119,5 +198,69 @@ classdef PathFinder < handle
        
     end
 
+    methods (Static)
+
+        function paths = sortPaths(paths)
+            % Order the the paths shortest length to longest length
+            % (the expected format is that which is returned from 
+            % findAllNetworkPathsToAgent()).
+            [~, columns] = sort(cellfun(@length, paths));
+            paths = paths(columns);
+        end
+        
+        function mutualConnections = findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId)
+            % Return common connections this agent shares with another 
+            % (that agent). The mutualConnections array contains the index 
+            % numbers of other agents in the Agency Matrix and excludes 
+            % the other agent.
+            
+            %
+            % Algorithm: Sum two rows of the Adjancey Matrix and any element
+            % that is equal to 2 is a mutual connection.
+            %
+            mutualConnections = find((AM(thisAgentId,:) + AM(thatAgentId,:)) == 2);
+        end
+        
+        function uncommonConnections = findMyUncommonConnectionsFromAgent(AM, thisAgentId, thatAgentId)
+            % Return the uncommon connections this agent possesses from
+            % that agent. The uncommonConnections array contains the 
+            % index ids of other agents in the Adjacency Matrix. 
+
+            %
+            % Algorithm: Subtract my connections from the other agents using 
+            % the Agency Matrix. The uncommon agents will correspond to those 
+            % possessing a quantity of +1 (excluding the agent being tested)
+            %
+            uncommonConnections = find((AM(thisAgentId,:) - AM(thatAgentId,:)) == 1);
+            uncommonConnections = uncommonConnections(uncommonConnections ~= thatAgentId);
+        end
+        
+        function connections = findConnectionsForAgent(AM, agentId)
+            % Return the index number of connections for agentId using the
+            % Adjacency Matrix
+            connections = find(AM(agentId,:) ~= 0);
+        end
+
+        function result = areAgentsConnected(AM, thisAgentId, thatAgentId)
+            % Is this agent directly connected to that agent?
+            if AM(thisAgentId, thatAgentId) == 1
+                result = true;
+            else 
+                result = false;
+            end
+        end
+
+        function result = isAgentCompletelyConnected(AM, agentId)
+            % Is this agent connected to everybody?
+            [~, connections] = size(PathFinder.findConnectionsForAgent(AM, agentId));
+            [~, possibleConnections] = size(AM);
+            if connections == (possibleConnections - 1)
+                result = true;
+            else 
+                result = false;
+            end
+        end
+        
+    end
 end
 

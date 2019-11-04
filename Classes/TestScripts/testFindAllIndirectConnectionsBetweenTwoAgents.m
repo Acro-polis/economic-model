@@ -47,7 +47,7 @@ function runConnectionsTest(polis, AM, buyingAgentId, testNumber, expectedConnec
     buyingAgentsIndirectConnections = {};
     for i = 1:numel(buyingAgentsDirectConnections)
         targetAgentId = buyingAgentsDirectConnections(i);
-        buyingAgentsIndirectConnections = [buyingAgentsIndirectConnections , polis.findAllIndirectConnectionsBetweenTwoAgents(0, [], buyingAgentId, targetAgentId)]; 
+        buyingAgentsIndirectConnections = [buyingAgentsIndirectConnections , polis.pathFinder.findAllIndirectConnectionsBetweenTwoAgents(0, [], buyingAgentId, targetAgentId)]; 
     end
     allDirectAndIndirectConnections = unique([cell2mat(buyingAgentsIndirectConnections) , buyingAgentsDirectConnections]);
     assert(isequal(allDirectAndIndirectConnections,expectedConnections) == 1,"Test %d failed, expected and found connections do not match", testNumber);

@@ -68,7 +68,7 @@ Buying - subtracting currency
             
             % Record the first leg
             thatAgent = agentsInPath(1);
-            mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, obj.agent.id, thatAgent.id);
+            mutualAgentIds = PathFinder.findMutualConnectionsWithAgent(AM, obj.agent.id, thatAgent.id);
             logStatement("\nFirst Leg:  id 1 = %d, id 2 = %d\n", [obj.agent.id, thatAgent.id], 2, obj.agent.polis.LoggingLevel);
             obj.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY, TransactionType.SELL_TRANSITIVE, transactionId, timeStep);
             
@@ -77,7 +77,7 @@ Buying - subtracting currency
                 for leg = 1:(numberAgents - 2)
                     thisAgent = agentsInPath(leg);
                     thatAgent = agentsInPath(leg + 1);
-                    mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, thisAgent.id, thatAgent.id);
+                    mutualAgentIds = PathFinder.findMutualConnectionsWithAgent(AM, thisAgent.id, thatAgent.id);
                     logStatement("Middle Leg: id %d = %d, id %d = %d\n", [leg, thisAgent.id, leg + 1, thatAgent.id], 2, obj.agent.polis.LoggingLevel);
                     thisAgent.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY_TRANSITIVE, TransactionType.SELL_TRANSITIVE, transactionId, timeStep);            
                 end
@@ -86,7 +86,7 @@ Buying - subtracting currency
             % Record the last leg
             thisAgent = agentsInPath(numberAgents - 1);
             thatAgent = agentsInPath(numberAgents);
-            mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, thisAgent.id, thatAgent.id);
+            mutualAgentIds = PathFinder.findMutualConnectionsWithAgent(AM, thisAgent.id, thatAgent.id);
             logStatement("Last Leg:   id %d = %d, id %d = %d\n", [numberAgents - 1, thisAgent.id, numberAgents, thatAgent.id], 2, obj.agent.polis.LoggingLevel);
             thisAgent.commitPurchaseSegment(amount, thatAgent, mutualAgentIds, TransactionType.BUY_TRANSITIVE, TransactionType.SELL, transactionId, timeStep);            
             

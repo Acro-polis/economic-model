@@ -160,39 +160,42 @@ classdef Agent < handle
 %                                    
 %         end
                
-        function selectedPath = findALiquidPathForTheTransactionAmount(obj, AM, paths, amount)
-            % Return the first path that supports the transaction. Paths
-            % should be ordered from the shortest to the longest.
-            selectedPath = [];
-            [indices, ~] = size(paths);
-            for index = 1:indices
-                path = cell2mat(paths(index, 1));
-                logStatement("\nPath %d of %d\n", [index, indices], 2, obj.polis.LoggingLevel)
-                logIntegerArray("Analyzing Path",path, 2, obj.polis.LoggingLevel);
-                if obj.checkIfPathIsValid(AM, path, amount) 
-                    selectedPath = path;
-                    return;
-                end
-            end
-        end
-                
-        function result = areWeConnected(obj, AM, targetAgentId)
-            % Is this agent directly connected to the target agent?
-            result = false;
-            if AM(obj.id, targetAgentId) == 1
-                result = true;
-            end
-        end
+% Refactor - Moved to PathFinder        
+%         function selectedPath = findALiquidPathForTheTransactionAmount(obj, paths, amount)
+%             % Return the first path that supports the transaction. Paths
+%             % should be ordered from the shortest to the longest.
+%             selectedPath = [];
+%             [indices, ~] = size(paths);
+%             for index = 1:indices
+%                 path = cell2mat(paths(index, 1));
+%                 logStatement("\nPath %d of %d\n", [index, indices], 2, obj.polis.LoggingLevel)
+%                 logIntegerArray("Analyzing Path",path, 2, obj.polis.LoggingLevel);
+%                 if obj.polis.pathFinder.checkIfPathIsLiquid(path, amount) 
+%                     selectedPath = path;
+%                     return;
+%                 end
+%             end
+%         end
         
-        function result = amICompletelyConnected(obj, AM)
-            % Is this agent connected to everybody?
-            result = false;
-            [~, connections] = size(obj.findMyConnections(AM));
-            [~, possibleConnections] = size(AM);
-            if connections == (possibleConnections - 1)
-                result = true;
-            end
-        end
+% Refactor - Moved to PathFinder        
+%         function result = areWeConnected(obj, AM, targetAgentId)
+%             % Is this agent directly connected to the target agent?
+%             result = false;
+%             if AM(obj.id, targetAgentId) == 1
+%                 result = true;
+%             end
+%         end
+        
+% Refactor - Moved to PathFinder        
+%         function result = amICompletelyConnected(obj, AM)
+%             % Is this agent connected to everybody?
+%             result = false;
+%             [~, connections] = size(obj.findMyConnections(AM));
+%             [~, possibleConnections] = size(AM);
+%             if connections == (possibleConnections - 1)
+%                 result = true;
+%             end
+%         end
         
 % Refactor - Moved to Path Finder        
 %         function connections = findMyConnections(obj, AM)
@@ -325,35 +328,37 @@ classdef Agent < handle
         end
 
     end
-        
+
     methods (Static)
-                
-        function paths = sortPaths(paths)
-            % Order the the network paths shortest length to longest length
-            % (the expected format is that which is returned from 
-            % findAllNetworkPathsToAgent()).
-            [~, columns] = sort(cellfun(@length, paths));
-            paths = paths(columns);
-        end
+         
+% Refactor - Moved to PathFinder                   
+%         function paths = sortPaths(paths)
+%             % Order the the network paths shortest length to longest length
+%             % (the expected format is that which is returned from 
+%             % findAllNetworkPathsToAgent()).
+%             [~, columns] = sort(cellfun(@length, paths));
+%             paths = paths(columns);
+%         end
         
-        function connections = findConnectionsForAgent(AM, agentId)
-            % Return the index number of connections for agentId using the
-            % Adjacency Matrix
-            connections = find(AM(agentId,:) ~= 0);
-        end
+%         function connections = findConnectionsForAgent(AM, agentId)
+%             % Return the index number of connections for agentId using the
+%             % Adjacency Matrix
+%             connections = find(AM(agentId,:) ~= 0);
+%         end
                 
-        function mutualConnections = findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId)
-            % Return common connections this agent shares with another 
-            % (that agent). The mutualConnections array contains the index 
-            % numbers of other agents in the Agency Matrix and excludes 
-            % the other agent.
-            
-            %
-            % Algorithm: Sum two rows of the Adjancey Matrix and any element
-            % that is equal to 2 is a mutual connection.
-            %
-            mutualConnections = find((AM(thisAgentId,:) + AM(thatAgentId,:)) == 2);
-        end
+% Refactor - Moved to PathFinder
+%         function mutualConnections = findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId)
+%             % Return common connections this agent shares with another 
+%             % (that agent). The mutualConnections array contains the index 
+%             % numbers of other agents in the Agency Matrix and excludes 
+%             % the other agent.
+%             
+%             %
+%             % Algorithm: Sum two rows of the Adjancey Matrix and any element
+%             % that is equal to 2 is a mutual connection.
+%             %
+%             mutualConnections = find((AM(thisAgentId,:) + AM(thatAgentId,:)) == 2);
+%         end
 
 %         function uncommonConnections = findAgentsUncommonConnections(AM, thisAgentId, thatAgentId)
 %             % Return the uncommon connections that agent posseses from
@@ -369,48 +374,50 @@ classdef Agent < handle
 %             uncommonConnections = uncommonConnections(uncommonConnections ~= thisAgentId);
 %         end
 
-        function uncommonConnections = findMyUncommonConnectionsFromAgent(AM, thisAgentId, thatAgentId)
-            % Return the uncommon connections this agent possesses from
-            % that agent. The uncommonConnections array contains the 
-            % index ids of other agents in the Adjacency Matrix. 
-
-            %
-            % Algorithm: Subtract my connections from the other agents using 
-            % the Agency Matrix. The uncommon agents will correspond to those 
-            % possessing a quantity of +1 (excluding the agent being tested)
-            %
-            uncommonConnections = find((AM(thisAgentId,:) - AM(thatAgentId,:)) == 1);
-            uncommonConnections = uncommonConnections(uncommonConnections ~= thatAgentId);
-        end
+% Refactor - Moved to PathFinder
+%         function uncommonConnections = findMyUncommonConnectionsFromAgent(AM, thisAgentId, thatAgentId)
+%             % Return the uncommon connections this agent possesses from
+%             % that agent. The uncommonConnections array contains the 
+%             % index ids of other agents in the Adjacency Matrix. 
+% 
+%             %
+%             % Algorithm: Subtract my connections from the other agents using 
+%             % the Agency Matrix. The uncommon agents will correspond to those 
+%             % possessing a quantity of +1 (excluding the agent being tested)
+%             %
+%             uncommonConnections = find((AM(thisAgentId,:) - AM(thatAgentId,:)) == 1);
+%             uncommonConnections = uncommonConnections(uncommonConnections ~= thatAgentId);
+%         end
       
     end
 
     methods (Access = private)
               
-        function pathIsGood = checkIfPathIsValid(obj, AM, path, amount)
-            % Determine if this path carries enough balance to support the
-            % transaction amount
-            pathIsGood = true;
-            logIntegerArray("Working on path", path, 2, obj.polis.LoggingLevel);
-            [~, segments] = size(path);
-            for segment = 2:segments
-                thisAgentId = path(segment - 1);
-                thatAgentId = path(segment);
-                logStatement("Checking segment %d to %d\n", [thisAgentId, thatAgentId], 2, obj.polis.LoggingLevel);
-                mutualAgentIds = Agent.findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId);
-                availableBalance = obj.polis.agents(thisAgentId).availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
-                logStatement("Available Balance = %.2f, Amount = %.2f\n", [availableBalance, amount], 2, obj.polis.LoggingLevel);
-                if availableBalance <= amount
-                    logStatement("Path failed, no balance\n", [], 2, obj.polis.LoggingLevel);
-                    pathIsGood = false;
-                    % Record Agent that caused the liquidity failure
-                    lf = LiquidityFailure(thisAgentId, thatAgentId, amount, mutualAgentIds, path, "", obj.polis.currentTime);
-                    obj.polis.liquidityFailures = [obj.polis.liquidityFailures; lf];
-                    %lf.dump;
-                    break;
-                end
-            end
-        end
+% Refactor - moved to PathFinder        
+%         function pathIsGood = checkIfPathIsValid(obj, AM, path, amount)
+%             % Determine if this path carries enough balance to support the
+%             % transaction amount
+%             pathIsGood = true;
+%             logIntegerArray("Working on path", path, 2, obj.polis.LoggingLevel);
+%             [~, segments] = size(path);
+%             for segment = 2:segments
+%                 thisAgentId = path(segment - 1);
+%                 thatAgentId = path(segment);
+%                 logStatement("Checking segment %d to %d\n", [thisAgentId, thatAgentId], 2, obj.polis.LoggingLevel);
+%                 mutualAgentIds = PathFinder.findMutualConnectionsWithAgent(AM, thisAgentId, thatAgentId);
+%                 availableBalance = obj.polis.agents(thisAgentId).availableBalanceForTransactionWithAgent(thatAgentId, mutualAgentIds);
+%                 logStatement("Available Balance = %.2f, Amount = %.2f\n", [availableBalance, amount], 2, obj.polis.LoggingLevel);
+%                 if availableBalance <= amount
+%                     logStatement("Path failed, no balance\n", [], 2, obj.polis.LoggingLevel);
+%                     pathIsGood = false;
+%                     % Record Agent that caused the liquidity failure
+%                     lf = LiquidityFailure(thisAgentId, thatAgentId, amount, mutualAgentIds, path, "", obj.polis.currentTime);
+%                     obj.polis.liquidityFailures = [obj.polis.liquidityFailures; lf];
+%                     %lf.dump;
+%                     break;
+%                 end
+%             end
+%         end
         
 % Refactor - moved to PathFinder        
 %        function paths = findNextNetworkConnection(obj, AM, searchLevel, currentPath, thisAgentId, thatAgentId, targetAgentId, paths)
