@@ -93,8 +93,8 @@ fprintf("===========================================================\n");
 
 % Loop over the number of iterations
 %parpool('local', 2);
-for iteration = 1:numberIterations
-%parfor iteration = 1:numberIterations
+%for iteration = 1:numberIterations
+parfor iteration = 1:numberIterations
         
     polis = Polis(AM, maxSearchLevels); 
     polis.createAgents(1, numSteps);
@@ -200,7 +200,7 @@ for iteration = 1:numberIterations
                % Submit the purchase
                logStatement("\n++ Proposed Purchase Of Agent %d From Agent %d\n", [agentBuying.id, agentSelling.id], 1, polis.LoggingLevel);
                numUnits = 1;
-               result = polis.submitPurchase(agentBuying, agentSelling, numUnits, price, time)
+               result = polis.submitPurchase(agentBuying, agentSelling, numUnits, price, time);
 
                if result == TransactionType.TRANSACTION_SUCCEEDED
                    logStatement("\nSale Successful!\n", [], 1, polis.LoggingLevel);

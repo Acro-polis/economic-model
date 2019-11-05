@@ -1,0 +1,21 @@
+
+
+ Summary of simultion input parameters
+
+
+ Program: Economic Commerce Model / Static Dynamic Network, Version ECM_1.4.2, Ouput Location: Model2F3000_Sim3(Refactored) 
+
+ Modeling 100 Agents for Network: Hybrid SN=2 EN=100 T=49 alpha=0.00 ver=H_1.2.0 
+
+ Executing 16 Iterations of 52 time steps each
+
+ Transaction-Distance = 3
+
+ Seed Wallet = 0.00 Drachma, UBI = 360.00 Drachma / Application, UBI Applied Every = 1.00 Time Steps
+
+ Demurrage = 5.00 Percent, Demurrage Applied Every = 4.00 Time Steps
+
+ Passive Agents = 5.00 Percent, Sellers = 15.00 Percent
+
+ Seller Unit Price = 300.00, Seller Initial Inventory Units = 3000.00
+
