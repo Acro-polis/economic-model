@@ -2,9 +2,9 @@
 %
 % Test suite that tests methods:
 %
-% Agent.findMutualConnectionsWithAgent()
-% Agent.findAgentsUncommonConnections()
-% Agent.findMyUncommonConnectionsFromAgent()
+% PathFinder.findMutualConnectionsWithAgent()
+% PathFinder.findAgentsUncommonConnections()
+% PathFinder.findMyUncommonConnectionsFromAgent()
 %
 % TODO: Add other methods not covered by testAgentWallets
 % and testTrustedTransaction
@@ -78,16 +78,16 @@ fprintf("\nTests Completed Successfully\n");
 %+++++++++++++++++++++++++++++++++++++++++
 
 function testMutualConnectionsWithAgent(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections)
-    fprintf("\nTest %da: Agent.findMutualConnectionsWithAgent\n\n", testNumber);
+    fprintf("\nTest %da: PathFinder.findMutualConnectionsWithAgent\n\n", testNumber);
     fprintf("Seeking common connections between agents %d and %d\n", sourceAgentId, targetAgentId);
-    commonConnections = Agent.findMutualConnectionsWithAgent(polis.AM, sourceAgentId, targetAgentId);
+    commonConnections = PathFinder.findMutualConnectionsWithAgent(polis.AM, sourceAgentId, targetAgentId);
     logIntegerArray("Common Connections",commonConnections, 2, 2);
     [~, connections] = size(commonConnections);
     assert(connections == expectedConnections,"Error: expected %d connections, found %d connections", expectedConnections, connections);
 end
 
 function testFindAgentsUncommonConnections(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections)
-    fprintf("\nTest %db: Agent.findAgentsUncommonConnections\n\n", testNumber);
+    fprintf("\nTest %db: PathFinder.findAgentsUncommonConnections\n\n", testNumber);
     fprintf("Seeking uncommon connections agent %d has from %d\n", targetAgentId, sourceAgentId);
     uncommonConnections = findUncommonConnectionsBetweenTwoAgents(polis.AM, sourceAgentId, targetAgentId);
     logIntegerArray("Uncommon Connections",uncommonConnections, 2, 2);
@@ -96,9 +96,9 @@ function testFindAgentsUncommonConnections(polis, testNumber, sourceAgentId, tar
 end
 
 function testFindMyUncommonConnectionsFromAgent(polis, testNumber, sourceAgentId, targetAgentId, expectedConnections)
-    fprintf("\nTest %dc: Agent.findMyUncommonConnectionsFromAgent\n\n", testNumber);
+    fprintf("\nTest %dc: PathFinder.findMyUncommonConnectionsFromAgent\n\n", testNumber);
     fprintf("Seeking uncommon connections agent %d has from %d\n", sourceAgentId, targetAgentId);
-    uncommonConnections = Agent.findMyUncommonConnectionsFromAgent(polis.AM, sourceAgentId, targetAgentId);
+    uncommonConnections = PathFinder.findMyUncommonConnectionsFromAgent(polis.AM, sourceAgentId, targetAgentId);
     logIntegerArray("Uncommon Connections",uncommonConnections, 2, 2);
     [~, connections] = size(uncommonConnections);
     assert(connections == expectedConnections,"Error: expected %d uncommon connections, found %d uncommon connections", expectedConnections, connections);

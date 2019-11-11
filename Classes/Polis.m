@@ -1,8 +1,6 @@
 classdef Polis < handle
 %================================================================
-% Class Polis
-%
-% Welcome to Mount Olympus
+%POLIS Welcome to Mount Olympus
 %
 % Created by Jess 10.26.18
 %================================================================
@@ -13,19 +11,21 @@ classdef Polis < handle
     end
     
     properties (SetAccess = private)
-        AM                  % The system adjacency matrix
-        agents              % Array of all agents
-        maximumSearchLevels % Maximum search steps allowed for finding valid paths, 6 is a good number
+        AM                              % The system adjacency matrix
+        agents                          % Array of all agents
+        maximumSearchLevels             % Maximum search steps allowed for finding valid paths, 6 is a good number
+        pathFinder          PathFinder  % Singleton, encapsulates path logic
     end
 
     properties (SetAccess = private, GetAccess = private)
-        lastTransactionId
+        lastTransactionId   uint32              % Last transaction id created
+        transactionMgr      TransactionManager  % Singleton, encapsulates transactional logic
     end
     
     properties (Constant)
-        LoggingLevel = 0;   % Current Levels 0, 1, 2 (0 least, 2 most)
-        PolisId = 0 
-        PercentDemurage = 0.05
+        LoggingLevel = 0;       % Current Levels 0, 1, 2 (0 least, 2 most)
+        PolisId = 0             % Object Id, not used right now
+        PercentDemurage = 0.05  % Used for some tests, should not use for simulations
     end
     
     properties (Dependent)
@@ -40,17 +40,69 @@ classdef Polis < handle
     
     methods (Access = public)
         
+        function obj = Polis(AM, maximumSearchLevels)
+            %TRANSACTIONMANAGER Polis constructor
+            %   TODO
+            obj.AM = AM;
+            obj.maximumSearchLevels = maximumSearchLevels;
+            obj.transactionMgr = TransactionManager(obj);
+            obj.pathFinder = PathFinder(obj);
+            obj.lastTransactionId = 0; % Reset the sequence
+        end
+        
+        function result = submitPurchase(obj, agentBuying, agentSelling, numberItems, price, time)
+            % Submit a purachase between buying agent and the selling 
+            % agent. The transaction may require intermediary agents
+            % to complete the transaction. Validate the proposed 
+            % transaction, and if it passes, complete the transaction.
+            
+            amount = numberItems*price;
+            %result = TransactionType.FAILED_UNKNOWN;
+            
+            % Insure seller has enough inventory
+            if agentSelling.availabeInventory < numberItems
+                result = TransactionType.FAILED_NO_INVENTORY;
+                return;
+            end
+
+            % Find all possible paths from the buyer to the seller
+            paths = obj.pathFinder.findAllNetworkPathsFromThisAgentToThatAgent(agentBuying, agentSelling);
+            obj.logPaths(paths);
+            if isempty(paths)
+                result = TransactionType.FAILED_NO_PATH_FOUND;
+                return;
+            end
+
+            % Find a liquid transitive-transaction path
+            path = obj.pathFinder.findALiquidPathForTheTransactionAmount(paths, amount);
+            logIntegerArray("Ths selected path is", path, 2, obj.LoggingLevel);
+            if isempty(path) 
+                result = TransactionType.FAILED_NO_LIQUIDITY;
+                return;
+            end
+
+            % Okay, we free to complete the transaction
+            [~, numberAgents] = size(path);
+            if numberAgents == 2
+                targetAgent = obj.agents(path(1,2));
+                mutualAgentIds = PathFinder.findMutualConnectionsWithAgent(obj.AM, agentBuying.id, targetAgent.id);
+                obj.transactionMgr.commitPurchaseWithDirectConnection(amount, agentBuying, targetAgent, mutualAgentIds, time);
+            else
+                % Create an array of Agents from the paths array
+                agentsOnPath = Agent.empty; % Need to instantiate empty Agent objects to be able to preallocate
+                for i = 2:numberAgents
+                    agentsOnPath = [agentsOnPath , obj.agents(path(1,i))];
+                end
+                obj.transactionMgr.commitPurchaseWithIndirectConnection(amount, agentBuying, agentsOnPath, time);
+            end
+            
+            result = TransactionType.TRANSACTION_SUCCEEDED;
+            
+        end
+
         function agent = getAgentById(obj, agentId)
             % Given an agent id, return the corresponding agent object
             agent = obj.agents(agentId);
-        end
-        
-        function obj = Polis(AM, maximumSearchLevels)
-            % Assign the adjacency matrix maximum search levels
-            obj.AM = AM;
-            obj.maximumSearchLevels = maximumSearchLevels;
-            % Reset the sequence
-            obj.lastTransactionId = 0;
         end
     
         function createAgents(obj, birthday, totalTimeSteps)
@@ -152,13 +204,13 @@ classdef Polis < handle
             uncommonConnectionAgentIds = [];
             initialSearchLevel = 0;
             buyingAgent = obj.agents(buyingAgentId);
-            buyingAgentDirectConnectionIds = buyingAgent.findMyConnections(obj.AM);
+            buyingAgentDirectConnectionIds = obj.pathFinder.findAgentsConnections(buyingAgent);
                         
             % Recursively find all indirect connections within the
             % allowed transaction distance
             for i = 1:numel(buyingAgentDirectConnectionIds)
                 targetAgentId = buyingAgentDirectConnectionIds(i);
-                buyingAgentsIndirectConnectionsIds = [buyingAgentsIndirectConnectionsIds , obj.findAllIndirectConnectionsBetweenTwoAgents(initialSearchLevel, uncommonConnectionAgentIds, buyingAgentId, targetAgentId)]; 
+                buyingAgentsIndirectConnectionsIds = [buyingAgentsIndirectConnectionsIds , obj.pathFinder.findAllIndirectConnectionsBetweenTwoAgents(initialSearchLevel, uncommonConnectionAgentIds, buyingAgentId, targetAgentId)]; 
             end
 
             % Find the unique set of direct and indirect agent ids
@@ -174,45 +226,6 @@ classdef Polis < handle
             sellers(indexes) = [];
             sellerIds = intersect([sellers.id], buyerConnectionsIds);
             
-        end
-           
-        function uncommonConnectionAgentIds = findAllIndirectConnectionsBetweenTwoAgents(obj, searchLevel, uncommonConnectionAgentIds, thisAgentId, thatAgentId)
-            % For two connected agents, thisAgent and thatAgent, find the
-            % uncommon connections thatAgent has from thisAgent. Recursivly
-            % repeat the process until the search level is reached or we
-            % run out of uncommon connections. Remove any duplicates along
-            % the way.
-            
-            logLevel = 2;
-            
-            if searchLevel > obj.maximumSearchLevels % Must exceed search level to return
-              logStatement("\nSearch Maximum Reached for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.LoggingLevel);
-              return; 
-            else
-                searchLevel = searchLevel + 1;
-            end
-            
-            % Find uncommon connections and remove any already found
-            logStatement("\nProcessing This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.LoggingLevel);
-            newUncommonConnections = findUncommonConnectionsBetweenTwoAgents(obj.AM, thisAgentId, thatAgentId);
-            newUncommonConnections = setdiff(newUncommonConnections, uncommonConnectionAgentIds);
-
-            if numel(newUncommonConnections) == 0
-                logStatement("\nNone Found for This Agent = %d, That Agent = %d, Search Level = %d\n", [thisAgentId, thatAgentId, searchLevel], logLevel, obj.LoggingLevel);
-                return;
-            else
-                logIntegerArray("Found Uncommon Connections", newUncommonConnections, 2, obj.LoggingLevel);
-                
-                % Accumulate what we found
-                uncommonConnectionAgentIds = [uncommonConnectionAgentIds , newUncommonConnections];
-                
-                % Recursivley search for more indirect connections
-                for i = 1:numel(newUncommonConnections)
-                    uncommonConnectionAgentId = newUncommonConnections(i);
-                    uncommonConnectionAgentIds = obj.findAllIndirectConnectionsBetweenTwoAgents(searchLevel, uncommonConnectionAgentIds, thatAgentId, uncommonConnectionAgentId);
-                end
-            end
-
         end
                 
         %
@@ -406,8 +419,26 @@ classdef Polis < handle
             numberOfFailures = numel(matchingObjects);
         end
         
-    end
+        %
+        % Logging Methods
+        %
+
+        function logPaths(obj, paths)
+        % Output all paths to the console (format is a cell array with
+        % each element being an integer array signifying a path through
+        % the network from one agent to another and the path lentghs
+        % are expected to be different).
+        [totPaths, ~] = size(paths);
+        logStatement("\nThere are %d total paths\n", totPaths, 2, obj.LoggingLevel)
+            for i = 1:totPaths
+                logStatement("\nPath = %d\n", i, 2, obj.LoggingLevel);
+                aPath = cell2mat(paths(i,1));
+                logIntegerArray("Path", aPath, 2, obj.LoggingLevel);
+            end
+        end
     
+    end
+
     methods (Static)
     end
     

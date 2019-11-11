@@ -1,6 +1,6 @@
 %=====================================================
 %
-% TODO - Incorporate this into overall test play
+% TODO - Incorporate this into overall test plan
 %
 % Author: Jess
 % Created: 10.31.2018
@@ -28,13 +28,13 @@ fprintf("\nTesting with Connected Graph of 4 Agents\n\n");
 polis.depositUBI(100, time);
 
 % A1 buys from A2
-agent1.submitPurchase(AM, numItems, 50, agent2, time);
+result = polis.submitPurchase(agent1, agent2, numItems, 50, time);
 
-mutualConnections = Agent.findMutualConnectionsWithAgent(AM, agent1.id, agent2.id);
+mutualConnections = PathFinder.findMutualConnectionsWithAgent(AM, agent1.id, agent2.id);
 availableBalance1 = agent1.availableBalanceForTransactionWithAgent(agent2.id, mutualConnections);
 balances1 = agent1.individualBalancesForTransactionWithAgent(agent2.id, mutualConnections);
 
-mutualConnections = Agent.findMutualConnectionsWithAgent(AM, agent2.id, agent1.id);
+mutualConnections = PathFinder.findMutualConnectionsWithAgent(AM, agent2.id, agent1.id);
 availableBalance2 = agent2.availableBalanceForTransactionWithAgent(agent1.id, mutualConnections);
 balances2 = agent2.individualBalancesForTransactionWithAgent(agent1.id, mutualConnections);
 

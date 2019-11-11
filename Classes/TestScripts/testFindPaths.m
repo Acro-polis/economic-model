@@ -99,8 +99,9 @@ fprintf("\nTests Completed Successfully\n");
 function runPathTest(polis, sourceAgentId, targetAgentId, testNumber, expectedPaths)
     fprintf("\n------------------------------------------\n");
     fprintf("\nTest %d - Testing connections between agents %d and %d\n", testNumber, sourceAgentId, targetAgentId);
-    paths = polis.agents(sourceAgentId).findAllNetworkPathsToAgent(polis.AM, targetAgentId);
-    polis.agents(sourceAgentId).logPaths(paths);
+    paths = polis.pathFinder.findAllNetworkPathsFromThisAgentToThatAgent(polis.agents(sourceAgentId), polis.agents(targetAgentId));
+%RF    paths = polis.agents(sourceAgentId).findAllNetworkPathsToAgent(polis.AM, targetAgentId);
+    polis.logPaths(paths);
     [numPaths, ~] = size(paths);
     assert(numPaths == expectedPaths,"Test %d failed, expectd %d paths, found %d", testNumber, expectedPaths, numPaths);
     fprintf("\nGood, %d Path(s) From Source Agent %d To Target Agent %d\n", expectedPaths, sourceAgentId, targetAgentId);
