@@ -2,6 +2,8 @@
 %
 % Economic Commerce Model: 
 %
+% Model v1.4.2: Refactoring - results should be the same as v1.4.1
+%
 % Model v1.4.1: We now track and report which agents prevented a sale 
 % due to not having enough liquidity to propagate the deal along the path.
 % We have a new plot that shows this (Failures By Type By Agent) and we
@@ -22,7 +24,7 @@
 % Created: 2018.08.30
 %===================================================
 program_name = "Economic Commerce Model / Static Dynamic Network";
-version_number = "ECM_1.4.1";
+version_number = "ECM_1.4.2";
 
 % Read the input parameters (specify "inputFilename" as an environment
 % variable prior to running)
@@ -197,8 +199,8 @@ parfor iteration = 1:numberIterations
 
                % Submit the purchase
                logStatement("\n++ Proposed Purchase Of Agent %d From Agent %d\n", [agentBuying.id, agentSelling.id], 1, polis.LoggingLevel);
-               numUnits = 1;           
-               result = agentBuying.submitPurchase(polis.AM, numUnits, numUnits*price, agentSelling, time);
+               numUnits = 1;
+               result = polis.submitPurchase(agentBuying, agentSelling, numUnits, price, time);
 
                if result == TransactionType.TRANSACTION_SUCCEEDED
                    logStatement("\nSale Successful!\n", [], 1, polis.LoggingLevel);
