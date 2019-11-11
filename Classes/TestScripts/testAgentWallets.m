@@ -38,19 +38,19 @@ agent3 = polis.agents(3);
 agent4 = polis.agents(4);
 
 % A1 buys from A2
-result = agent1.submitPurchase(AM, numItems, 100, agent2, time);
+result = polis.submitPurchase(agent1, agent2, numItems, 100, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 % A1 buys from A3
-result = agent1.submitPurchase(AM, numItems, 50, agent3, time);
+result = polis.submitPurchase(agent1, agent3, numItems, 50, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 % A3 buys from A1
-result = agent3.submitPurchase(AM, numItems, 75, agent1, time);
+result = polis.submitPurchase(agent3, agent1, numItems, 75, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 % A2 buys from A4
-result = agent2.submitPurchase(AM, numItems, 200, agent4, time);
+result = polis.submitPurchase(agent2, agent4, numItems, 200, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 agents = [agent1, agent2, agent3, agent4];
@@ -78,7 +78,7 @@ time = time + 1;
 fprintf("\nTest Agent Wallets: time = %d\n",time);
 
 % A2 buys from A5
-result = agent2.submitPurchase(AM, numItems, 250.0, agent5, time);
+result = polis.submitPurchase(agent2, agent5, numItems, 250, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 agents = [agent1, agent2, agent3, agent4, agent5];
@@ -93,7 +93,7 @@ fprintf("\nTest Agent Wallets: Time = %d\n",time);
 
 agent8 = polis.agents(8);
 agent6 = polis.agents(6);
-result = agent8.submitPurchase(AM, numItems, 100.0, agent1, time);
+result = polis.submitPurchase(agent8, agent1, numItems, 100, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 agent8.dumpLedger();
@@ -112,7 +112,7 @@ fprintf("\nTest Agent Wallets: time = %d\n",time);
 
 agent10 = polis.agents(10);
 agent9 = polis.agents(9);
-result = agent10.submitPurchase(AM, numItems, 125.0, agent1, time);
+result = polis.submitPurchase(agent10, agent1, numItems, 125, time);
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 agents = [agent10, agent9, agent8, agent6, agent1];
@@ -150,15 +150,21 @@ agent4 = polis.agents(4);
 agent6 = polis.agents(6);
 
 time = time + 1;
-result = agent1.submitPurchase(AM, numItems, 400.00, agent6, time);
+result = polis.submitPurchase(agent1, agent6, numItems, 400, time);
+agent1.dumpLedger();
+agent6.dumpLedger();
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 time = time + 1;
-result = agent3.submitPurchase(AM, numItems, 250.00, agent1, time);
+result = polis.submitPurchase(agent3, agent1, numItems, 250, time);
+agent1.dumpLedger();
+agent3.dumpLedger();
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 time = time + 1;
-result = agent1.submitPurchase(AM, numItems, 249.00, agent2, time);
+result = polis.submitPurchase(agent1, agent2, numItems, 249, time);
+agent1.dumpLedger();
+agent2.dumpLedger();
 assert(result == TransactionType.TRANSACTION_SUCCEEDED,"Test = %d - Transaction Failed, Status = %d", time, result);
 
 agents = [agent1, agent2, agent3, agent4, agent6];
