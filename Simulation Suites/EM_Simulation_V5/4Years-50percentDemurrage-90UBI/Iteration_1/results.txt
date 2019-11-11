@@ -11,7 +11,7 @@
 
 - Starting wallet size/agent = 0.00 drachma
 
-- Price of goods = 360.00 drachmas
+- Price of goods = 324.00 drachmas
 
 - Initial Inventory = 3000.00 Units
 
@@ -23,13 +23,13 @@
 
 ----- Summarized Results, End Of Time Step = 208 -----
 
-* Simulation Time = 543.12 + Results Generation Time = 2.94 = 546.06 Minutes
+* Simulation Time = 1964.01 + Results Generation Time = 4.16 = 1968.17 Minutes
 
-* Total Money Supply = 45000.00 drachma, Total Demurrage = -1827000.00 drachma, Total UBI = 1872000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = 0.00)
+* Total Money Supply = 45000.00 drachma, Total Demurrage = -1827000.00 drachma, Total UBI = 1872000.00 drachma (check: Tot. TMS - (UBI + Demurrage) = -0.00)
 
-* Remaining Inventory Supply = 37002.00, Remaining Inventory Value = $13320720.00, Total Inventory Exchanged = 4998 (check: Purchased - Sold = 0.00)
+* Remaining Inventory Supply = 37668.00, Remaining Inventory Value = $12204432.00, Total Inventory Exchanged = 4332 (check: Purchased - Sold = 0.00)
 
-* Items Purchased = 4998.00, Failed No Money = 10034.00, Failed No Liquidity = 4728.00, Failed No Paths = 0.00, Failed No Inventory = 0.00, Failed No Seller = 0.00
+* Items Purchased = 4332.00, Failed No Money = 8404.00, Failed No Liquidity = 7024.00, Failed No Paths = 0.00, Failed No Inventory = 0.00, Failed No Seller = 0.00
 * Expected Purchases = Items Purchased + Sum Of Failures = 19760
-* Selling Efficiency = 25.29 percent
+* Selling Efficiency = 21.92 percent
 

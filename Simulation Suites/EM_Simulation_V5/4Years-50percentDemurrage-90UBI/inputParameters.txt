@@ -7,7 +7,7 @@
 
  Modeling 100 Agents for Network: Hybrid SN=10 EN=100 T=9 alpha=0.00 ver=H_1.2.0 
 
- Executing 1 Iterations of 208 time steps each
+ Executing 8 Iterations of 208 time steps each
 
  Transaction-Distance = 3
 
@@ -17,5 +17,5 @@
 
  Passive Agents = 5.00 Percent, Sellers = 15.00 Percent
 
- Seller Unit Price = 360.00, Seller Initial Inventory Units = 3000.00
+ Seller Unit Price = 324.00, Seller Initial Inventory Units = 3000.00
 
