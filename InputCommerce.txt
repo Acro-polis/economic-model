@@ -19,7 +19,7 @@
 
 Note for 3): Specify the uniquely named subfolder in the 
 economic-model/Network Models folder where the corresponding edges.csv 
-file resides
+file resides.
 
 Model 1: Hybrid SN=1 EN=100 T=99 alpha=0.00 ver=H_1.2.0
 Model 2: Hybrid SN=2 EN=100 T=49 alpha=0.00 ver=H_1.2.0
